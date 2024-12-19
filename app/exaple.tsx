@@ -14,9 +14,9 @@ export default function TimerScreen() {
   const [showMessage, setShowMessage] = useState(false);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1 bg-secondary">
       <StatusBar style="light" />
-      <ScrollView contentContainerStyle={styles.scrollView}>
+      <ScrollView className="flex grow gap-12">
         {/* Header */}
         <View className="bg-orange-500 p-4">
           <View className="flex-row justify-between items-center">
@@ -58,27 +58,25 @@ export default function TimerScreen() {
 
         {/* Main Content */}
         <Card className="mx-4">
-          <CardContent className="p-6 space-y-8">
-            <View className="space-y-4">
-              <View className="flex-row items-baseline space-x-4">
-                <Text className="text-2xl font-bold text-orange-500">
-                  Timer 1:
-                </Text>
-                <Input
-                  placeholder="Speaker Name"
-                  value={speakerName}
-                  onChangeText={setSpeakerName}
-                  className="flex-1 border-b border-t-0 border-l-0 border-r-0 rounded-none bg-transparent px-0 text-xl"
-                />
-              </View>
+          <CardContent className="p-6 flex gap-8">
+            <View className="flex-row items-center gap-4">
+              <Text className="text-2xl font-bold text-orange-500">
+                Timer 1:
+              </Text>
+              <Input
+                placeholder="Speaker Name"
+                value={speakerName}
+                onChangeText={setSpeakerName}
+                className="flex-1 border-b border-t-0 border-l-0 border-r-0 rounded-none bg-transparent px-0 text-xl"
+              />
             </View>
 
-            <View className="space-y-8">
+            <View className="flex gap-8">
               <View>
-                <Text className="text-xl font-semibold mb-2">
+                <Text className="text-xl font-semibold mb-2 text-primary">
                   Countdown Time:
                 </Text>
-                <Text className="text-2xl text-gray-600">Enter time</Text>
+                <Text className="text-2xl text-primary">Enter time</Text>
               </View>
               <View>
                 <Text className="text-xl font-semibold mb-2">
@@ -90,8 +88,8 @@ export default function TimerScreen() {
               </View>
             </View>
 
-            <View className="space-y-4">
-              <View className="flex-row space-x-4">
+            <View className="flex gap-6">
+              <View className="flex-row gap-4">
                 <Button
                   variant="outline"
                   size="lg"
@@ -142,9 +140,3 @@ export default function TimerScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollView: {
-    flexGrow: 1,
-  },
-});
