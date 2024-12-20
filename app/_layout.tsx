@@ -86,14 +86,15 @@ export default function RootLayout() {
             headerLeft: () => (
               <View className="flex flex-row gap-12 items-center">
                 <CompanyLogo
-                  // scale={0.1}
                   width={117}
                   height={36.4}
-                  strokeWidth={0.75}
+                  strokeWidth={1}
                   viewBox="0 0 180 56"
                 />
                 <Pressable>
-                  <Text>Event: Description</Text>
+                  <Text className="text-2xl font-semibold">
+                    Event: Description
+                  </Text>
                 </Pressable>
               </View>
             ),
@@ -127,7 +128,6 @@ export default function RootLayout() {
                 </View>
               </>
             ),
-            headerShadowVisible: false,
           }}
         />
       </Stack>
