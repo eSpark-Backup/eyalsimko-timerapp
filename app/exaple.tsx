@@ -133,7 +133,9 @@ export default function TimerScreen() {
                     placeholder="Enter time"
                     value={countDown}
                     onChange={setCountDown}
-                    modalTitle="Set countdown time for Speaker"
+                    modalTitle={`Set countdown time for ${
+                      speakerName || "Speaker"
+                    }`}
                   />
                 </View>
                 <View className="flex flex-row gap-12">
@@ -144,7 +146,9 @@ export default function TimerScreen() {
                     placeholder="Enter time"
                     value={blinkingStartTime}
                     onChange={setBlinkingStartTime}
-                    modalTitle="Set blinking start time for Speaker"
+                    modalTitle={`Set blinking start time for ${
+                      speakerName || "Speaker"
+                    }`}
                   />
                 </View>
               </View>
