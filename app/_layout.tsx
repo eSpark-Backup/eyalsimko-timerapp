@@ -7,7 +7,7 @@ import {
   Theme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { SplashScreen, Stack } from "expo-router";
+import { Link, SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { Platform, Pressable, View } from "react-native";
@@ -20,6 +20,7 @@ import { Text } from "~/components/ui/text";
 import { CompanyLogo } from "~/lib/icons/CompanyLogo";
 import { Button } from "~/components/ui/button";
 import { MoreVertical, Wifi, WifiOff } from "lucide-react-native";
+import { useStore } from "~/lib/store";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -68,6 +69,10 @@ export default function RootLayout() {
     });
   }, []);
 
+  const eventName = useStore((state) => state.eventName) || "Event";
+  const eventDescription =
+    useStore((state) => state.eventDescription) || "Description";
+
   if (!isColorSchemeLoaded) {
     return null;
   }
@@ -91,11 +96,11 @@ export default function RootLayout() {
                   strokeWidth={1}
                   viewBox="0 0 180 56"
                 />
-                <Pressable>
+                <Link href="/eventSettings">
                   <Text className="text-2xl font-semibold">
-                    Event: Description
+                    {`${eventName}: ${eventDescription}`}
                   </Text>
-                </Pressable>
+                </Link>
               </View>
             ),
             headerRight: () => (
@@ -128,6 +133,13 @@ export default function RootLayout() {
                 </View>
               </>
             ),
+          }}
+        />
+        <Stack.Screen
+          name="eventSettings"
+          options={{
+            title: "Event Settings",
+            presentation: "modal",
           }}
         />
       </Stack>
