@@ -1,18 +1,19 @@
-import { create, StateCreator } from 'zustand'
-
-export interface EventConfig {
+type State = {
   eventName: string
   eventDescription: string
-  setConfig: (config: Pick<EventConfig, 'eventName' | 'eventDescription'>) => void
 }
 
-export const createBearSlice: StateCreator<
-  EventConfig,
-  [],
-  [],
-  EventConfig
-> = (set) => ({
-  eventName: '',
-  eventDescription: '',
-  setConfig: (config) => set(config),
-})
+import { createStore } from '@xstate/store';
+
+export const eventConfigStore = createStore({
+  context: {
+    eventName: '',
+    eventDescription: '',
+  },
+  on: {
+    setConfig: (context, { eventName, eventDescription }: State) => ({
+      eventDescription,
+      eventName
+    }),
+  },
+});

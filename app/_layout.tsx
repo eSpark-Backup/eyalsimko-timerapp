@@ -20,7 +20,9 @@ import { Text } from "~/components/ui/text";
 import { CompanyLogo } from "~/lib/icons/CompanyLogo";
 import { Button } from "~/components/ui/button";
 import { MoreVertical, Wifi, WifiOff } from "lucide-react-native";
-import { useStore } from "~/lib/store";
+import { eventConfigStore } from "~/lib/store/eventConfig";
+import { useSelector } from "@xstate/store/react";
+import { TimerContext } from "~/lib/store/timer";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -69,81 +71,89 @@ export default function RootLayout() {
     });
   }, []);
 
-  const eventName = useStore((state) => state.eventName) || "Event";
+  const eventName =
+    useSelector(eventConfigStore, (state) => state.context.eventName) ||
+    "Event";
   const eventDescription =
-    useStore((state) => state.eventDescription) || "Description";
+    useSelector(eventConfigStore, (state) => state.context.eventDescription) ||
+    "Description";
+  // const eventName = useStore((state) => state.eventName) || "Event";
+  // const eventDescription =
+  //   useStore((state) => state.eventDescription) || "Description";
 
   if (!isColorSchemeLoaded) {
     return null;
   }
 
   return (
-    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <StatusBar
-        style={isDarkColorScheme ? "light" : "dark"}
-        networkActivityIndicatorVisible
-      />
-      <Stack>
-        <Stack.Screen
-          name="index"
-          options={{
-            title: "",
-            headerLeft: () => (
-              <View className="flex flex-row gap-12 items-center">
-                <CompanyLogo
-                  width={117}
-                  height={36.4}
-                  strokeWidth={1}
-                  viewBox="0 0 180 56"
-                />
-                <Link href="/eventSettings">
-                  <Text className="text-2xl font-semibold">
-                    {`${eventName}: ${eventDescription}`}
-                  </Text>
-                </Link>
-              </View>
-            ),
-            headerRight: () => (
-              <>
-                <View className="flex flex-row items-center gap-6">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex flex-row gap-2"
-                  >
-                    <Wifi className="h-4 w-4 mr-2" />
-                    <Text>WIRELESS</Text>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex flex-row gap-2"
-                  >
-                    <WifiOff className="h-4 w-4 mr-2" />
-                    <Text>WIRED</Text>
-                  </Button>
-                  <ThemeToggle />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-primary-foreground"
-                  >
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
+    <TimerContext.Provider>
+      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+        <StatusBar
+          style={isDarkColorScheme ? "light" : "dark"}
+          networkActivityIndicatorVisible
+        />
+        <Stack>
+          <Stack.Screen
+            name="index"
+            options={{
+              title: "",
+              headerLeft: () => (
+                <View className="flex flex-row gap-12 items-center">
+                  <CompanyLogo
+                    width={117}
+                    height={36.4}
+                    strokeWidth={1}
+                    viewBox="0 0 180 56"
+                  />
+                  <Link href="/eventSettings">
+                    <Text className="text-2xl font-semibold">
+                      {`${eventName}: ${eventDescription}`}
+                    </Text>
+                  </Link>
                 </View>
-              </>
-            ),
-          }}
-        />
-        <Stack.Screen
-          name="eventSettings"
-          options={{
-            title: "Event Settings",
-            presentation: "modal",
-          }}
-        />
-      </Stack>
-      <PortalHost />
-    </ThemeProvider>
+              ),
+              headerRight: () => (
+                <>
+                  <View className="flex flex-row items-center gap-6">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex flex-row gap-2"
+                    >
+                      <Wifi className="h-4 w-4 mr-2" />
+                      <Text>WIRELESS</Text>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex flex-row gap-2"
+                    >
+                      <WifiOff className="h-4 w-4 mr-2" />
+                      <Text>WIRED</Text>
+                    </Button>
+                    <ThemeToggle />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-primary-foreground"
+                    >
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </View>
+                </>
+              ),
+            }}
+          />
+          <Stack.Screen
+            name="eventSettings"
+            options={{
+              title: "Event Settings",
+              presentation: "modal",
+            }}
+          />
+        </Stack>
+        <PortalHost />
+      </ThemeProvider>
+    </TimerContext.Provider>
   );
 }

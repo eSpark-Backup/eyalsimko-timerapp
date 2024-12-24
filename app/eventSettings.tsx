@@ -1,14 +1,21 @@
+import { useSelector } from "@xstate/store/react";
 import { Link, useNavigation } from "expo-router";
 import React from "react";
 import { View, Text } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { useStore } from "~/lib/store";
+import { eventConfigStore } from "~/lib/store/eventConfig";
 
 const EventSettings: React.FC = () => {
-  const initialEventName = useStore((state) => state.eventName);
-  const initialEventDescription = useStore((state) => state.eventDescription);
-  const saveConfig = useStore((state) => state.setConfig);
+  const initialEventName = useSelector(
+    eventConfigStore,
+    (state) => state.context.eventName
+  );
+  const initialEventDescription = useSelector(
+    eventConfigStore,
+    (state) => state.context.eventDescription
+  );
+
   const [eventName, setEventName] = React.useState(initialEventName);
   const [eventDescription, setEventDescription] = React.useState(
     initialEventDescription
@@ -38,7 +45,8 @@ const EventSettings: React.FC = () => {
         </Link>
         <Button
           onPress={() => {
-            saveConfig({
+            eventConfigStore.send({
+              type: "setConfig",
               eventName,
               eventDescription,
             });
