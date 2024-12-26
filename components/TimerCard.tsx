@@ -10,6 +10,7 @@ import { Play } from "~/lib/icons/Play";
 import { Pause } from "~/lib/icons/Pause";
 import { RotateCcw } from "~/lib/icons/RotateCcw";
 import { Square } from "~/lib/icons/Square";
+import { eventConfigStore } from "~/lib/store/eventConfig";
 
 export const BlinkingLine = ({ isBlinking }: { isBlinking: boolean }) => {
   const movingValue = useRef(new Animated.Value(0)).current;
@@ -59,6 +60,10 @@ export const BlinkingLine = ({ isBlinking }: { isBlinking: boolean }) => {
 
 function Countdown() {
   const actorRef = TimerContext.useActorRef();
+  const blinkLength = useSelector(
+    eventConfigStore,
+    (state) => state.context.blinkLength
+  );
   const timer = useSelector(actorRef, (state) => state.context.timer);
   const isRunning = useSelector(actorRef, (state) =>
     state.matches({
@@ -74,8 +79,15 @@ function Countdown() {
     ? "text-green-500"
     : "text-primary";
 
-  const shouldBlink =
-    !!timer.elapsed && !isOverdue && timer.startBlinkingTime >= timer.elapsed;
+  const blinkTimePeriod = {
+    start: timer.startBlinkingTime,
+    end: blinkLength === null ? 0 : timer.startBlinkingTime - blinkLength,
+  };
+
+  const inBlinkTimePeriod = timer.elapsed
+    ? timer.elapsed <= blinkTimePeriod.start &&
+      timer.elapsed >= blinkTimePeriod.end
+    : false;
 
   const displayTime =
     timer.elapsed === null ? timer.countdownTime : Math.abs(timer.elapsed);
@@ -84,11 +96,11 @@ function Countdown() {
     <View className="flex flex-row gap-2 text-2xl items-baseline">
       <Text className="text-xl">Timer {timer.speakerName}:</Text>
       <View className="flex flex-row gap-0.5">
-        <BlinkingLine isBlinking={shouldBlink} />
+        <BlinkingLine isBlinking={inBlinkTimePeriod} />
         <Text className={cn("text-5xl", timerColor)}>
           {formatDuration(displayTime)}
         </Text>
-        <BlinkingLine isBlinking={shouldBlink} />
+        <BlinkingLine isBlinking={inBlinkTimePeriod} />
       </View>
     </View>
   );
@@ -166,8 +178,8 @@ export const TimerCard = ({
   speakerName,
   startBlinkingTime,
 }: {
-  countdownTime?: number;
-  startBlinkingTime?: number;
+  countdownTime: number | null;
+  startBlinkingTime: number | null;
   speakerName: string;
 }) => {
   const [showMessage, setShowMessage] = useState(false);

@@ -60,7 +60,6 @@ export const timerStore = setup({
         setup: {
           actions: assign({
             timer: ({ context, event }) => {
-              console.log(context, event);
               return {
                 ...event.data,
                 elapsed: null
@@ -98,7 +97,6 @@ export const timerStore = setup({
               actions: assign({
                 timer: ({ context }) => {
                   const runningContext = context as Running
-                  console.log("TICK", runningContext.timer)
                   return {
                     ...runningContext.timer,
                     elapsed: runningContext.timer.elapsed - 1

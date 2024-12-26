@@ -1,119 +1,167 @@
-import * as React from "react";
-import { View } from "react-native";
-import Animated, {
-  FadeInUp,
-  FadeOutDown,
-  LayoutAnimationConfig,
-} from "react-native-reanimated";
-import { Info } from "~/lib/icons/Info";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import React, { useState } from "react";
+import { View, TouchableOpacity } from "react-native";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
-import { Progress } from "~/components/ui/progress";
+import { Input } from "~/components/ui/input";
+import { Card, CardContent } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
+import { LinearGradient } from "expo-linear-gradient";
+import { TimerPickerModal } from "react-native-timer-picker";
+import * as Haptics from "expo-haptics"; // for haptic feedback
+import { TimerCard } from "~/components/TimerCard";
+import { cn, formatDuration, getDurationObject } from "~/lib/utils";
+import { Progress } from "~/components/ui/progress";
+import { eventConfigStore } from "~/lib/store/eventConfig";
+import { useSelector } from "@xstate/react";
 
-import Example from "./exaple";
+function SetTime({
+  value,
+  defaultValue,
+  placeholder,
+  onChange,
+  modalTitle,
+}: {
+  value: number | null;
+  defaultValue?: number | null;
+  onChange: (value: number) => void;
+  placeholder: string;
+  modalTitle: string;
+}) {
+  const [showPicker, setShowPicker] = useState(false);
 
-export default Example;
+  const initialValue = value ?? defaultValue;
 
-const GITHUB_AVATAR_URI =
-  "https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg";
+  const isDefaultValueUsed =
+    defaultValue === undefined ? false : value === null ? true : false;
 
-export function Screen() {
-  const [progress, setProgress] = React.useState(78);
-
-  function updateProgressValue() {
-    setProgress(Math.floor(Math.random() * 100));
-  }
   return (
-    <View className="flex-1 justify-center items-center gap-5 p-6 bg-secondary/30">
-      <Card className="w-full max-w-sm p-6 rounded-2xl">
-        <CardHeader className="items-center">
-          <Avatar alt="Rick Sanchez's Avatar" className="w-24 h-24">
-            <AvatarImage source={{ uri: GITHUB_AVATAR_URI }} />
-            <AvatarFallback>
-              <Text>RS</Text>
-            </AvatarFallback>
-          </Avatar>
-          <View className="p-3" />
-          <CardTitle className="pb-2 text-center">Rick Sanchez</CardTitle>
-          <View className="flex-row">
-            <CardDescription className="text-base font-semibold">
-              Scientist
-            </CardDescription>
-            <Tooltip delayDuration={150}>
-              <TooltipTrigger className="px-2 pb-0.5 active:opacity-50">
-                <Info
-                  size={14}
-                  strokeWidth={2.5}
-                  className="w-4 h-4 text-foreground/70"
-                />
-              </TooltipTrigger>
-              <TooltipContent className="py-2 px-4 shadow">
-                <Text className="native:text-lg">Freelance</Text>
-              </TooltipContent>
-            </Tooltip>
+    <>
+      <TouchableOpacity activeOpacity={0.7} onPress={() => setShowPicker(true)}>
+        <View>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setShowPicker(true)}
+          >
+            <Text
+              className={cn(
+                "text-2xl",
+                isDefaultValueUsed && "text-muted-foreground"
+              )}
+            >
+              {initialValue ? formatDuration(initialValue) : placeholder}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+      <TimerPickerModal
+        initialValue={
+          initialValue ? getDurationObject(initialValue) : undefined
+        }
+        visible={showPicker}
+        setIsVisible={setShowPicker}
+        onConfirm={(pickedDuration) => {
+          onChange(
+            pickedDuration.hours * 3600 +
+              pickedDuration.minutes * 60 +
+              pickedDuration.seconds
+          );
+          setShowPicker(false);
+        }}
+        modalTitle={modalTitle}
+        onCancel={() => setShowPicker(false)}
+        closeOnOverlayPress
+        LinearGradient={LinearGradient}
+        Haptics={Haptics}
+        styles={{
+          theme: "dark",
+        }}
+        modalProps={{
+          overlayOpacity: 0.2,
+        }}
+      />
+    </>
+  );
+}
+
+export default function TimerScreen() {
+  const defaultBlinkingStartTime = useSelector(
+    eventConfigStore,
+    (state) => state.context.defaultBlinkingStartTime
+  );
+
+  const [countDown, setCountDown] = useState<number | null>(null);
+  const [blinkingStartTime, setBlinkingStartTime] = useState<number | null>(
+    null
+  );
+  const [speakerName, setSpeakerName] = useState("");
+
+  const effectiveBlinkingStartTime =
+    blinkingStartTime ?? defaultBlinkingStartTime;
+
+  return (
+    <View className="flex flex-1 gap-4 p-4 bg-secondary">
+      {/* For some reason resizing doesn't happen when screen in background w/o progress bar */}
+      <Progress
+        value={10}
+        className="h-2 hidden"
+        indicatorClassName="bg-sky-600"
+      />
+      <Card>
+        <CardContent className="p-6 flex flex-col gap-8">
+          <View className="flex flex-row justify-between gap-8 md:gap-32">
+            <Button variant="outline" className="bg-brand">
+              <Text className="text-primary-foreground">Prev</Text>
+            </Button>
+            <View className="flex flex-row grow gap-4 items-center">
+              <Text className="text-3xl font-bold text-primary">Timer 1:</Text>
+              <Input
+                placeholder="Speaker Name"
+                value={speakerName}
+                onChangeText={setSpeakerName}
+                style={{ fontSize: 24, lineHeight: 32 }}
+                className="flex-1 border-b border-t-0 border-l-0 border-r-0 rounded-none bg-transparent px-0 text-primary"
+              />
+            </View>
+
+            <Button variant="outline" className="bg-brand">
+              <Text className="text-primary-foreground">Next</Text>
+            </Button>
           </View>
-        </CardHeader>
-        <CardContent>
-          <View className="flex-row justify-around gap-3">
-            <View className="items-center">
-              <Text className="text-sm text-muted-foreground">Dimension</Text>
-              <Text className="text-xl font-semibold">C-137</Text>
+          <View className="flex flex-col md:flex-row justify-between gap-8 px-12">
+            <View className="flex flex-row gap-12">
+              <Text className="text-2xl font-semibold mb-2 text-primary">
+                Countdown Time:
+              </Text>
+              <SetTime
+                placeholder="Enter time"
+                value={countDown}
+                onChange={setCountDown}
+                modalTitle={`Set countdown time for ${
+                  speakerName || "Speaker"
+                }`}
+              />
             </View>
-            <View className="items-center">
-              <Text className="text-sm text-muted-foreground">Age</Text>
-              <Text className="text-xl font-semibold">70</Text>
-            </View>
-            <View className="items-center">
-              <Text className="text-sm text-muted-foreground">Species</Text>
-              <Text className="text-xl font-semibold">Human</Text>
+            <View className="flex flex-row gap-12">
+              <Text className="text-2xl font-semibold mb-2 text-primary">
+                Blink Start Time:
+              </Text>
+              <SetTime
+                placeholder="Enter time"
+                value={blinkingStartTime}
+                defaultValue={defaultBlinkingStartTime}
+                onChange={setBlinkingStartTime}
+                modalTitle={`Set blinking start time for ${
+                  speakerName || "Speaker"
+                }`}
+              />
             </View>
           </View>
         </CardContent>
-        <CardFooter className="flex-col gap-3 pb-0">
-          <View className="flex-row items-center overflow-hidden">
-            <Text className="text-sm text-muted-foreground">Productivity:</Text>
-            <LayoutAnimationConfig skipEntering>
-              <Animated.View
-                key={progress}
-                entering={FadeInUp}
-                exiting={FadeOutDown}
-                className="w-11 items-center"
-              >
-                <Text className="text-sm font-bold text-sky-600">
-                  {progress}%
-                </Text>
-              </Animated.View>
-            </LayoutAnimationConfig>
-          </View>
-          <Progress
-            value={progress}
-            className="h-2"
-            indicatorClassName="bg-sky-600"
-          />
-          <View />
-          <Button
-            variant="outline"
-            className="shadow shadow-foreground/5"
-            onPress={updateProgressValue}
-          >
-            <Text>Update</Text>
-          </Button>
-        </CardFooter>
       </Card>
+      <TimerCard
+        countdownTime={countDown}
+        startBlinkingTime={effectiveBlinkingStartTime}
+        speakerName={speakerName}
+      />
     </View>
   );
 }

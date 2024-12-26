@@ -10,7 +10,7 @@ import {
 import { Link, SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
-import { Platform, Pressable, View } from "react-native";
+import { Platform, View } from "react-native";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { PortalHost } from "@rn-primitives/portal";
@@ -72,14 +72,11 @@ export default function RootLayout() {
   }, []);
 
   const eventName =
-    useSelector(eventConfigStore, (state) => state.context.eventName) ||
+    useSelector(eventConfigStore, (state) => state.context.eventName) ??
     "Event";
   const eventDescription =
-    useSelector(eventConfigStore, (state) => state.context.eventDescription) ||
+    useSelector(eventConfigStore, (state) => state.context.eventDescription) ??
     "Description";
-  // const eventName = useStore((state) => state.eventName) || "Event";
-  // const eventDescription =
-  //   useStore((state) => state.eventDescription) || "Description";
 
   if (!isColorSchemeLoaded) {
     return null;
@@ -105,7 +102,14 @@ export default function RootLayout() {
                     strokeWidth={1}
                     viewBox="0 0 180 56"
                   />
-                  <Link href="/eventSettings">
+                  <Link
+                    href={{
+                      pathname: "/settings",
+                      params: {
+                        tab: "eventNameAndDescription",
+                      },
+                    }}
+                  >
                     <Text className="text-2xl font-semibold">
                       {`${eventName}: ${eventDescription}`}
                     </Text>
@@ -132,23 +136,24 @@ export default function RootLayout() {
                       <Text>WIRED</Text>
                     </Button>
                     <ThemeToggle />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-primary-foreground"
-                    >
-                      <MoreVertical className="h-5 w-5" />
-                    </Button>
+                    <Link href="/settings" asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-primary-foreground"
+                      >
+                        <MoreVertical className="h-5 w-5" />
+                      </Button>
+                    </Link>
                   </View>
                 </>
               ),
             }}
           />
           <Stack.Screen
-            name="eventSettings"
+            name="settings"
             options={{
-              title: "Event Settings",
-              presentation: "modal",
+              title: "Event settings",
             }}
           />
         </Stack>
