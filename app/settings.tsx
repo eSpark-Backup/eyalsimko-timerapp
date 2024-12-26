@@ -63,7 +63,13 @@ function TimerPickerWithControls({
   );
 }
 
-function EventNameSettings() {
+function EventNameSettings({
+  onSubmit,
+  onReset,
+}: {
+  onSubmit: () => void;
+  onReset: () => void;
+}) {
   const initialEventName = useSelector(
     eventConfigStore,
     (state) => state.context.eventName
@@ -98,6 +104,7 @@ function EventNameSettings() {
       <View className="flex-row gap-4">
         <Button
           onPress={() => {
+            onSubmit();
             eventConfigStore.send({
               type: "setEventName",
               eventName,
@@ -113,6 +120,7 @@ function EventNameSettings() {
           onPress={() => {
             setEventDescription("");
             setEventName("");
+            onReset();
             eventConfigStore.send({
               type: "setEventName",
               eventName: null,
@@ -129,6 +137,13 @@ function EventNameSettings() {
 }
 
 export default function SettingsScreen() {
+  const initialAccordionTab = useLocalSearchParams<{ tab?: string }>().tab;
+  const [currentTab, setCurrentTab] = useState<string | undefined>(
+    initialAccordionTab
+  );
+  const toggleTab = (tab: string) => {
+    setCurrentTab(currentTab === tab ? undefined : tab);
+  };
   const defaultBlinkingStartTime = useSelector(
     eventConfigStore,
     (state) => state.context.defaultBlinkingStartTime
@@ -137,25 +152,31 @@ export default function SettingsScreen() {
     eventConfigStore,
     (state) => state.context.blinkLength
   );
-  const initialAccordionTab = useLocalSearchParams<{ tab: string }>().tab;
   return (
     <View className="flex flex-1 justify-center items-center gap-5 p-6">
       <Accordion
-        defaultValue={initialAccordionTab}
+        value={currentTab}
         type="single"
         collapsible
         className="w-full max-w-sm native:max-w-md"
       >
         <AccordionItem value="eventNameAndDescription">
-          <AccordionTrigger>
+          <AccordionTrigger
+            onPress={() => toggleTab("eventNameAndDescription")}
+          >
             <Text>Event name & description</Text>
           </AccordionTrigger>
           <AccordionContent>
-            <EventNameSettings />
+            <EventNameSettings
+              onSubmit={() => setCurrentTab("")}
+              onReset={() => setCurrentTab("")}
+            />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="defaultBlinkingStartTime">
-          <AccordionTrigger>
+          <AccordionTrigger
+            onPress={() => toggleTab("defaultBlinkingStartTime")}
+          >
             <Text>
               Default blink start time:{" "}
               {defaultBlinkingStartTime
@@ -167,12 +188,14 @@ export default function SettingsScreen() {
             <TimerPickerWithControls
               initialValue={defaultBlinkingStartTime}
               reset={() => {
+                setCurrentTab("");
                 eventConfigStore.send({
                   type: "setDefaultBlinkingStartTime",
                   defaultBlinkingStartTime: null,
                 });
               }}
               submit={(value) => {
+                setCurrentTab("");
                 eventConfigStore.send({
                   type: "setDefaultBlinkingStartTime",
                   defaultBlinkingStartTime: value,
@@ -182,7 +205,7 @@ export default function SettingsScreen() {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="blinkLength">
-          <AccordionTrigger>
+          <AccordionTrigger onPress={() => toggleTab("blinkLength")}>
             <Text>
               Blink length: {blinkLength ? formatDuration(blinkLength) : "None"}
             </Text>
@@ -191,12 +214,14 @@ export default function SettingsScreen() {
             <TimerPickerWithControls
               initialValue={blinkLength}
               reset={() => {
+                setCurrentTab("");
                 eventConfigStore.send({
                   type: "setBlinkLength",
                   blinkLength: null,
                 });
               }}
               submit={(value) => {
+                setCurrentTab("");
                 eventConfigStore.send({
                   type: "setBlinkLength",
                   blinkLength: value,
