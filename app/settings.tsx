@@ -12,11 +12,13 @@ import { eventConfigStore } from "~/lib/store/eventConfig";
 import { formatDuration, getDurationObject } from "~/lib/utils";
 import * as Haptics from "expo-haptics"; // for haptic feedback
 import { useColorScheme } from "~/lib/useColorScheme";
-import { NAV_THEME } from "~/lib/constants";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import { Input } from "~/components/ui/input";
 import { useLocalSearchParams } from "expo-router";
+import { Sun } from "~/lib/icons/Sun";
+import { MoonStar } from "~/lib/icons/MoonStar";
+import { SunMoon } from "~/lib/icons/SunMoon";
 
 function TimerPickerWithControls({
   initialValue,
@@ -36,8 +38,8 @@ function TimerPickerWithControls({
       <TimerPicker
         Haptics={Haptics}
         styles={{
-          theme: colorScheme,
-          backgroundColor: NAV_THEME[colorScheme].background,
+          theme: colorScheme === "system" ? undefined : colorScheme,
+          backgroundColor: "transparent",
         }}
         initialValue={state}
         onDurationChange={(duration) => {
@@ -136,6 +138,40 @@ function EventNameSettings({
   );
 }
 
+function ThemeSettings() {
+  const { colorScheme, setColorScheme } = useColorScheme();
+
+  const themes = [
+    { value: "dark", title: "Dark", Icon: MoonStar },
+    { value: "light", title: "Light", Icon: Sun },
+    { value: "system", title: "System", Icon: SunMoon },
+  ] as const;
+
+  return (
+    <View className="flex justify-between md:flex-row gap-4">
+      {themes.map((theme) => (
+        <Button
+          key={theme.value}
+          variant={colorScheme === theme.value ? "default" : "secondary"}
+          className="grow flex-row gap-2"
+          onPress={() => setColorScheme(theme.value)}
+        >
+          <theme.Icon
+            className={
+              colorScheme === theme.value
+                ? "text-background"
+                : "text-foreground"
+            }
+            size={24}
+            strokeWidth={1.25}
+          />
+          <Text>{theme.title}</Text>
+        </Button>
+      ))}
+    </View>
+  );
+}
+
 export default function SettingsScreen() {
   const initialAccordionTab = useLocalSearchParams<{ tab?: string }>().tab;
   const [currentTab, setCurrentTab] = useState<string | undefined>(
@@ -152,8 +188,9 @@ export default function SettingsScreen() {
     eventConfigStore,
     (state) => state.context.blinkLength
   );
+  const { colorScheme } = useColorScheme();
   return (
-    <View className="flex flex-1 justify-center items-center gap-5 p-6">
+    <View className="flex flex-1 justify-center items-center gap-5 p-6 bg-secondary/30">
       <Accordion
         value={currentTab}
         type="single"
@@ -228,6 +265,14 @@ export default function SettingsScreen() {
                 });
               }}
             />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="theme">
+          <AccordionTrigger onPress={() => toggleTab("theme")}>
+            <Text>Theme: {colorScheme}</Text>
+          </AccordionTrigger>
+          <AccordionContent>
+            <ThemeSettings />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

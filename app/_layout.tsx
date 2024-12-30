@@ -19,10 +19,13 @@ import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { Text } from "~/components/ui/text";
 import { CompanyLogo } from "~/lib/icons/CompanyLogo";
 import { Button } from "~/components/ui/button";
-import { MoreVertical, Wifi, WifiOff } from "lucide-react-native";
+import { MoreVertical } from "~/lib/icons/MoreVertical";
+import { Wifi } from "~/lib/icons/Wifi";
+import { WifiOff } from "~/lib/icons/WifiOff";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { useSelector } from "@xstate/store/react";
 import { TimerContext } from "~/lib/store/timer";
+import { CircleHelp } from "~/lib/icons/CircleHelp";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -94,59 +97,77 @@ export default function RootLayout() {
             name="index"
             options={{
               title: "",
-              headerLeft: () => (
-                <View className="flex flex-row gap-12 items-center">
-                  <CompanyLogo
-                    width={117}
-                    height={36.4}
-                    strokeWidth={1}
-                    viewBox="0 0 180 56"
-                  />
-                  <Link
-                    href={{
-                      pathname: "/settings",
-                      params: {
-                        tab: "eventNameAndDescription",
-                      },
-                    }}
-                  >
-                    <Text className="text-2xl font-semibold">
-                      {`${eventName}: ${eventDescription}`}
-                    </Text>
-                  </Link>
-                </View>
-              ),
-              headerRight: () => (
-                <>
-                  <View className="flex flex-row items-center gap-6">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex flex-row gap-2"
-                    >
-                      <Wifi className="h-4 w-4 mr-2" />
-                      <Text>WIRELESS</Text>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex flex-row gap-2"
-                    >
-                      <WifiOff className="h-4 w-4 mr-2" />
-                      <Text>WIRED</Text>
-                    </Button>
-                    <ThemeToggle />
-                    <Link href="/settings" asChild>
+              header: () => (
+                <View className="pt-safe w-full">
+                  <View className="p-4 flex-row justify-between gap-2 md:gap-12">
+                    <View className="flex shrink flex-row gap-2 md:gap-12 items-center">
+                      <CompanyLogo
+                        className="text-primary"
+                        width={117}
+                        height={36.4}
+                        strokeWidth={1}
+                        viewBox="0 0 180 56"
+                      />
+                      <Link
+                        href={{
+                          pathname: "/settings",
+                          params: {
+                            tab: "eventNameAndDescription",
+                          },
+                        }}
+                      >
+                        <View className="w-40 md:w-9/12">
+                          <Text
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                            className="text-lg md:text-2xl font-semibold"
+                          >
+                            {`${eventName}: ${eventDescription}`}
+                          </Text>
+                        </View>
+                      </Link>
+                    </View>
+                    <View className="flex flex-row items-center sm:gap-4 md:gap-6">
                       <Button
                         variant="ghost"
-                        size="icon"
-                        className="text-primary-foreground"
+                        size="sm"
+                        className="hidden md:flex flex-row gap-2"
                       >
-                        <MoreVertical className="h-5 w-5" />
+                        <Wifi className="h-4 w-4 mr-2 text-primary" />
+                        <Text>WIRELESS</Text>
                       </Button>
-                    </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hidden md:flex flex-row gap-2"
+                      >
+                        <WifiOff className="h-4 w-4 mr-2 text-primary" />
+                        <Text>WIRED</Text>
+                      </Button>
+                      <View className="hidden md:flex">
+                        <ThemeToggle />
+                      </View>
+                      <Link href="/help" asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-primary-foreground"
+                        >
+                          <CircleHelp className="h-5 w-5 text-primary" />
+                        </Button>
+                      </Link>
+                      <Link href="/settings" asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-primary-foreground"
+                        >
+                          <MoreVertical className="h-5 w-5 text-primary" />
+                        </Button>
+                      </Link>
+                    </View>
                   </View>
-                </>
+                </View>
               ),
             }}
           />
@@ -154,6 +175,21 @@ export default function RootLayout() {
             name="settings"
             options={{
               title: "Event settings",
+              headerRight: () => (
+                <Link href="/help" asChild>
+                  <Button variant="ghost" className="flex flex-row gap-2">
+                    <CircleHelp className="h-4 w-4 text-foreground" />
+                    <Text>Help</Text>
+                  </Button>
+                </Link>
+              ),
+            }}
+          />
+          <Stack.Screen
+            name="help"
+            options={{
+              title: "Help",
+              presentation: "modal",
             }}
           />
         </Stack>

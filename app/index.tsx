@@ -176,7 +176,7 @@ export default function TimerScreen() {
   );
 
   return (
-    <View className="flex flex-1 gap-4 p-4 bg-secondary">
+    <View className="flex flex-1 gap-4 p-4 bg-secondary/30">
       {/* For some reason resizing doesn't happen when screen in background w/o progress bar */}
       <Progress
         value={10}

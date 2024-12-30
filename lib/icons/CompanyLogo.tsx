@@ -1,6 +1,7 @@
 import { createLucideIcon } from "lucide-react-native";
+import { iconWithClassName } from "./iconWithClassName";
 
-export const CompanyLogo = createLucideIcon("CompanyLogo", [
+const CompanyLogo = createLucideIcon("CompanyLogo", [
   [
     "path",
     {
@@ -114,3 +115,7 @@ export const CompanyLogo = createLucideIcon("CompanyLogo", [
     },
   ],
 ]);
+
+iconWithClassName(CompanyLogo);
+
+export { CompanyLogo };
