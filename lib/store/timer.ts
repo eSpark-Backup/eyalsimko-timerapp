@@ -2,12 +2,13 @@ import { createActorContext } from '@xstate/react';
 import { assign, fromCallback, setup } from 'xstate';
 
 type Idle = { timer: null }
-type Running = { timer: { elapsed: number, startBlinkingTime: number, speakerName: string, countdownTime: number } }
-type Resetted = { timer: { elapsed: null, startBlinkingTime: number, speakerName: string, countdownTime: number } }
+type Running = { timer: { elapsed: number, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number } }
+type Resetted = { timer: { elapsed: null, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number } }
 
 type State = {
   timer: {
     elapsed: number | null,
+    speakerIndex: number,
     speakerName: string
     countdownTime: number
     startBlinkingTime: number
@@ -20,6 +21,7 @@ type Events = {
     speakerName: string
     countdownTime: number
     startBlinkingTime: number
+    speakerIndex: number
   }
 } | {
   type: "start"

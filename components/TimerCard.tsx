@@ -52,8 +52,8 @@ export const BlinkingLine = ({ isBlinking }: { isBlinking: boolean }) => {
 
   return (
     <Animated.View
-      className="bg-red-600 w-2"
-      style={{ opacity: movingValue, height: 29 }}
+      className="bg-red-600 w-2 h-5 md:h-8"
+      style={{ opacity: movingValue }}
     />
   );
 };
@@ -92,16 +92,29 @@ function Countdown() {
   const displayTime =
     timer.elapsed === null ? timer.countdownTime : Math.abs(timer.elapsed);
 
+  const blinkPeriod = (
+    <Text className="text-xl">
+      Blink from {formatDuration(blinkTimePeriod.start)} till{" "}
+      {formatDuration(blinkTimePeriod.end)}
+    </Text>
+  );
+
+  const isBlinking = inBlinkTimePeriod && isRunning;
+
   return (
-    <View className="flex flex-row gap-2 text-2xl items-baseline">
-      <Text className="text-xl">Timer {timer.speakerName}:</Text>
-      <View className="flex flex-row gap-0.5">
-        <BlinkingLine isBlinking={inBlinkTimePeriod} />
-        <Text className={cn("text-5xl", timerColor)}>
+    <View className="flex flex-col md:flex-row md:landscape:flex-col gap-2 md:gap-4 items-baseline">
+      <View className="flex flex-row gap-1 items-baseline">
+        <Text className="text-xl">
+          Timer {timer.speakerIndex + 1}: {timer.speakerName}:
+        </Text>
+        <View className="flex flex-row gap-0.5"></View>
+        <BlinkingLine isBlinking={isBlinking} />
+        <Text className={cn("text-3xl md:text-5xl", timerColor)}>
           {formatDuration(displayTime)}
         </Text>
-        <BlinkingLine isBlinking={inBlinkTimePeriod} />
+        <BlinkingLine isBlinking={isBlinking} />
       </View>
+      {blinkPeriod}
     </View>
   );
 }
@@ -174,10 +187,12 @@ function CountdownControls() {
 }
 
 export const TimerCard = ({
+  speakerIndex,
   countdownTime,
   speakerName,
   startBlinkingTime,
 }: {
+  speakerIndex: number;
   countdownTime: number | null;
   startBlinkingTime: number | null;
   speakerName: string;
@@ -200,14 +215,16 @@ export const TimerCard = ({
             variant="destructive"
             size="lg"
             className="w-full h-14 bg-brand flex-row items-center gap-2"
-            disabled={!countdownTime || !startBlinkingTime}
+            disabled={!countdownTime || !startBlinkingTime || !speakerName}
             onPress={() => {
               actorRef.send({ type: "reset" });
-              countdownTime &&
+              speakerName &&
+                countdownTime &&
                 startBlinkingTime &&
                 actorRef.send({
                   type: "setup",
                   data: {
+                    speakerIndex,
                     speakerName,
                     countdownTime,
                     startBlinkingTime,
