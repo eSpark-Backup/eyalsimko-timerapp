@@ -19,6 +19,8 @@ import { useLocalSearchParams } from "expo-router";
 import { Sun } from "~/lib/icons/Sun";
 import { MoonStar } from "~/lib/icons/MoonStar";
 import { SunMoon } from "~/lib/icons/SunMoon";
+import { TimerContext } from "~/lib/store/timer";
+import { CircleAlert } from "~/lib/icons/CircleAlert";
 
 function TimerPickerWithControls({
   initialValue,
@@ -188,6 +190,7 @@ export default function SettingsScreen() {
     eventConfigStore,
     (state) => state.context.blinkLength
   );
+  const timerActorRef = TimerContext.useActorRef();
   const { colorScheme } = useColorScheme();
   return (
     <View className="flex flex-1 justify-center items-center gap-5 p-6 bg-secondary/30">
@@ -273,6 +276,26 @@ export default function SettingsScreen() {
           </AccordionTrigger>
           <AccordionContent>
             <ThemeSettings />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="reset">
+          <AccordionTrigger onPress={() => toggleTab("reset")}>
+            <Text>Clear Timers</Text>
+          </AccordionTrigger>
+          <AccordionContent>
+            <Button
+              variant={"destructive"}
+              className="flex-row gap-2"
+              onPress={() => {
+                eventConfigStore.send({
+                  type: "reset",
+                });
+                timerActorRef.send({ type: "reset" });
+              }}
+            >
+              <CircleAlert className="h-4 w-4 mr-2 text-destructive-foreground" />
+              <Text>Clear event data</Text>
+            </Button>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

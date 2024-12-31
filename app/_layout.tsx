@@ -24,7 +24,7 @@ import { Wifi } from "~/lib/icons/Wifi";
 import { WifiOff } from "~/lib/icons/WifiOff";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { useSelector } from "@xstate/store/react";
-import { TimerContext } from "~/lib/store/timer";
+import { TimerContext, TimerSync } from "~/lib/store/timer";
 import { CircleHelp } from "~/lib/icons/CircleHelp";
 
 const LIGHT_THEME: Theme = {
@@ -47,7 +47,6 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-
   React.useEffect(() => {
     (async () => {
       const theme = await AsyncStorage.getItem("theme");
@@ -81,12 +80,13 @@ export default function RootLayout() {
     useSelector(eventConfigStore, (state) => state.context.eventDescription) ??
     "Description";
 
-  if (!isColorSchemeLoaded) {
+  if (!isColorSchemeLoaded || !TimerContext.isResolved) {
     return null;
   }
 
   return (
     <TimerContext.Provider>
+      <TimerSync />
       <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
         <StatusBar
           style={isDarkColorScheme ? "light" : "dark"}

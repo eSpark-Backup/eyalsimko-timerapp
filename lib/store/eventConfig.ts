@@ -12,6 +12,7 @@ type State = {
   speakers: Speaker[]
 }
 
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useSelector } from '@xstate/react'
 import { createStore } from '@xstate/store';
 import { useEffect } from 'react'
@@ -72,9 +73,32 @@ export const eventConfigStore = createStore({
       return {
         speakers
       }
+    },
+    initialize: (context, state: State) => {
+      return state
+    },
+    reset: () => {
+      return initialState
     }
   }
 });
+
+const snapshotKey = 'configSnapshot-v0'
+
+AsyncStorage.getItem(snapshotKey)
+  .then(snapshot => {
+    const parsedSnapshot = JSON.parse(snapshot ?? 'null') as State | null
+    if (parsedSnapshot) {
+      eventConfigStore.send({
+        type: 'initialize',
+        ...parsedSnapshot
+      })
+    }
+  })
+
+eventConfigStore.subscribe(snapshot => {
+  AsyncStorage.setItem(snapshotKey, JSON.stringify(snapshot.context))
+})
 
 export const useSpeaker = (speakerIndex: number): Speaker | undefined => {
   const speaker = useSelector(

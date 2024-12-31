@@ -1,4 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createActorContext } from '@xstate/react';
+import { createActor } from 'xstate';
 import { assign, fromCallback, setup } from 'xstate';
 
 type Idle = { timer: null }
@@ -144,4 +146,40 @@ export const timerStore = setup({
   }
 });
 
-export const TimerContext = createActorContext(timerStore);
+let TimerContext = {
+  ...createActorContext(timerStore),
+  isResolved: false,
+}
+
+const snapshotKey = 'timerSnapshot-v0'
+
+const getContext = async () => {
+  const snapshot = JSON.parse(await AsyncStorage.getItem(snapshotKey) ?? 'null')
+  const context = createActorContext(timerStore, {
+    snapshot,
+  });
+
+  TimerContext = {
+    ...context,
+    isResolved: true,
+  }
+}
+
+getContext()
+
+const useSyncTimerState = () => {
+  if (!TimerContext.isResolved) return
+  const actor = TimerContext.useActorRef()
+
+  actor.subscribe(() => {
+    AsyncStorage.setItem(snapshotKey, JSON.stringify(actor.getPersistedSnapshot()))
+  })
+}
+
+export function TimerSync() {
+  useSyncTimerState()
+
+  return null
+}
+
+export { TimerContext }
