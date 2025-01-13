@@ -1,5 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  TouchableOpacity,
+  ScrollView,
+  KeyboardAvoidingView,
+} from "react-native";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Card, CardContent } from "~/components/ui/card";
@@ -176,72 +181,81 @@ export default function TimerScreen() {
   );
 
   return (
-    <View className="flex flex-1 gap-4 p-4 bg-secondary/30">
-      {/* For some reason resizing doesn't happen when screen in background w/o progress bar */}
-      <Progress
-        value={10}
-        className="h-2 hidden"
-        indicatorClassName="bg-sky-600"
-      />
-      <Card>
-        <CardContent className="p-6 flex flex-col gap-8">
-          <View className="flex flex-row justify-between gap-8 md:gap-32">
-            <View className="hidden md:flex">{prevButton}</View>
-            <View className="flex flex-row grow gap-4 items-center">
-              <Text className="text-3xl font-bold text-primary">
-                Timer {speakerIndex + 1}:
-              </Text>
-              <Input
-                placeholder="Speaker Name"
-                value={speakerName}
-                onChangeText={setSpeakerName}
-                style={{ fontSize: 24, lineHeight: 32 }}
-                className="flex-1 border-b border-t-0 border-l-0 border-r-0 rounded-none bg-transparent px-0 text-primary"
-              />
-            </View>
-            <View className="hidden md:flex">{nextButton}</View>
+    <KeyboardAvoidingView style={{ flexGrow: 1 }} behavior="padding">
+      <View className="flex-1 bg-secondary/30">
+        <ScrollView
+          className="p-4 pb-safe"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <View className="flex-1 gap-4">
+            {/* For some reason resizing doesn't happen when screen in background w/o progress bar */}
+            <Progress
+              value={10}
+              className="h-2 hidden"
+              indicatorClassName="bg-sky-600"
+            />
+            <Card>
+              <CardContent className="p-6 flex flex-col gap-8">
+                <View className="flex flex-row justify-between gap-8 md:gap-32">
+                  <View className="hidden md:flex">{prevButton}</View>
+                  <View className="flex flex-row grow gap-4 items-center">
+                    <Text className="text-3xl font-bold text-primary">
+                      Timer {speakerIndex + 1}:
+                    </Text>
+                    <Input
+                      placeholder="Speaker Name"
+                      value={speakerName}
+                      onChangeText={setSpeakerName}
+                      style={{ fontSize: 24, lineHeight: 32 }}
+                      className="flex-1 border-b border-t-0 border-l-0 border-r-0 rounded-none bg-transparent px-0 text-primary"
+                    />
+                  </View>
+                  <View className="hidden md:flex">{nextButton}</View>
+                </View>
+                <View className="flex flex-col md:flex-row justify-between gap-8">
+                  <View className="flex flex-row gap-12 justify-between">
+                    <Text className="text-2xl font-semibold mb-2 text-primary">
+                      Countdown Time:
+                    </Text>
+                    <SetTime
+                      placeholder="Enter time"
+                      value={countDown}
+                      onChange={setCountDown}
+                      modalTitle={`Set countdown time for ${
+                        speakerName || "Speaker"
+                      }`}
+                    />
+                  </View>
+                  <View className="flex flex-row gap-12 justify-between">
+                    <Text className="text-2xl font-semibold mb-2 text-primary">
+                      Blink Start Time:
+                    </Text>
+                    <SetTime
+                      placeholder="Enter time"
+                      value={blinkingStartTime}
+                      defaultValue={defaultBlinkingStartTime}
+                      onChange={setBlinkingStartTime}
+                      modalTitle={`Set blinking start time for ${
+                        speakerName || "Speaker"
+                      }`}
+                    />
+                  </View>
+                </View>
+                <View className="flex flex-row justify-between md:hidden">
+                  {prevButton}
+                  {nextButton}
+                </View>
+              </CardContent>
+            </Card>
+            <TimerCard
+              speakerIndex={speakerIndex}
+              countdownTime={countDown}
+              startBlinkingTime={effectiveBlinkingStartTime}
+              speakerName={speakerName}
+            />
           </View>
-          <View className="flex flex-col md:flex-row justify-between gap-8">
-            <View className="flex flex-row gap-12 justify-between">
-              <Text className="text-2xl font-semibold mb-2 text-primary">
-                Countdown Time:
-              </Text>
-              <SetTime
-                placeholder="Enter time"
-                value={countDown}
-                onChange={setCountDown}
-                modalTitle={`Set countdown time for ${
-                  speakerName || "Speaker"
-                }`}
-              />
-            </View>
-            <View className="flex flex-row gap-12 justify-between">
-              <Text className="text-2xl font-semibold mb-2 text-primary">
-                Blink Start Time:
-              </Text>
-              <SetTime
-                placeholder="Enter time"
-                value={blinkingStartTime}
-                defaultValue={defaultBlinkingStartTime}
-                onChange={setBlinkingStartTime}
-                modalTitle={`Set blinking start time for ${
-                  speakerName || "Speaker"
-                }`}
-              />
-            </View>
-          </View>
-          <View className="flex flex-row justify-between md:hidden">
-            {prevButton}
-            {nextButton}
-          </View>
-        </CardContent>
-      </Card>
-      <TimerCard
-        speakerIndex={speakerIndex}
-        countdownTime={countDown}
-        startBlinkingTime={effectiveBlinkingStartTime}
-        speakerName={speakerName}
-      />
-    </View>
+        </ScrollView>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

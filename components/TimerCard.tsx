@@ -2,7 +2,7 @@ import { Animated, Easing, View } from "react-native";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useSelector } from "@xstate/react";
 import { TimerContext } from "~/lib/store/timer";
 import { cn, formatDuration } from "~/lib/utils";
@@ -11,6 +11,7 @@ import { Pause } from "~/lib/icons/Pause";
 import { RotateCcw } from "~/lib/icons/RotateCcw";
 import { Square } from "~/lib/icons/Square";
 import { eventConfigStore } from "~/lib/store/eventConfig";
+import { Input } from "./ui/input";
 
 export const BlinkingLine = ({ isBlinking }: { isBlinking: boolean }) => {
   const movingValue = useRef(new Animated.Value(0)).current;
@@ -197,9 +198,36 @@ export const TimerCard = ({
   startBlinkingTime: number | null;
   speakerName: string;
 }) => {
-  const [showMessage, setShowMessage] = useState(false);
-
   const actorRef = TimerContext.useActorRef();
+
+  const canSetMessage = useSelector(actorRef, (state) =>
+    state.can({ type: "setMessage", data: { message: "" } })
+  );
+  const canShowMessage = useSelector(actorRef, (state) =>
+    state.can({ type: "showMessage" })
+  );
+  const canHideMessage = useSelector(actorRef, (state) =>
+    state.can({ type: "hideMessage" })
+  );
+  const messageIsVisible = useSelector(
+    actorRef,
+    (state) => state.context.timer?.messageIsVisible ?? false
+  );
+
+  const canToggleMessage = canShowMessage || canHideMessage;
+
+  const message = useSelector(
+    actorRef,
+    (state) => state.context.timer?.message ?? ""
+  );
+
+  const toggleMessage = () => {
+    if (messageIsVisible) {
+      actorRef.send({ type: "hideMessage" });
+    } else {
+      actorRef.send({ type: "showMessage" });
+    }
+  };
 
   return (
     <Card className="flex-1">
@@ -235,21 +263,55 @@ export const TimerCard = ({
             <RotateCcw className="color-primary-foreground" />
             <Text className="text-primary-foreground text-lg">Reset</Text>
           </Button>
-          <Button
-            variant="destructive"
-            size="lg"
-            className="w-full h-14 bg-brand"
-            onPress={() => setShowMessage(!showMessage)}
-          >
-            <Text className="text-primary-foreground text-lg">
-              Show Message
-            </Text>
-          </Button>
-          {showMessage && (
-            <Text className="text-2xl font-semibold text-brand border-b border-brand pb-2">
-              Time is up!
-            </Text>
-          )}
+          <View className="flex flex-col md:flex-row gap-4 md:gap-8">
+            <View className="flex-1 h-14">
+              {!messageIsVisible && (
+                <Input
+                  editable={canSetMessage}
+                  placeholder={`Message for the ${speakerName || "Speaker"}`}
+                  className="flex-1"
+                  numberOfLines={1}
+                  value={message}
+                  style={{ fontSize: 21, lineHeight: 28 }}
+                  onChangeText={(text) => {
+                    actorRef.send({
+                      type: "setMessage",
+                      data: { message: text },
+                    });
+                  }}
+                  maxLength={40}
+                />
+              )}
+              {messageIsVisible && (
+                <Input
+                  editable={false}
+                  placeholder={`Message for the ${speakerName || "Speaker"}`}
+                  className="flex-1 border-brand text-brand opacity-1"
+                  numberOfLines={1}
+                  value={message}
+                  style={{ fontSize: 21, lineHeight: 28 }}
+                  onChangeText={(text) => {
+                    actorRef.send({
+                      type: "setMessage",
+                      data: { message: text },
+                    });
+                  }}
+                  maxLength={40}
+                />
+              )}
+            </View>
+            <Button
+              variant="destructive"
+              size="lg"
+              className="h-14 bg-brand"
+              onPress={toggleMessage}
+              disabled={!canToggleMessage}
+            >
+              <Text className="text-primary-foreground text-lg">
+                {messageIsVisible ? "Hide" : "Show"} Message
+              </Text>
+            </Button>
+          </View>
         </View>
       </CardFooter>
     </Card>

@@ -4,8 +4,8 @@ import { createActor } from 'xstate';
 import { assign, fromCallback, setup } from 'xstate';
 
 type Idle = { timer: null }
-type Running = { timer: { elapsed: number, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number } }
-type Resetted = { timer: { elapsed: null, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number } }
+type Running = { timer: { elapsed: number, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number, message: string, messageIsVisible: boolean } }
+type Resetted = { timer: { elapsed: null, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number, message: string, messageIsVisible: boolean } }
 
 type State = {
   timer: {
@@ -14,6 +14,8 @@ type State = {
     speakerName: string
     countdownTime: number
     startBlinkingTime: number
+    message: string,
+    messageIsVisible: boolean
   } | null
 }
 
@@ -37,6 +39,15 @@ type Events = {
   type: "pause"
 } | {
   type: "resume"
+} | {
+  type: "setMessage",
+  data: {
+    message: string
+  }
+} | {
+  type: "showMessage"
+} | {
+  type: "hideMessage"
 }
 
 export const timerStore = setup({
@@ -63,12 +74,12 @@ export const timerStore = setup({
       on: {
         setup: {
           actions: assign({
-            timer: ({ context, event }) => {
-              return {
-                ...event.data,
-                elapsed: null
-              }
-            }
+            timer: ({ event }) => ({
+              ...event.data,
+              message: 'Time is up!',
+              elapsed: null,
+              messageIsVisible: false
+            })
           }),
           target: 'ACTIVE'
         }
@@ -108,7 +119,42 @@ export const timerStore = setup({
                 }
               })
             },
-            pause: "paused",
+            pause: {
+              target: 'paused',
+              actions: assign({
+                timer: ({ context }) => {
+                  const runningContext = context as Running
+                  return {
+                    ...runningContext.timer,
+                    messageIsVisible: false
+                  }
+                }
+              })
+            },
+            showMessage: {
+              actions: assign({
+                timer: ({ context }) => {
+                  console.log("show!")
+                  const runningContext = context as Running
+                  return {
+                    ...runningContext.timer,
+                    messageIsVisible: true
+                  }
+                }
+              })
+            },
+            hideMessage: {
+              actions: assign({
+                timer: ({ context }) => {
+                  console.log("hide!!")
+                  const runningContext = context as Running
+                  return {
+                    ...runningContext.timer,
+                    messageIsVisible: false
+                  }
+                }
+              })
+            }
           }
         },
         paused: {
@@ -118,6 +164,17 @@ export const timerStore = setup({
         },
       },
       on: {
+        setMessage: {
+          actions: assign({
+            timer: ({ context, event }) => {
+              const runningContext = context as Running
+              return {
+                ...runningContext.timer,
+                message: event.data.message
+              }
+            }
+          }),
+        },
         stop: {
           target: '.stopped',
           actions: assign({
@@ -125,6 +182,7 @@ export const timerStore = setup({
               const runningContext = context as Running
               return {
                 ...runningContext.timer,
+                messageIsVisible: false,
                 elapsed: null
               }
             }
