@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createActorContext } from '@xstate/react';
-import { createActor } from 'xstate';
 import { assign, fromCallback, setup } from 'xstate';
 
 type Idle = { timer: null }
@@ -64,6 +63,7 @@ export const timerStore = setup({
     })
   }
 }).createMachine({
+  /** @xstate-layout N4IgpgJg5mDOIC5QBcCWBbMAnAxFuYyA2gAwC6ioADgPaypo0B2lIAHogLQBM3AdAE4SAVgEB2YQEYBAFgAcEgQGYAbABoQATy4k+KyTO4CVKkmJkC5A4WKUBfOxrSYsfAJIARADIBRHLEIAVypSCiQQWnpGFnCOBCUBPklk624VGWFuYRIVYQ1tBAs5PmEVZVtbEm45OSyHJwxsPgBBAGEAFTcANT8A5ABZOFgAQxhQ1kiGVGZWOIlhPhkSGQsSY2EZSRIlfMQrXTWlI+4ZJUklMUkVepBnJrbOnv9kGhDyCbopmdjEAW4lEqifRbGzcEhySS7BCSIx8cFrf6bJQyFSqGQ3O6uB7dHx8WAvKhUSDPYZYYjvcKTaKzRBiFRiPhGI7naoGORlKFKOS6ORKKobARXORSDGNLEdHF8LCBJhMVBMKA4TqtADS40pn2pPwQKm4DOESjBJnBwM2UOq-FkR2FVXk3GSopcLQlPSlMrlCpwVGGgQC6uomumMVAcX+KkEUnESmyCl5ck53L4vP5FiFIsctzFzseuOlsvlitgAAsaAB3QawEZjCkBqJBmk6qpJ4xLQ3VMSXdRaRBlYomKPmFTc5ECR33F2590FnBF1AQMAVqtgf0RQPfEOIC4A3kCawiZQXEiQ7sIMRpPQiZNczJZMRj8U5vje33E-CwQKYFdU+vawzh4ViMK1i8nyYgCOaiZGLqEhbLu1gog4GZMDQ87wOEmIfHW67sFwYi6EIogwbICiiDIUKcDUSQGGcJD8icCTcPe7jeD4mFfMGOEICQnKqEx2I9GxWobtC5iLPBIhrBIvDGFCmwlNyyhSNksgwtcGaYtmkr4q8RIQIJP7CWexR0meaR8pIoiqFCFn8CI5g2keBqyMIfETm6+YKvp2FxKscL0raIGgseBQXJISaAScKI2HSkjmK5j7PgEekalhHGhrwYkbBJ4g3jJJ7VLoUF6lIay7hsakOEAA */
   id: 'timer',
   initial: 'IDLE',
   context: {

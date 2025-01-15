@@ -23,9 +23,12 @@ import { MoreVertical } from "~/lib/icons/MoreVertical";
 import { Wifi } from "~/lib/icons/Wifi";
 import { WifiOff } from "~/lib/icons/WifiOff";
 import { eventConfigStore } from "~/lib/store/eventConfig";
+import { useSelector as useMachineSelector } from "@xstate/react";
 import { useSelector } from "@xstate/store/react";
 import { TimerContext, TimerSync } from "~/lib/store/timer";
 import { CircleHelp } from "~/lib/icons/CircleHelp";
+import { connectionActor } from "~/lib/store/connectionStore";
+import { cn } from "~/lib/utils";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -80,6 +83,25 @@ export default function RootLayout() {
     useSelector(eventConfigStore, (state) => state.context.eventDescription) ??
     "Description";
 
+  const isConnected = useMachineSelector(connectionActor, (state) =>
+    state.matches("CONNECTED")
+  );
+  const isConnecting = useMachineSelector(connectionActor, (state) =>
+    state.matches("CONNECTING")
+  );
+  const isDisconnectedOrIDLE = useMachineSelector(
+    connectionActor,
+    (state) => state.matches("DISCONNECTED") || state.matches("IDLE")
+  );
+  const isConnectionError = useMachineSelector(connectionActor, (state) =>
+    state.matches("ERROR")
+  );
+
+  const connectionType = useMachineSelector(connectionActor, (state) => {
+    if (isConnected) return state.context.type;
+    return null;
+  });
+
   if (!isColorSchemeLoaded || !TimerContext.isResolved) {
     return null;
   }
@@ -128,13 +150,33 @@ export default function RootLayout() {
                       </Link>
                     </View>
                     <View className="flex flex-row items-center sm:gap-4 md:gap-6">
+                      <View
+                        className={cn(
+                          "h-2 w-2 rounded-full bg-primary",
+                          isDisconnectedOrIDLE && "bg-gray-300",
+                          isConnected && "bg-green-500",
+                          isConnecting && "bg-gray-500",
+                          isConnectionError && "bg-red-500"
+                        )}
+                      />
                       <Button
                         variant="ghost"
                         size="sm"
                         className="hidden md:flex flex-row gap-2"
                       >
-                        <Wifi className="h-4 w-4 mr-2 text-primary" />
-                        <Text>WIRELESS</Text>
+                        <Wifi
+                          className={cn(
+                            "h-4 w-4 mr-2 text-primary",
+                            connectionType === "WIFI" && "text-green-500"
+                          )}
+                        />
+                        <Text
+                          className={cn(
+                            connectionType === "WIFI" && "text-green-500"
+                          )}
+                        >
+                          WIRELESS
+                        </Text>
                       </Button>
                       <Button
                         variant="ghost"

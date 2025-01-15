@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "expo start -c --ios",
+    "mock-server": "node ./mockServer.mjs",
     "dev:web": "expo start -c --web",
     "dev:android": "expo start -c --android",
     "android": "expo start -c --android",
@@ -51,6 +52,7 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "3.3.5",
     "tailwindcss-animate": "^1.0.7",
+    "ws": "^8.18.0",
     "xstate": "^5.19.0"
   },
   "devDependencies": {
