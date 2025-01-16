@@ -9,7 +9,13 @@ wss.on('connection', function connection(ws) {
   ws.on('error', console.error);
 
   ws.on('message', function message(data) {
-    console.log('received: %s', data);
+    const dataStr = Buffer.from(data).toString()
+    if (dataStr === "shutdown") {
+      console.log("shutdown")
+      return ws.close()
+    }
+
+    console.log('received: %s', data, dataStr);
   });
 
   ws.on("close", () => {

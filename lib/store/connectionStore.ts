@@ -14,6 +14,7 @@ type State = NonConnectedState | ConnectedState
 type WsMessage = string
 type Events =
   | { type: 'initialize' }
+  | { type: 'reconnect' }
   | { type: 'connected' }
   | { type: 'failed' }
   | { type: 'disconnect' }
@@ -117,15 +118,16 @@ const connectionStore = setup({
         src: 'subscribeConnection',
         input: ({ context }) => context.ws as WebSocket,
       },
+      exit: assign(({ context }) => ({
+        ws: null,
+        type: null,
+      })),
       on: {
         disconnect: {
           target: 'DISCONNECTED',
-          actions: assign(({
-            ws: ({ context }) => {
-              context.ws?.close()
-              return null
-            }
-          }))
+          actions: ({ context }) => {
+            context.ws?.close()
+          },
         },
         sendMessage: {
           actions: ({ event, context }) => {
@@ -134,15 +136,12 @@ const connectionStore = setup({
         },
         connectionLost: {
           target: 'ERROR',
-          actions: assign(({
-            ws: null,
-          }))
         }
       }
     },
     DISCONNECTED: {
       on: {
-        initialize: 'CONNECTING'
+        reconnect: 'CONNECTING'
       }
     },
     ERROR: {

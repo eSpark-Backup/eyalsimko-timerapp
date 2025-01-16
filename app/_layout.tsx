@@ -159,33 +159,53 @@ export default function RootLayout() {
                           isConnectionError && "bg-red-500"
                         )}
                       />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="hidden md:flex flex-row gap-2"
+                      <Link
+                        href={{
+                          pathname: "/settings",
+                          params: {
+                            tab: "connection",
+                          },
+                        }}
+                        asChild
                       >
-                        <Wifi
-                          className={cn(
-                            "h-4 w-4 mr-2 text-primary",
-                            connectionType === "WIFI" && "text-green-500"
-                          )}
-                        />
-                        <Text
-                          className={cn(
-                            connectionType === "WIFI" && "text-green-500"
-                          )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hidden md:flex flex-row gap-2"
                         >
-                          WIRELESS
-                        </Text>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="hidden md:flex flex-row gap-2"
+                          <Wifi
+                            className={cn(
+                              "h-4 w-4 text-primary",
+                              connectionType === "WIFI" && "text-green-500"
+                            )}
+                          />
+                          <Text
+                            className={cn(
+                              connectionType === "WIFI" && "text-green-500"
+                            )}
+                          >
+                            WIRELESS
+                          </Text>
+                        </Button>
+                      </Link>
+                      <Link
+                        href={{
+                          pathname: "/settings",
+                          params: {
+                            tab: "connection",
+                          },
+                        }}
+                        asChild
                       >
-                        <WifiOff className="h-4 w-4 mr-2 text-primary" />
-                        <Text>WIRED</Text>
-                      </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hidden md:flex flex-row gap-2"
+                        >
+                          <WifiOff className="h-4 w-4 text-primary" />
+                          <Text>WIRED</Text>
+                        </Button>
+                      </Link>
                       <View className="hidden md:flex">
                         <ThemeToggle />
                       </View>
