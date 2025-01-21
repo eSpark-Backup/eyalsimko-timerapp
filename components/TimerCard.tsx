@@ -2,7 +2,7 @@ import { Animated, Easing, View } from "react-native";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { TimerContext } from "~/lib/store/timer";
 import { cn, formatDuration } from "~/lib/utils";
@@ -53,7 +53,7 @@ export const BlinkingLine = ({ isBlinking }: { isBlinking: boolean }) => {
 
   return (
     <Animated.View
-      className="bg-red-600 w-2 h-5 md:h-8"
+      className="bg-red-600 w-1 md:w-2 h-5 md:h-9"
       style={{ opacity: movingValue }}
     />
   );
@@ -264,7 +264,7 @@ export const TimerCard = ({
             <Text className="text-primary-foreground text-lg">Reset</Text>
           </Button>
           <View className="flex flex-col md:flex-row gap-4 md:gap-8">
-            <View className="flex-1 h-14">
+            <View className="flex-1">
               {!messageIsVisible && (
                 <Input
                   editable={canSetMessage}

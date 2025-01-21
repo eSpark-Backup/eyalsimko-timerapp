@@ -25,6 +25,8 @@ import { Power } from "~/lib/icons/Power";
 import { Unplug } from "~/lib/icons/Unplug";
 import React from "react";
 import { RotateCcw } from "~/lib/icons/RotateCcw";
+import { TimerContext } from "~/lib/store/timer";
+import { CircleAlert } from "~/lib/icons/CircleAlert";
 
 function TimerPickerWithControls({
   initialValue,
@@ -230,7 +232,7 @@ function ConnectionSettings() {
             disabled={!canShutDown}
             onPress={() => connectionActor.send(shutDownEvent)}
           >
-            <Power className="h-4 w-4 text-primary" />
+            <Power className="h-4 w-4 text-destructive-foreground" />
             <Text>Shutdown</Text>
           </Button>
         </View>
@@ -286,6 +288,8 @@ export default function SettingsScreen() {
     connectionActor,
     (state) => state.context.type
   );
+
+  const timerActorRef = TimerContext.useActorRef();
 
   return (
     <View className="flex flex-1 justify-center items-center gap-5 p-6 bg-secondary/30">
@@ -384,6 +388,26 @@ export default function SettingsScreen() {
           </AccordionTrigger>
           <AccordionContent>
             <ConnectionSettings />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="reset">
+          <AccordionTrigger onPress={() => toggleTab("reset")}>
+            <Text>Clear Timers</Text>
+          </AccordionTrigger>
+          <AccordionContent>
+            <Button
+              variant={"destructive"}
+              className="flex-row gap-2"
+              onPress={() => {
+                eventConfigStore.send({
+                  type: "reset",
+                });
+                timerActorRef.send({ type: "reset" });
+              }}
+            >
+              <CircleAlert className="h-4 w-4 text-destructive-foreground" />
+              <Text>Clear event data</Text>
+            </Button>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

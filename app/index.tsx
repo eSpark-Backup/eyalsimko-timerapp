@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -46,6 +47,8 @@ function SetTime({
   const isDefaultValueUsed =
     defaultValue === undefined ? false : value === null ? true : false;
 
+  const isAndroid = Platform.OS === "android";
+
   return (
     <>
       <TouchableOpacity activeOpacity={0.7} onPress={() => setShowPicker(true)}>
@@ -55,6 +58,9 @@ function SetTime({
             onPress={() => setShowPicker(true)}
           >
             <Text
+              style={{
+                marginRight: isAndroid ? 0.0001 : 0, // A hack to prevent hiding last digit on android
+              }}
               className={cn(
                 "text-2xl",
                 isDefaultValueUsed && "text-muted-foreground"
@@ -151,7 +157,7 @@ export default function TimerScreen() {
         className="bg-brand flex flex-row gap-2"
         disabled={speakerIndex === 0}
       >
-        <ArrowLeft className="h-4 w-4 mr-2 color-primary-foreground" />
+        <ArrowLeft className="h-4 w-4 color-primary-foreground" />
         <Text className="text-primary-foreground">Prev</Text>
       </Button>
     </Link>
@@ -172,9 +178,9 @@ export default function TimerScreen() {
           {isLastSpeaker ? "Add" : "Next"}
         </Text>
         {isLastSpeaker ? (
-          <Plus className="h-4 w-4 mr-2 color-primary-foreground" />
+          <Plus className="h-4 w-4 color-primary-foreground" />
         ) : (
-          <ArrowRight className="h-4 w-4 mr-2 color-primary-foreground" />
+          <ArrowRight className="h-4 w-4 color-primary-foreground" />
         )}
       </Button>
     </Link>
@@ -206,15 +212,19 @@ export default function TimerScreen() {
                       placeholder="Speaker Name"
                       value={speakerName}
                       onChangeText={setSpeakerName}
-                      style={{ fontSize: 24, lineHeight: 32 }}
-                      className="flex-1 border-b border-t-0 border-l-0 border-r-0 rounded-none bg-transparent px-0 text-primary"
+                      style={{
+                        fontSize: 21,
+                        lineHeight: 28,
+                        height: 50,
+                      }}
+                      className="flex-1 border-b border-t-0 border-l-0 border-r-0 rounded-none bg-transparent font-semibold px-0 text-primary"
                     />
                   </View>
                   <View className="hidden md:flex">{nextButton}</View>
                 </View>
                 <View className="flex flex-col md:flex-row justify-between gap-8">
-                  <View className="flex flex-row gap-12 justify-between">
-                    <Text className="text-2xl font-semibold mb-2 text-primary">
+                  <View className="flex flex-row gap-8">
+                    <Text className="text-2xl font-semibold text-primary">
                       Countdown Time:
                     </Text>
                     <SetTime
@@ -226,8 +236,8 @@ export default function TimerScreen() {
                       }`}
                     />
                   </View>
-                  <View className="flex flex-row gap-12 justify-between">
-                    <Text className="text-2xl font-semibold mb-2 text-primary">
+                  <View className="flex flex-row gap-8">
+                    <Text className="text-2xl font-semibold text-primary">
                       Blink Start Time:
                     </Text>
                     <SetTime
