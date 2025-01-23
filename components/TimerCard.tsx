@@ -12,6 +12,8 @@ import { RotateCcw } from "~/lib/icons/RotateCcw";
 import { Square } from "~/lib/icons/Square";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { Input } from "./ui/input";
+import { connectionActor } from "~/lib/store/connectionStore";
+import Toast from "react-native-toast-message";
 
 export const BlinkingLine = ({ isBlinking }: { isBlinking: boolean }) => {
   const movingValue = useRef(new Animated.Value(0)).current;
@@ -122,6 +124,7 @@ function Countdown() {
 
 function CountdownControls() {
   const actorRef = TimerContext.useActorRef();
+  const isActive = useSelector(actorRef, (state) => state.matches("ACTIVE"));
   const isRunning = useSelector(actorRef, (state) =>
     state.matches({ ACTIVE: "running" })
   );
@@ -136,6 +139,12 @@ function CountdownControls() {
     })
   );
   const canStop = useSelector(actorRef, (state) => state.can({ type: "stop" }));
+  const canPause = useSelector(actorRef, (state) =>
+    state.can({ type: "pause" })
+  );
+  const canResume = useSelector(actorRef, (state) =>
+    state.can({ type: "resume" })
+  );
 
   return (
     <View className="flex sm:flex-1 flex-row gap-4 justify-between md:justify-end">
@@ -143,6 +152,7 @@ function CountdownControls() {
         <Button
           variant="outline"
           size="lg"
+          disabled={!canPause}
           className="h-14 bg-secondary flex-row items-center gap-2"
           onPress={() => actorRef.send({ type: "pause" })}
         >
@@ -155,6 +165,7 @@ function CountdownControls() {
           variant="outline"
           size="lg"
           className="h-14 bg-secondary flex-row items-center gap-2"
+          disabled={!canResume}
           onPress={() => actorRef.send({ type: "resume" })}
         >
           <Play className="color-primary" />
@@ -172,10 +183,11 @@ function CountdownControls() {
           <Text className="text-primary text-lg">Start</Text>
         </Button>
       )}
-      {canStop && (
+      {isActive && (
         <Button
           variant="outline"
           size="lg"
+          disabled={!canStop}
           className="h-14 bg-secondary flex-row items-center gap-2"
           onPress={() => actorRef.send({ type: "stop" })}
         >
@@ -229,6 +241,22 @@ export const TimerCard = ({
     }
   };
 
+  const setupEvent = {
+    type: "setup",
+    data: {
+      speakerName,
+      countdownTime: countdownTime ?? 0,
+      startBlinkingTime: startBlinkingTime ?? 0,
+      speakerIndex,
+    },
+  } as const;
+  const canSetup = useSelector(actorRef, (state) => state.can(setupEvent));
+
+  const isConnected = useSelector(connectionActor, (state) =>
+    state.matches("CONNECTED")
+  );
+  const canReset = isConnected ? canSetup : true;
+
   return (
     <Card className="flex-1">
       <CardContent className="p-6 flex flex-1 flex-col gap-8">
@@ -243,21 +271,19 @@ export const TimerCard = ({
             variant="destructive"
             size="lg"
             className="w-full h-14 bg-brand flex-row items-center gap-2"
-            disabled={!countdownTime || !startBlinkingTime || !speakerName}
+            disabled={!canReset}
             onPress={() => {
-              actorRef.send({ type: "reset" });
-              speakerName &&
-                countdownTime &&
-                startBlinkingTime &&
-                actorRef.send({
-                  type: "setup",
-                  data: {
-                    speakerIndex,
-                    speakerName,
-                    countdownTime,
-                    startBlinkingTime,
-                  },
+              if (!isConnected) {
+                Toast.show({
+                  type: "error",
+                  text1: "Not connected",
+                  text2:
+                    "Not connected to module. Please choose connect over WIRELESS or WIRED from the settings menu.",
                 });
+                return;
+              }
+              actorRef.send({ type: "reset" });
+              actorRef.send(setupEvent);
             }}
           >
             <RotateCcw className="color-primary-foreground" />

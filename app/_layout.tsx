@@ -29,6 +29,7 @@ import { TimerContext, TimerSync } from "~/lib/store/timer";
 import { CircleHelp } from "~/lib/icons/CircleHelp";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { cn } from "~/lib/utils";
+import { ToastProvider } from "~/components/ui/toast";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -256,6 +257,7 @@ export default function RootLayout() {
           />
         </Stack>
         <PortalHost />
+        <ToastProvider />
       </ThemeProvider>
     </TimerContext.Provider>
   );

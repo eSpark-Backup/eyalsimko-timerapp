@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createActorContext } from '@xstate/react';
-import { assign, fromCallback, setup } from 'xstate';
+import { and, assign, fromCallback, fromEventObservable, setup } from 'xstate';
+import { connectionActor } from './connectionStore';
 
 type Idle = { timer: null }
 type Running = { timer: { elapsed: number, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number, message: string, messageIsVisible: boolean } }
@@ -15,10 +16,10 @@ type State = {
     startBlinkingTime: number
     message: string,
     messageIsVisible: boolean
-  } | null
+  } | null,
 }
 
-type Events = {
+type SetupEvent = {
   type: "setup",
   data: {
     speakerName: string
@@ -26,7 +27,9 @@ type Events = {
     startBlinkingTime: number
     speakerIndex: number
   }
-} | {
+}
+
+type Events = SetupEvent | {
   type: "start"
 } | {
   type: "TICK"
@@ -60,40 +63,74 @@ export const timerStore = setup({
         sendBack({ type: 'TICK' });
       }, 1000);
       return () => clearInterval(interval);
+    }),
+    waitForDisconnect: fromCallback(({ sendBack }) => {
+      connectionActor.subscribe(snapshot => {
+        if (!snapshot.matches("CONNECTED")) {
+          console.log("NOT CONNECTED!")
+          sendBack({ type: "reset" })
+        }
+      })
     })
-  }
+  },
+  guards: {
+    isConnected: () => connectionActor.getSnapshot().matches("CONNECTED"),
+  },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QBcCWBbMAnAxFuYyA2gAwC6ioADgPaypo0B2lIAHogLQBM3AdAE4SAVgEB2YQEYBAFgAcEgQGYAbABoQATy4k+KyTO4CVKkmJkC5A4WKUBfOxrSYsfAJIARADIBRHLEIAVypSCiQQWnpGFnCOBCUBPklk624VGWFuYRIVYQ1tBAs5PmEVZVtbEm45OSyHJwxsPgBBAGEAFTcANT8A5ABZOFgAQxhQ1kiGVGZWOIlhPhkSGQsSY2EZSRIlfMQrXTWlI+4ZJUklMUkVepBnJrbOnv9kGhDyCbopmdjEAW4lEqifRbGzcEhySS7BCSIx8cFrf6bJQyFSqGQ3O6uB7dHx8WAvKhUSDPYZYYjvcKTaKzRBiFRiPhGI7naoGORlKFKOS6ORKKobARXORSDGNLEdHF8LCBJhMVBMKA4TqtADS40pn2pPwQKm4DOESjBJnBwM2UOq-FkR2FVXk3GSopcLQlPSlMrlCpwVGGgQC6uomumMVAcX+KkEUnESmyCl5ck53L4vP5FiFIsctzFzseuOlsvlitgAAsaAB3QawEZjCkBqJBmk6qpJ4xLQ3VMSXdRaRBlYomKPmFTc5ECR33F2590FnBF1AQMAVqtgf0RQPfEOIC4A3kCawiZQXEiQ7sIMRpPQiZNczJZMRj8U5vje33E-CwQKYFdU+vawzh4ViMK1i8nyYgCOaiZGLqEhbLu1gog4GZMDQ87wOEmIfHW67sFwYi6EIogwbICiiDIUKcDUSQGGcJD8icCTcPe7jeD4mFfMGOEICQnKqEx2I9GxWobtC5iLPBIhrBIvDGFCmwlNyyhSNksgwtcGaYtmkr4q8RIQIJP7CWexR0meaR8pIoiqFCFn8CI5g2keBqyMIfETm6+YKvp2FxKscL0raIGgseBQXJISaAScKI2HSkjmK5j7PgEekalhHGhrwYkbBJ4g3jJJ7VLoUF6lIay7hsakOEAA */
   id: 'timer',
   initial: 'IDLE',
   context: {
-    timer: null
+    timer: null,
   },
   states: {
     IDLE: {
       on: {
         setup: {
+          guard: and(['isConnected', ({ event }) => {
+            return event.data.speakerName.length > 0 && event.data.countdownTime > 0 && event.data.startBlinkingTime > 0
+          }]),
           actions: assign({
-            timer: ({ event }) => ({
-              ...event.data,
-              message: 'Time is up!',
-              elapsed: null,
-              messageIsVisible: false
-            })
+            timer: ({ event }) => {
+              connectionActor.send({
+                type: "sendMessage", message: [{
+                  type: "blink",
+                  data: event.data.startBlinkingTime
+                }, {
+                  type: "reset",
+                  data: event.data.countdownTime,
+                }]
+              })
+              return {
+                ...event.data,
+                message: 'Time is up!',
+                elapsed: null,
+                messageIsVisible: false
+              }
+            }
           }),
           target: 'ACTIVE'
         }
       }
     },
     ACTIVE: {
+      invoke: {
+        src: 'waitForDisconnect'
+      },
       states: {
         stopped: {
           on: {
             start: {
+              guard: 'isConnected',
               target: 'running',
               actions: assign({
                 timer: ({ context }) => {
                   const stoppedContext = context as Resetted
+                  connectionActor.send({
+                    type: "sendMessage", message: {
+                      type: "start"
+                    }
+                  })
                   return {
                     ...stoppedContext.timer,
                     elapsed: stoppedContext.timer.countdownTime
@@ -120,10 +157,12 @@ export const timerStore = setup({
               })
             },
             pause: {
+              guard: 'isConnected',
               target: 'paused',
               actions: assign({
                 timer: ({ context }) => {
                   const runningContext = context as Running
+                  connectionActor.send({ type: "sendMessage", message: { type: "pause" } })
                   return {
                     ...runningContext.timer,
                     messageIsVisible: false
@@ -132,10 +171,11 @@ export const timerStore = setup({
               })
             },
             showMessage: {
+              guard: 'isConnected',
               actions: assign({
                 timer: ({ context }) => {
-                  console.log("show!")
                   const runningContext = context as Running
+                  connectionActor.send({ type: "sendMessage", message: { type: "msg", data: runningContext.timer.message } })
                   return {
                     ...runningContext.timer,
                     messageIsVisible: true
@@ -144,10 +184,11 @@ export const timerStore = setup({
               })
             },
             hideMessage: {
+              guard: 'isConnected',
               actions: assign({
                 timer: ({ context }) => {
-                  console.log("hide!!")
                   const runningContext = context as Running
+                  connectionActor.send({ type: "sendMessage", message: { type: "hide" } })
                   return {
                     ...runningContext.timer,
                     messageIsVisible: false
@@ -159,7 +200,13 @@ export const timerStore = setup({
         },
         paused: {
           on: {
-            resume: 'running'
+            resume: {
+              guard: 'isConnected',
+              target: 'running',
+              actions: () => {
+                connectionActor.send({ type: "sendMessage", message: { type: "resume" } })
+              }
+            }
           }
         },
       },
@@ -177,9 +224,16 @@ export const timerStore = setup({
         },
         stop: {
           target: '.stopped',
+          guard: 'isConnected',
           actions: assign({
             timer: ({ context }) => {
               const runningContext = context as Running
+              connectionActor.send({
+                type: "sendMessage",
+                message: {
+                  type: "stop",
+                }
+              })
               return {
                 ...runningContext.timer,
                 messageIsVisible: false,
@@ -201,7 +255,7 @@ export const timerStore = setup({
       }),
       target: '.IDLE'
     }
-  }
+  },
 });
 
 let TimerContext = {

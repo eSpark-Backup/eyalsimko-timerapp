@@ -199,7 +199,10 @@ function ConnectionSettings() {
     state.can(disconnectEvent)
   );
 
-  const shutDownEvent = { type: "sendMessage", message: "shutdown" } as const;
+  const shutDownEvent = {
+    type: "sendMessage",
+    message: { type: "shutdown" },
+  } as const;
   const canShutDown = useMachineSelector(connectionActor, (state) =>
     state.can(shutDownEvent)
   );

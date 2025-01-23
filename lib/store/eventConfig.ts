@@ -16,6 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useSelector } from '@xstate/react'
 import { createStore } from '@xstate/store';
 import { useEffect } from 'react'
+import { connectionActor } from './connectionStore'
 
 const initialState: State = {
   eventName: null,
@@ -35,9 +36,14 @@ export const eventConfigStore = createStore({
     setDefaultBlinkingStartTime: (context, { defaultBlinkingStartTime }: Pick<State, 'defaultBlinkingStartTime'>) => ({
       defaultBlinkingStartTime
     }),
-    setBlinkLength: (context, { blinkLength }: Pick<State, 'blinkLength'>) => ({
-      blinkLength
-    }),
+    setBlinkLength: (context, { blinkLength }: Pick<State, 'blinkLength'>) => {
+      if (blinkLength)
+        connectionActor.send({ type: "sendMessage", message: { type: "blink_length", data: blinkLength } })
+
+      return {
+        blinkLength
+      }
+    },
     addSpeaker: (context) => {
       return {
         speakers: [...context.speakers, {
