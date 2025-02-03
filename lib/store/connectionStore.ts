@@ -174,8 +174,14 @@ const connectionStore = setup({
         src: 'connect',
         onDone: {
           target: 'CONNECTED',
-          actions: assign(({ context, system, event }) => {
+          actions: assign(({ context, event }) => {
             context.messageQueue.forEach(message => sendMessageOverWs(event.output.ws, message))
+            if (!context.messageQueue.some(message => message.type === "blink_length")) {
+              sendMessageOverWs(event.output.ws, {
+                type: "blink_length",
+                data: 0,
+              })
+            }
             return {
               ws: event.output.ws,
               type: event.output.type,
