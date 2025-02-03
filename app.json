@@ -15,15 +15,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.theoneupgroup.timer",
-      "config": {
-        "usesNonExemptEncryption": false
-      },
-      "infoPlist": {
-        "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true
-        }
-      }
+      "bundleIdentifier": "com.theoneupgroup.timer"
     },
     "android": {
       "adaptiveIcon": {
