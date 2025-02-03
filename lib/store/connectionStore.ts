@@ -176,17 +176,17 @@ const connectionStore = setup({
         src: 'subscribeConnection',
         input: ({ context }) => context.ws as WebSocket,
       },
-      exit: assign(({ context }) => ({
-        ws: null,
-        type: null,
-      })),
+      exit: assign(({ context }) => {
+        context.ws?.send("disconnect")
+        context.ws?.close()
+        return {
+          ws: null,
+          type: null,
+        }
+      }),
       on: {
         disconnect: {
           target: 'DISCONNECTED',
-          actions: ({ context }) => {
-            context.ws?.send("disconnect")
-            context.ws?.close()
-          },
         },
         sendMessage: {
           actions: ({ event, context }) => {
