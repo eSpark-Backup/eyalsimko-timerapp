@@ -79,6 +79,7 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
         resolve({
           ws,
           type: config.type,
+          messageQueue: [],
         })
       }
     }

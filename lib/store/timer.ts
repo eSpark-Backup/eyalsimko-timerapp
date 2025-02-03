@@ -85,33 +85,6 @@ export const timerStore = setup({
   },
   states: {
     IDLE: {
-      on: {
-        setup: {
-          guard: and(['isConnected', ({ event }) => {
-            return event.data.speakerName.length > 0 && event.data.countdownTime > 0 && event.data.startBlinkingTime > 0
-          }]),
-          actions: assign({
-            timer: ({ event }) => {
-              connectionActor.send({
-                type: "sendMessage", message: [{
-                  type: "blink",
-                  data: event.data.startBlinkingTime
-                }, {
-                  type: "reset",
-                  data: event.data.countdownTime,
-                }]
-              })
-              return {
-                ...event.data,
-                message: 'Time is up!',
-                elapsed: null,
-                messageIsVisible: false
-              }
-            }
-          }),
-          target: 'ACTIVE'
-        }
-      }
     },
     ACTIVE: {
       invoke: {
@@ -247,6 +220,31 @@ export const timerStore = setup({
     }
   },
   on: {
+    setup: {
+      guard: and(['isConnected', ({ event }) => {
+        return event.data.speakerName.length > 0 && event.data.countdownTime > 0 && event.data.startBlinkingTime > 0
+      }]),
+      actions: assign({
+        timer: ({ event }) => {
+          connectionActor.send({
+            type: "sendMessage", message: [{
+              type: "blink",
+              data: event.data.startBlinkingTime
+            }, {
+              type: "reset",
+              data: event.data.countdownTime,
+            }]
+          })
+          return {
+            ...event.data,
+            message: 'Time is up!',
+            elapsed: null,
+            messageIsVisible: false
+          }
+        }
+      }),
+      target: '.ACTIVE'
+    },
     reset: {
       actions: assign({
         timer: () => {
