@@ -1,8 +1,8 @@
 import { assign, createActor, fromCallback, fromPromise, setup } from 'xstate';
 
 const wsConfigs = [
-  { url: "ws://192.168.0.108:8081", type: "LAN" },
-  { url: "ws://192.168.0.112:8080", type: "WIFI" },
+  { url: "ws://192.168.0.109:8081", type: "LAN" },
+  { url: "ws://192.168.0.109:8080", type: "WIFI" },
 ] as const
 
 type Config = typeof wsConfigs[number]
