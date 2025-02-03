@@ -67,7 +67,6 @@ export const timerStore = setup({
     waitForDisconnect: fromCallback(({ sendBack }) => {
       connectionActor.subscribe(snapshot => {
         if (!snapshot.matches("CONNECTED")) {
-          console.log("NOT CONNECTED!")
           sendBack({ type: "reset" })
         }
       })
