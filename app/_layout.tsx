@@ -203,8 +203,19 @@ export default function RootLayout() {
                           size="sm"
                           className="hidden md:flex flex-row gap-2"
                         >
-                          <WifiOff className="h-4 w-4 text-primary" />
-                          <Text>WIRED</Text>
+                          <WifiOff
+                            className={cn(
+                              "h-4 w-4 text-primary",
+                              connectionType === "LAN" && "text-green-500"
+                            )}
+                          />
+                          <Text
+                            className={cn(
+                              connectionType === "LAN" && "text-green-500"
+                            )}
+                          >
+                            WIRED
+                          </Text>
                         </Button>
                       </Link>
                       <View className="hidden md:flex">

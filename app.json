@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Timer",
+    "name": "TOUP Timer",
     "slug": "Timer",
     "version": "1.0.0",
     "orientation": "default",
@@ -12,18 +12,25 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.theoneupgroup.timer",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "co.theoneupgroup.timer"
+      "package": "com.theoneupgroup.timer"
     },
     "web": {
       "bundler": "metro",
@@ -31,7 +38,23 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "radion",
+          "project": "toug-timer",
+          "url": "https://sentry.io/"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -43,6 +66,12 @@
       "eas": {
         "projectId": "e27640a0-ad84-44a1-af3f-62d98aefcbd7"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e27640a0-ad84-44a1-af3f-62d98aefcbd7"
     }
   }
 }

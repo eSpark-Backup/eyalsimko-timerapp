@@ -1,8 +1,9 @@
+import * as Sentry from "@sentry/react-native";
 import { assign, createActor, fromCallback, fromPromise, setup } from 'xstate';
 
 const wsConfigs = [
-  { url: "ws://192.168.0.109:8081", type: "LAN" },
-  { url: "ws://192.168.0.109:8080", type: "WIFI" },
+  { url: "ws://192.168.0.109:8080/ws", type: "LAN" },
+  { url: "ws://192.168.0.109:8081/ws", type: "WIFI" },
 ] as const
 
 type Config = typeof wsConfigs[number]
@@ -55,36 +56,59 @@ type Events =
   | { type: 'sendMessage', message: WsMessage | WsMessage[] }
 
 const getConnection = (config: Config): Promise<ConnectedState> => {
+  const attemptId = Math.random().toString(36).substring(2, 15)
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(config.url);
+    try {
+      console.log(`Trying to connect to ${config.url} via ${config.type}. Attempt id: ${attemptId}`, "debug")
+      Sentry.captureMessage(`Trying to connect to ${config.url} via ${config.type}. Attempt id: ${attemptId}`, "debug")
+      const ws = new WebSocket(config.url);
 
-    ws.onerror = reject
-
-    const onOpen = () => {
-      ws.send("init")
-    }
-
-    ws.onopen = onOpen
-
-    const timeout = setTimeout(() => {
-      ws.close()
-      reject(new Error("Have not recienved hello message"))
-    }, 1000)
-
-    const onHelloMessage = ({ data }: { data: unknown }) => {
-      if (data === "hello") {
-        clearTimeout(timeout)
-        ws.removeEventListener('open', onOpen)
-        ws.removeEventListener('message', onHelloMessage)
-        resolve({
-          ws,
-          type: config.type,
-          messageQueue: [],
-        })
+      const onOpen = () => {
+        console.log(`Connection ${attemptId}: ws.onopen call`, "debug")
+        Sentry.captureMessage(`Connection ${attemptId}: ws.onopen call`, "debug")
+        ws.send("init")
       }
-    }
 
-    ws.onmessage = onHelloMessage
+      ws.onopen = onOpen
+
+      const timeout = setTimeout(() => {
+        ws.close()
+        console.log(`Connection ${attemptId}: timed out`, "error")
+        Sentry.captureMessage(`Connection ${attemptId}: timed out`, "error")
+        reject(new Error("Have not recienved hello message"))
+      }, 1000)
+
+      ws.onerror = (err: Event) => {
+        clearTimeout(timeout)
+        const errWithCorrectType = err as unknown as WebSocketErrorEvent
+        console.log(`Connection ${attemptId}: ws.onerror call ${errWithCorrectType.message}`, "error")
+        Sentry.captureMessage(`Connection ${attemptId}: ws.onerror call ${errWithCorrectType.message}`, "error")
+        reject(err)
+      }
+
+      const onHelloMessage = ({ data }: { data: unknown }) => {
+        if (data === "hello") {
+          console.log(`Connection ${attemptId}: "hello" received; Connection established`, "debug")
+          Sentry.captureMessage(`Connection ${attemptId}: "hello" received; Connection established`, "debug")
+          clearTimeout(timeout)
+          ws.removeEventListener('open', onOpen)
+          ws.removeEventListener('message', onHelloMessage)
+          resolve({
+            ws,
+            type: config.type,
+            messageQueue: []
+          })
+        } else {
+          console.log(`Connection ${attemptId}: ${data} received`, "debug")
+          Sentry.captureMessage(`Connection ${attemptId}: ${data} received`, "debug")
+        }
+      }
+
+      ws.onmessage = onHelloMessage
+    } catch (e) {
+      console.log(`Connection ${attemptId}: exception received ${e}`, "error")
+      Sentry.captureMessage(`Connection ${attemptId}: exception received ${e}`, "error")
+    }
   })
 }
 
