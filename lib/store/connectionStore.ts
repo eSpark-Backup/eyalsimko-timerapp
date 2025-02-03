@@ -189,9 +189,6 @@ const connectionStore = setup({
             } as const
           })
         },
-        input: {
-          url: 'ws://192.168.0.112:8080',
-        },
         onError: {
           target: 'ERROR',
         }
