@@ -4,8 +4,8 @@ import NetInfo from '@react-native-community/netinfo';
 import Toast from 'react-native-toast-message';
 
 const wsConfigs = [
-  { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
-  { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
+  { url: "ws://192.168.0.107:8001/ws", type: "LAN" },
+  { url: "ws://192.168.0.107:8000/ws", type: "WIFI" },
 ] as const
 
 const connectToServer = async () => {
@@ -46,6 +46,10 @@ type WsMessage = {
   // TBD: used for default blink start time. Is it really needed as blink event gonna be sent anyway?
   type: "blink_start",
   data: number,
+} | {
+  type: "disconnect",
+} | {
+  type: "init"
 }
 
 const queueableMessageTypes = ["blink_length"]
@@ -70,7 +74,9 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
 
       const onOpen = () => {
         Sentry.captureMessage(`Connection ${attemptId}: ws.onopen call`, "debug")
-        ws.send("init")
+        // send reset and stop to set screen to blank state
+        const initMessages = [{ type: "init" }, { type: "reset", data: 0 }, { type: "stop" }] as const
+        initMessages.forEach(message => sendMessageOverWs(ws, message))
       }
 
       ws.onopen = onOpen
@@ -220,6 +226,11 @@ const connectionStore = setup({
         input: ({ context }) => context.ws as WebSocket,
       },
       exit: assign(({ context }) => {
+        if (context.ws) {
+          // send stop to hide timer to prevent the bug when timer is running while screen shows QR code
+          const messages = [{ type: "stop" }, { type: "disconnect" }] as const
+          messages.forEach(message => sendMessageOverWs(context.ws, message))
+        }
         context.ws?.send("disconnect")
         context.ws?.close()
         return {
