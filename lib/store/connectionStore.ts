@@ -139,17 +139,11 @@ const connectionStore = setup({
     connect: fromPromise(connectToServer),
     tryToReconnect: fromPromise(() => {
       return new Promise((resolve, reject) => {
-        NetInfo.fetch().then((connection) => {
+        NetInfo.addEventListener((connection) => {
           if (connection.type === "none") {
-            NetInfo.addEventListener((connection) => {
-              if (connection.type === "none") {
-                setTimeout(() => reject(), 100)
-              } else {
-                resolve(undefined)
-              }
-            })
+            setTimeout(() => reject(), 100)
           } else {
-            setTimeout(() => reject(undefined), 100)
+            resolve(undefined)
           }
         })
       })
