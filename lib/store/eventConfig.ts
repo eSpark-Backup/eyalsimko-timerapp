@@ -4,12 +4,18 @@ type Speaker = {
   countDownTime: number | null
 }
 
+type WiFiConfig = {
+  ssid: string,
+  password: string
+}
+
 type State = {
   eventName: string | null
   eventDescription: string | null
   defaultBlinkingStartTime: number | null
   blinkLength: number | null
   speakers: Speaker[]
+  screenWifiConfig: WiFiConfig[]
 }
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -24,6 +30,7 @@ const initialState: State = {
   defaultBlinkingStartTime: null,
   blinkLength: null,
   speakers: [],
+  screenWifiConfig: [],
 }
 
 export const eventConfigStore = createStore({
@@ -42,6 +49,16 @@ export const eventConfigStore = createStore({
 
       return {
         blinkLength
+      }
+    },
+    addWifiConfig: (context, { ssid, password }: WiFiConfig) => {
+      const existedConfigs = context.screenWifiConfig.find(config => config.ssid === ssid)
+      if (existedConfigs && existedConfigs.password === password) return context
+      return {
+        screenWifiConfig: [
+          ...context.screenWifiConfig.filter(config => config.ssid !== ssid),
+          { ssid, password }
+        ]
       }
     },
     addSpeaker: (context) => {
@@ -83,13 +100,16 @@ export const eventConfigStore = createStore({
     initialize: (context, state: State) => {
       return state
     },
-    reset: () => {
-      return initialState
+    reset: (context) => {
+      return {
+        ...initialState,
+        screenWifiConfig: context.screenWifiConfig
+      }
     }
   }
 });
 
-const snapshotKey = 'configSnapshot-v0'
+const snapshotKey = 'configSnapshot-v1'
 
 AsyncStorage.getItem(snapshotKey)
   .then(snapshot => {

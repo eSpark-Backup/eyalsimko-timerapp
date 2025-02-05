@@ -1,4 +1,11 @@
-import { View } from "react-native";
+import {
+  Linking,
+  PermissionsAndroid,
+  Platform,
+  ScrollView,
+  View,
+} from "react-native";
+import WifiManager from "react-native-wifi-reborn";
 import {
   Accordion,
   AccordionContent,
@@ -14,9 +21,9 @@ import { formatDuration, getDurationObject } from "~/lib/utils";
 import * as Haptics from "expo-haptics"; // for haptic feedback
 import { useColorScheme } from "~/lib/useColorScheme";
 import { Button } from "~/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "~/components/ui/input";
-import { useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { Sun } from "~/lib/icons/Sun";
 import { MoonStar } from "~/lib/icons/MoonStar";
 import { SunMoon } from "~/lib/icons/SunMoon";
@@ -27,6 +34,20 @@ import React from "react";
 import { RotateCcw } from "~/lib/icons/RotateCcw";
 import { TimerContext } from "~/lib/store/timer";
 import { CircleAlert } from "~/lib/icons/CircleAlert";
+import NetInfo from "@react-native-community/netinfo";
+import { QrCode } from "~/lib/icons/QrCode";
+import * as IntentLauncher from "expo-intent-launcher";
+import { ConnectionType, getConnectionType } from "~/lib/connectionType";
+import Toast from "react-native-toast-message";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function TimerPickerWithControls({
   initialValue,
@@ -180,7 +201,41 @@ function ThemeSettings() {
   );
 }
 
+type WifiNetwork = Awaited<ReturnType<typeof WifiManager.loadWifiList>>[number];
+
 function ConnectionSettings() {
+  const [connectionType, setConnectionType] = useState<ConnectionType>("NONE");
+  const [availableNetworks, setAvailableNetworks] = useState<WifiNetwork[]>([]);
+  const [isConnectingToWifi, setIsConnectingToWifi] = useState(false);
+  const knownWifiNetworks = useSelector(
+    eventConfigStore,
+    (state) => state.context.screenWifiConfig
+  );
+  const knownLifeWifiNetworks = knownWifiNetworks.filter((network) =>
+    availableNetworks.find((wifi) => wifi.SSID === network.ssid)
+  );
+
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+    WifiManager.loadWifiList().then(setAvailableNetworks);
+  }, []);
+
+  useEffect(() => {
+    return NetInfo.addEventListener(() => {
+      getConnectionType().then(setConnectionType);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      WifiManager.isEnabled().then((enabled) => {
+        if (!enabled) {
+          WifiManager.setEnabled(true);
+        }
+      });
+    }
+  }, []);
+
   const isConnected = useMachineSelector(connectionActor, (state) =>
     state.matches("CONNECTED")
   );
@@ -217,8 +272,214 @@ function ConnectionSettings() {
     state.can(reconnectEvent)
   );
 
+  const openWifiSettings = () => {
+    if (Platform.OS === "ios") {
+      Linking.canOpenURL("App-Prefs:root=WIFI").then((supported) => {
+        if (supported) {
+          Linking.openURL("App-Prefs:root=WIFI");
+        } else {
+          Linking.openSettings();
+        }
+      });
+    }
+    if (Platform.OS === "android") {
+      IntentLauncher.startActivityAsync(
+        IntentLauncher.ActivityAction.WIFI_SETTINGS
+      );
+    }
+  };
+
+  const insets = useSafeAreaInsets();
+
+  const connectToWifi = async (
+    wifi: (typeof knownLifeWifiNetworks)[number]
+  ) => {
+    setIsConnectingToWifi(true);
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      {
+        title: "Location permission is required for WiFi connections",
+        message:
+          "This app needs location permission as this is required automatically connect to WiFi network.",
+        buttonNegative: "DENY",
+        buttonPositive: "ALLOW",
+      }
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      try {
+        await WifiManager.connectToProtectedWifiSSID({
+          ssid: wifi.ssid,
+          password: wifi.password,
+        });
+        connectionActor.send({ type: "retry" });
+      } catch {
+        Toast.show({
+          type: "error",
+          text1: `Unable to connect to ${wifi.ssid} WIFI`,
+          text2: "Connection failed",
+        });
+      } finally {
+        setIsConnectingToWifi(false);
+      }
+    } else {
+      Toast.show({
+        type: "error",
+        text1: `Unable to automatically connect to ${wifi.ssid} WIFI`,
+        text2: "User denied location permission",
+      });
+      setIsConnectingToWifi(false);
+    }
+  };
+
   return (
     <View className="flex gap-4">
+      {isConnectionError && (
+        <>
+          {connectionType === "SCREEN_WIFI" && (
+            <View>
+              <Text>You connected to the wrong wifi network.</Text>
+              <View className="flex gap-1">
+                {Platform.OS === "ios" && (
+                  <>
+                    <Text>
+                      Please connect to the WiFi network using SSID and password
+                      from the screen.
+                    </Text>
+                    <Button onPress={openWifiSettings}>
+                      <Text>Open WIFI settings to change the network</Text>
+                    </Button>
+                  </>
+                )}
+                {Platform.OS === "android" && (
+                  <>
+                    <Text>
+                      {" "}
+                      Please connect to the WiFi network using SSID and password
+                      from the screen or
+                    </Text>
+                    <Link href="/scanCode" asChild>
+                      <Button className="flex-row gap-2">
+                        <QrCode className="h-4 w-4 text-primary-foreground" />
+                        <Text>Scan the QR code from the screen</Text>
+                      </Button>
+                    </Link>
+                  </>
+                )}
+                <Text>
+                  To connect to the screen via a wired connection, please turn
+                  off the WiFi
+                </Text>
+                <Button onPress={openWifiSettings}>
+                  <Text>Open WIFI settings to turn WiFi off</Text>
+                </Button>
+              </View>
+            </View>
+          )}
+          {connectionType === "LAN" && (
+            <Text>
+              You used a wired connection, but the app can't reach the screen.
+              Please make sure you've connected to the screen by wire.
+            </Text>
+          )}
+          {connectionType === "NONE" && (
+            <>
+              <Text>No wired of WiFi connection available.</Text>
+              {Platform.OS === "ios" && (
+                <>
+                  <Text>
+                    Please connect to the WiFi network using SSID and password
+                    from the screen.
+                  </Text>
+                  <Button onPress={openWifiSettings}>
+                    <Text>Open WIFI settings to change the network</Text>
+                  </Button>
+                  <Text>Or connect to the screen by a wire</Text>
+                </>
+              )}
+              {Platform.OS === "android" && (
+                <>
+                  {knownLifeWifiNetworks.length !== 0 && (
+                    <View className="gap-1">
+                      <Text>Screen WIFI is available.</Text>
+                      {knownLifeWifiNetworks.length === 1 ? (
+                        <Button
+                          disabled={isConnectingToWifi}
+                          onPress={() => {
+                            connectToWifi(knownLifeWifiNetworks[0]);
+                          }}
+                        >
+                          <Text>
+                            {isConnectingToWifi
+                              ? "Connecting..."
+                              : `Connect to the ${knownLifeWifiNetworks[0].ssid}`}
+                          </Text>
+                        </Button>
+                      ) : (
+                        <Select
+                          disabled={isConnectingToWifi}
+                          onValueChange={(option) => {
+                            const wifiNetwork = knownLifeWifiNetworks.find(
+                              (network) => network.ssid === option?.value
+                            );
+                            if (wifiNetwork && !isConnectingToWifi) {
+                              connectToWifi(wifiNetwork);
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[250px]">
+                            <SelectValue
+                              className="text-foreground text-sm native:text-lg"
+                              placeholder={
+                                isConnecting
+                                  ? "Connecting..."
+                                  : "Connect to TOUG Wifi"
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent
+                            insets={{
+                              top: insets.top,
+                              bottom: insets.bottom,
+                              left: 12,
+                              right: 12,
+                            }}
+                            className="w-[250px]"
+                          >
+                            <SelectGroup>
+                              {knownLifeWifiNetworks.map(({ ssid }) => (
+                                <SelectItem
+                                  key={ssid}
+                                  label={ssid}
+                                  value={ssid}
+                                >
+                                  {ssid}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </View>
+                  )}
+                  <Text>
+                    Please connect to the WiFi network using SSID and password
+                    from the screen or
+                  </Text>
+                  <Button onPress={openWifiSettings}>
+                    <Text>Open WIFI settings to change the network</Text>
+                  </Button>
+                  <Link href="/scanCode" asChild>
+                    <Button className="flex-row gap-2">
+                      <QrCode className="h-4 w-4 text-primary-foreground" />
+                      <Text>Scan the QR code from the screen</Text>
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </>
+          )}
+        </>
+      )}
       {isConnected && (
         <View className="flex flex-row gap-4">
           <Button
@@ -241,18 +502,8 @@ function ConnectionSettings() {
         </View>
       )}
       {isConnecting && <Text>Connecting...</Text>}
-      {(isConnectionError || isDisconnected) && (
+      {isDisconnected && (
         <View className="flex flex-row gap-2">
-          {canRetry && (
-            <Button
-              className="flex-1 flex-row gap-2"
-              disabled={!canRetry}
-              onPress={() => connectionActor.send(retryEvent)}
-            >
-              <RotateCcw className="h-4 w-4 text-primary-foreground" />
-              <Text>Retry</Text>
-            </Button>
-          )}
           {canReconnect && (
             <Button
               className="flex-1 flex-row gap-2"
@@ -295,125 +546,131 @@ export default function SettingsScreen() {
   const timerActorRef = TimerContext.useActorRef();
 
   return (
-    <View className="flex flex-1 justify-center items-center gap-5 p-6 bg-secondary/30">
-      <Accordion
-        value={currentTab}
-        type="single"
-        collapsible
-        className="w-full max-w-sm native:max-w-md"
-      >
-        <AccordionItem value="eventNameAndDescription">
-          <AccordionTrigger
-            onPress={() => toggleTab("eventNameAndDescription")}
-          >
-            <Text>Event name & description</Text>
-          </AccordionTrigger>
-          <AccordionContent>
-            <EventNameSettings
-              onSubmit={() => setCurrentTab("")}
-              onReset={() => setCurrentTab("")}
-            />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="defaultBlinkingStartTime">
-          <AccordionTrigger
-            onPress={() => toggleTab("defaultBlinkingStartTime")}
-          >
-            <Text>
-              Default blink start time:{" "}
-              {defaultBlinkingStartTime
-                ? formatDuration(defaultBlinkingStartTime)
-                : "None"}
-            </Text>
-          </AccordionTrigger>
-          <AccordionContent>
-            <TimerPickerWithControls
-              initialValue={defaultBlinkingStartTime}
-              reset={() => {
-                setCurrentTab("");
-                eventConfigStore.send({
-                  type: "setDefaultBlinkingStartTime",
-                  defaultBlinkingStartTime: null,
-                });
-              }}
-              submit={(value) => {
-                setCurrentTab("");
-                eventConfigStore.send({
-                  type: "setDefaultBlinkingStartTime",
-                  defaultBlinkingStartTime: value,
-                });
-              }}
-            />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="blinkLength">
-          <AccordionTrigger onPress={() => toggleTab("blinkLength")}>
-            <Text>
-              Blink length: {blinkLength ? formatDuration(blinkLength) : "None"}
-            </Text>
-          </AccordionTrigger>
-          <AccordionContent>
-            <TimerPickerWithControls
-              initialValue={blinkLength}
-              reset={() => {
-                setCurrentTab("");
-                eventConfigStore.send({
-                  type: "setBlinkLength",
-                  blinkLength: null,
-                });
-              }}
-              submit={(value) => {
-                setCurrentTab("");
-                eventConfigStore.send({
-                  type: "setBlinkLength",
-                  blinkLength: value,
-                });
-              }}
-            />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="theme">
-          <AccordionTrigger onPress={() => toggleTab("theme")}>
-            <Text>Theme: {colorScheme}</Text>
-          </AccordionTrigger>
-          <AccordionContent>
-            <ThemeSettings />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="connection">
-          <AccordionTrigger onPress={() => toggleTab("connection")}>
-            <Text>
-              Connection settings:{" "}
-              {connectionMode
-                ? `Connected over ${connectionMode}`
-                : "Not connected"}
-            </Text>
-          </AccordionTrigger>
-          <AccordionContent>
-            <ConnectionSettings />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="reset">
-          <AccordionTrigger onPress={() => toggleTab("reset")}>
-            <Text>Clear Timers</Text>
-          </AccordionTrigger>
-          <AccordionContent>
-            <Button
-              variant={"destructive"}
-              className="flex-row gap-2"
-              onPress={() => {
-                eventConfigStore.send({
-                  type: "reset",
-                });
-                timerActorRef.send({ type: "reset" });
-              }}
+    <ScrollView
+      className="flex flex-1  bg-secondary/30"
+      contentContainerStyle={{ flexGrow: 1 }}
+    >
+      <View className="flex-1 items-center justify-center gap-5 p-6">
+        <Accordion
+          value={currentTab}
+          type="single"
+          collapsible
+          className="w-full max-w-sm native:max-w-md"
+        >
+          <AccordionItem value="eventNameAndDescription">
+            <AccordionTrigger
+              onPress={() => toggleTab("eventNameAndDescription")}
             >
-              <CircleAlert className="h-4 w-4 text-destructive-foreground" />
-              <Text>Clear event data</Text>
-            </Button>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </View>
+              <Text>Event name & description</Text>
+            </AccordionTrigger>
+            <AccordionContent>
+              <EventNameSettings
+                onSubmit={() => setCurrentTab("")}
+                onReset={() => setCurrentTab("")}
+              />
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="defaultBlinkingStartTime">
+            <AccordionTrigger
+              onPress={() => toggleTab("defaultBlinkingStartTime")}
+            >
+              <Text>
+                Default blink start time:{" "}
+                {defaultBlinkingStartTime
+                  ? formatDuration(defaultBlinkingStartTime)
+                  : "None"}
+              </Text>
+            </AccordionTrigger>
+            <AccordionContent>
+              <TimerPickerWithControls
+                initialValue={defaultBlinkingStartTime}
+                reset={() => {
+                  setCurrentTab("");
+                  eventConfigStore.send({
+                    type: "setDefaultBlinkingStartTime",
+                    defaultBlinkingStartTime: null,
+                  });
+                }}
+                submit={(value) => {
+                  setCurrentTab("");
+                  eventConfigStore.send({
+                    type: "setDefaultBlinkingStartTime",
+                    defaultBlinkingStartTime: value,
+                  });
+                }}
+              />
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="blinkLength">
+            <AccordionTrigger onPress={() => toggleTab("blinkLength")}>
+              <Text>
+                Blink length:{" "}
+                {blinkLength ? formatDuration(blinkLength) : "None"}
+              </Text>
+            </AccordionTrigger>
+            <AccordionContent>
+              <TimerPickerWithControls
+                initialValue={blinkLength}
+                reset={() => {
+                  setCurrentTab("");
+                  eventConfigStore.send({
+                    type: "setBlinkLength",
+                    blinkLength: null,
+                  });
+                }}
+                submit={(value) => {
+                  setCurrentTab("");
+                  eventConfigStore.send({
+                    type: "setBlinkLength",
+                    blinkLength: value,
+                  });
+                }}
+              />
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="theme">
+            <AccordionTrigger onPress={() => toggleTab("theme")}>
+              <Text>Theme: {colorScheme}</Text>
+            </AccordionTrigger>
+            <AccordionContent>
+              <ThemeSettings />
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="connection">
+            <AccordionTrigger onPress={() => toggleTab("connection")}>
+              <Text>
+                Connection settings:{" "}
+                {connectionMode
+                  ? `Connected over ${connectionMode}`
+                  : "Not connected"}
+              </Text>
+            </AccordionTrigger>
+            <AccordionContent>
+              <ConnectionSettings />
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="reset">
+            <AccordionTrigger onPress={() => toggleTab("reset")}>
+              <Text>Clear Timers</Text>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Button
+                variant={"destructive"}
+                className="flex-row gap-2"
+                onPress={() => {
+                  eventConfigStore.send({
+                    type: "reset",
+                  });
+                  timerActorRef.send({ type: "reset" });
+                }}
+              >
+                <CircleAlert className="h-4 w-4 text-destructive-foreground" />
+                <Text>Clear event data</Text>
+              </Button>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </View>
+    </ScrollView>
   );
 }

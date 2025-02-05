@@ -51,6 +51,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+
   React.useEffect(() => {
     (async () => {
       const theme = await AsyncStorage.getItem("theme");
@@ -87,15 +88,13 @@ export default function RootLayout() {
   const isConnected = useMachineSelector(connectionActor, (state) =>
     state.matches("CONNECTED")
   );
-  const isConnecting = useMachineSelector(connectionActor, (state) =>
-    state.matches("CONNECTING")
-  );
   const isDisconnectedOrIDLE = useMachineSelector(
     connectionActor,
     (state) => state.matches("DISCONNECTED") || state.matches("IDLE")
   );
-  const isConnectionError = useMachineSelector(connectionActor, (state) =>
-    state.matches("ERROR")
+  const isConnectionErrorOrConnecting = useMachineSelector(
+    connectionActor,
+    (state) => state.matches("ERROR") || state.matches("CONNECTING")
   );
 
   const connectionType = useMachineSelector(connectionActor, (state) => {
@@ -153,11 +152,11 @@ export default function RootLayout() {
                     <View className="flex flex-row items-center sm:gap-4 md:gap-6">
                       <View
                         className={cn(
-                          "h-2 w-2 rounded-full bg-primary",
+                          "h-2 w-2 rounded-full",
                           isDisconnectedOrIDLE && "bg-gray-300",
                           isConnected && "bg-green-500",
-                          isConnecting && "bg-gray-500",
-                          isConnectionError && "bg-red-500"
+                          // isConnecting && "bg-gray-500",
+                          isConnectionErrorOrConnecting && "bg-red-500"
                         )}
                       />
                       <Link
@@ -257,6 +256,12 @@ export default function RootLayout() {
                   </Button>
                 </Link>
               ),
+            }}
+          />
+          <Stack.Screen
+            name="scanCode"
+            options={{
+              header: () => null,
             }}
           />
           <Stack.Screen

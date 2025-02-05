@@ -1,10 +1,16 @@
 import * as Sentry from "@sentry/react-native";
 import { assign, createActor, fromCallback, fromPromise, setup } from 'xstate';
+import NetInfo from '@react-native-community/netinfo';
+import Toast from 'react-native-toast-message';
 
 const wsConfigs = [
-  { url: "ws://192.168.0.109:8080/ws", type: "LAN" },
-  { url: "ws://192.168.0.109:8081/ws", type: "WIFI" },
+  { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
+  { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
 ] as const
+
+const connectToServer = async () => {
+  return getConnection(wsConfigs[0]).catch(() => getConnection(wsConfigs[1]))
+}
 
 type Config = typeof wsConfigs[number]
 
@@ -59,12 +65,10 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
   const attemptId = Math.random().toString(36).substring(2, 15)
   return new Promise((resolve, reject) => {
     try {
-      console.log(`Trying to connect to ${config.url} via ${config.type}. Attempt id: ${attemptId}`, "debug")
       Sentry.captureMessage(`Trying to connect to ${config.url} via ${config.type}. Attempt id: ${attemptId}`, "debug")
       const ws = new WebSocket(config.url);
 
       const onOpen = () => {
-        console.log(`Connection ${attemptId}: ws.onopen call`, "debug")
         Sentry.captureMessage(`Connection ${attemptId}: ws.onopen call`, "debug")
         ws.send("init")
       }
@@ -73,7 +77,6 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
 
       const timeout = setTimeout(() => {
         ws.close()
-        console.log(`Connection ${attemptId}: timed out`, "error")
         Sentry.captureMessage(`Connection ${attemptId}: timed out`, "error")
         reject(new Error("Have not recienved hello message"))
       }, 1000)
@@ -81,14 +84,12 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
       ws.onerror = (err: Event) => {
         clearTimeout(timeout)
         const errWithCorrectType = err as unknown as WebSocketErrorEvent
-        console.log(`Connection ${attemptId}: ws.onerror call ${errWithCorrectType.message}`, "error")
         Sentry.captureMessage(`Connection ${attemptId}: ws.onerror call ${errWithCorrectType.message}`, "error")
         reject(err)
       }
 
       const onHelloMessage = ({ data }: { data: unknown }) => {
         if (data === "hello") {
-          console.log(`Connection ${attemptId}: "hello" received; Connection established`, "debug")
           Sentry.captureMessage(`Connection ${attemptId}: "hello" received; Connection established`, "debug")
           clearTimeout(timeout)
           ws.removeEventListener('open', onOpen)
@@ -99,14 +100,12 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
             messageQueue: []
           })
         } else {
-          console.log(`Connection ${attemptId}: ${data} received`, "debug")
           Sentry.captureMessage(`Connection ${attemptId}: ${data} received`, "debug")
         }
       }
 
       ws.onmessage = onHelloMessage
     } catch (e) {
-      console.log(`Connection ${attemptId}: exception received ${e}`, "error")
       Sentry.captureMessage(`Connection ${attemptId}: exception received ${e}`, "error")
     }
   })
@@ -131,7 +130,24 @@ const connectionStore = setup({
     initialize: fromCallback(({ sendBack }) => {
       sendBack({ type: 'initialize' })
     }),
-    connect: fromPromise(() => getConnection(wsConfigs[0]).catch(() => getConnection(wsConfigs[1]))),
+    connect: fromPromise(connectToServer),
+    tryToReconnect: fromPromise(() => {
+      return new Promise((resolve, reject) => {
+        NetInfo.fetch().then((connection) => {
+          if (connection.type === "none") {
+            NetInfo.addEventListener((connection) => {
+              if (connection.type === "none") {
+                setTimeout(() => reject(), 100)
+              } else {
+                resolve(undefined)
+              }
+            })
+          } else {
+            setTimeout(() => reject(undefined), 100)
+          }
+        })
+      })
+    })
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QGMD2A7dZkBcCWGAdAJIAiAMgKIDEe6e+AhgDZ4BeYA2gAwC6ioAA6pYDAugEgAHogCssgByEAzLICMANgBMahbI2KA7IYA0IAJ6IALN1mFuD7mq2HlTw1oUBfL2bSZsfCIAYQB5ADlwymCAFWJwgHFqCAwwQjoAN1QAazT-LFxxQjDI6LjEhEzUZEYg9B5eBslhUTrJGQQAWjU3QitDeUUtWS1uPWUNM0sEWW5lPo0FZwUFQwBONbU1jR8-DAK64oio2PiksAAnC9QLwkFmWoAzG4BbQnzAopKT8oTK9CyNTqDSaSBALTEGHaiDUsK0fVUVjWxnUqy0U0QnXUhAUyIMahGGgGVjUVh2vhAH0KIWOZTO1CpOEgoKEIkhEjBHQ03DW9jWqm0Sw0Gk26IsiFG8K0SORaxlujl5L2AWp6COpVOiWoj0YeGYzL4zTZbU5iD0vMWAx6-LU3A0yjWGIQykM3D6mgMVmUowUw0Mu0p+0+NI1MUopGSeFgjJZ4ON4mhCFJakII0MBjt3GGJOcTuGdm4hj0rhcS02mgDjK+tNi4eosDA6AgAFk4LBGDBYxCTaAOmp04Qix4Bi7lBN+wond1lCmXB4icoFA67ZWg6r1T861WMOQRDgu-GoaaECSrIQRboPWNlF6b07tIRpeMtA6x9LhUrAyrDqRiABlb4yjrOgxBYdguENMFuwTY95CUVRNB0PQDFWUxxWdF97EcNxZkWKxvApbc1UoAAlEjQhI6gLjAHALnMA9Whg3szQcQcPEvdQrC9WQrDzRcVA0W0xi0OUrE8NYfApdBUAgOBJCIo1GKPZiugnPoBjg4YfVkCYpyQtiPCXNNZGRRRV2-IoyCoRT2UTF87AUOZuH6NYeP7HjePQmwz19Fwxg0LiTKWcyDmrUMzhsntpEQRY3SsEzdCLXEuNWJ1FxTWYHAJfDSSWWR-UItdDkA2tSEipjopPMVpjWeFViRQxSRnODvRC4M1V-ACazDMqoMPDkVMXKVYQcG9FAmO1JnQ715hlDZ9BveL+za9dSPIkjyuUyrkSlLQ9ttGwMwdJ13MIftGs2G9atGKxJK8IA */
@@ -225,6 +241,14 @@ const connectionStore = setup({
         },
         connectionLost: {
           target: 'ERROR',
+          actions: () => {
+            Toast.show({
+              type: "error",
+              text1: 'Connection lost',
+              text2: 'Connection with the module has been lost.\nCheck your lan/WiFi connection or does the module is running.',
+            })
+
+          }
         }
       }
     },
@@ -234,6 +258,16 @@ const connectionStore = setup({
       }
     },
     ERROR: {
+      invoke: {
+        src: 'tryToReconnect',
+        onDone: {
+          target: 'CONNECTING',
+        },
+        onError: {
+          target: 'ERROR',
+          reenter: true,
+        }
+      },
       on: {
         retry: 'CONNECTING',
       }
