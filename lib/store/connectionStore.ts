@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/react-native";
 import { assign, createActor, fromCallback, fromPromise, setup } from 'xstate';
 import NetInfo from '@react-native-community/netinfo';
 import Toast from 'react-native-toast-message';
+import { AppState } from "react-native";
 
 const wsConfigs = [
   { url: "ws://192.168.0.112:8001/ws", type: "LAN" },
@@ -139,6 +140,16 @@ const connectionStore = setup({
     connect: fromPromise(connectToServer),
     tryToReconnect: fromPromise(() => {
       return new Promise((resolve, reject) => {
+        AppState.addEventListener('change', (newState) => {
+          if (newState === "active") {
+            NetInfo.fetch().then(connection => {
+              if (connection.type !== "none") {
+                resolve(undefined)
+              }
+            })
+          }
+        })
+
         NetInfo.fetch().then((connection) => {
           if (connection.type === "none") {
             NetInfo.addEventListener((connection) => {
