@@ -4,8 +4,8 @@ import NetInfo from '@react-native-community/netinfo';
 import Toast from 'react-native-toast-message';
 
 const wsConfigs = [
-  { url: "ws://192.168.0.107:8001/ws", type: "LAN" },
-  { url: "ws://192.168.0.107:8000/ws", type: "WIFI" },
+  { url: "ws://192.168.0.112:8001/ws", type: "LAN" },
+  { url: "ws://192.168.0.112:8000/ws", type: "WIFI" },
 ] as const
 
 const connectToServer = async () => {
