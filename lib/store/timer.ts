@@ -202,9 +202,18 @@ export const timerStore = setup({
               const runningContext = context as Running
               connectionActor.send({
                 type: "sendMessage",
-                message: {
+                // we have to send stop => reset => stop in order to:
+                message: [{
                   type: "stop",
-                }
+                  // first stop removes the timer from the screen
+                }, {
+                  type: "reset",
+                  data: runningContext.timer.countdownTime,
+                  // reset the timer on the screen to initial time. w/o prior stop event, there would be a visual blink on the screen with initial time
+                }, {
+                  type: "stop",
+                  // second stop to remove the timer from the screen
+                }]
               })
               return {
                 ...runningContext.timer,
