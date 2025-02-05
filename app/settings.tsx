@@ -4,6 +4,7 @@ import {
   Platform,
   ScrollView,
   View,
+  Alert,
 } from "react-native";
 import WifiManager from "react-native-wifi-reborn";
 import {
@@ -485,7 +486,24 @@ function ConnectionSettings() {
           <Button
             className="flex-1 flex-row gap-2"
             disabled={!canDisconnect}
-            onPress={() => connectionActor.send(disconnectEvent)}
+            onPress={() => {
+              Alert.alert(
+                "Disconnect",
+                "Disconnecting from the timer module will stop active timer and turn the timer in connection screen. Do you want to disconnect?",
+                [
+                  {
+                    text: "Cancel",
+                    style: "cancel",
+                    onPress: () => {},
+                  },
+                  {
+                    text: "Disconnect",
+                    style: "destructive",
+                    onPress: () => connectionActor.send(disconnectEvent),
+                  },
+                ]
+              );
+            }}
           >
             <Unplug className="h-4 w-4 text-primary-foreground" />
             <Text>Disconnect</Text>
@@ -494,7 +512,24 @@ function ConnectionSettings() {
             className="flex-1 flex-row gap-2"
             variant="destructive"
             disabled={!canShutDown}
-            onPress={() => connectionActor.send(shutDownEvent)}
+            onPress={() => {
+              Alert.alert(
+                "Shutdown",
+                "Shutting down the timer module will shut down the timer module. To continue using the timer module afterward, it has to be turned on again. Do you want to shutdown?",
+                [
+                  {
+                    text: "Cancel",
+                    style: "cancel",
+                    onPress: () => {},
+                  },
+                  {
+                    text: "Shutdown",
+                    style: "destructive",
+                    onPress: () => connectionActor.send(shutDownEvent),
+                  },
+                ]
+              );
+            }}
           >
             <Power className="h-4 w-4 text-destructive-foreground" />
             <Text>Shutdown</Text>
