@@ -4,12 +4,13 @@ import { and, assign, fromCallback, fromEventObservable, setup } from 'xstate';
 import { connectionActor } from './connectionStore';
 
 type Idle = { timer: null }
-type Running = { timer: { elapsed: number, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number, message: string, messageIsVisible: boolean } }
-type Resetted = { timer: { elapsed: null, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number, message: string, messageIsVisible: boolean } }
+type Running = { timer: { elapsed: number, elapsedInMs: number, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number, message: string, messageIsVisible: boolean } }
+type Resetted = { timer: { elapsed: null, elapsedInMs: number, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number, message: string, messageIsVisible: boolean } }
 
 type State = {
   timer: {
     elapsed: number | null,
+    elapsedInMs: number | null,
     speakerIndex: number,
     speakerName: string
     countdownTime: number
@@ -33,6 +34,7 @@ type Events = SetupEvent | {
   type: "start"
 } | {
   type: "TICK"
+  diff: number
 } | {
   type: "reset"
 } | {
@@ -59,9 +61,13 @@ export const timerStore = setup({
   },
   actors: {
     ticks: fromCallback(({ sendBack }) => {
+      let previoutTickTime = performance.now()
       const interval = setInterval(() => {
-        sendBack({ type: 'TICK' });
-      }, 1000);
+        const currentTickTime = performance.now()
+        const diff = currentTickTime - previoutTickTime
+        previoutTickTime = currentTickTime
+        sendBack({ type: 'TICK', diff });
+      }, 33);
       return () => clearInterval(interval);
     }),
     waitForDisconnect: fromCallback(({ sendBack }) => {
@@ -105,7 +111,8 @@ export const timerStore = setup({
                   })
                   return {
                     ...stoppedContext.timer,
-                    elapsed: stoppedContext.timer.countdownTime
+                    elapsed: stoppedContext.timer.countdownTime,
+                    elapsedInMs: stoppedContext.timer.countdownTime * 1000,
                   }
                 }
               })
@@ -119,11 +126,13 @@ export const timerStore = setup({
           on: {
             TICK: {
               actions: assign({
-                timer: ({ context }) => {
+                timer: ({ context, event }) => {
                   const runningContext = context as Running
+                  const elapsedInMs = runningContext.timer.elapsedInMs - event.diff
                   return {
                     ...runningContext.timer,
-                    elapsed: runningContext.timer.elapsed - 1
+                    elapsedInMs,
+                    elapsed: Math.round(elapsedInMs / 1000)
                   }
                 }
               })
@@ -247,6 +256,7 @@ export const timerStore = setup({
             ...event.data,
             message: 'Time is up!',
             elapsed: null,
+            elapsedInMs: null,
             messageIsVisible: false
           }
         }
