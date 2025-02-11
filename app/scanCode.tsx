@@ -1,11 +1,6 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useNavigation } from "expo-router";
-import {
-  TouchableOpacity,
-  View,
-  StyleSheet,
-  PermissionsAndroid,
-} from "react-native";
+import { View, StyleSheet, PermissionsAndroid, Platform } from "react-native";
 import Toast from "react-native-toast-message";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -14,6 +9,47 @@ import { useState } from "react";
 import * as Sentry from "@sentry/react-native";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { eventConfigStore } from "~/lib/store/eventConfig";
+import * as Location from "expo-location";
+
+const connectToWifi = async ({
+  ssid,
+  password,
+  onFinally,
+}: {
+  ssid: string;
+  password: string;
+  onFinally: () => void;
+}) => {
+  try {
+    Toast.show({
+      type: "info",
+      text1: "Trying to connect to the network",
+      text2: `${ssid}; ${password}`,
+    });
+    await WifiManager.connectToProtectedWifiSSID({
+      ssid,
+      password,
+    });
+    eventConfigStore.send({
+      type: "addWifiConfig",
+      ssid,
+      password,
+    });
+    connectionActor.send({ type: "retry" });
+  } catch {
+    Toast.show({
+      type: "error",
+      text1: `Unable to connect to ${ssid} WIFI`,
+      text2: "Connection failed",
+    });
+  } finally {
+    onFinally();
+  }
+  Toast.show({
+    type: "success",
+    text1: `Connected to ${ssid} WIFI`,
+  });
+};
 
 export default function ScanCodeScreen() {
   const [isTryingToConnect, setIsTryingToConnect] = useState(false);
@@ -59,52 +95,46 @@ export default function ScanCodeScreen() {
                 text1: "Trying to connect to the network",
                 text2: `${ssid}; ${password}`,
               });
-              const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-                {
-                  title: "Location permission is required for WiFi connections",
-                  message:
-                    "This app needs location permission as this is required automatically connect to WiFi network.",
-                  buttonNegative: "DENY",
-                  buttonPositive: "ALLOW",
+              if (Platform.OS === "android") {
+                const granted = await PermissionsAndroid.request(
+                  PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+                  {
+                    title:
+                      "Location permission is required for WiFi connections",
+                    message:
+                      "This app needs location permission as this is required automatically connect to WiFi network.",
+                    buttonNegative: "DENY",
+                    buttonPositive: "ALLOW",
+                  }
+                );
+                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                  connectToWifi({
+                    ssid,
+                    password,
+                    onFinally: () => {
+                      navigation.goBack();
+                    },
+                  });
                 }
-              );
-              if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                try {
-                  Toast.show({
-                    type: "info",
-                    text1: "Trying to connect to the network",
-                    text2: `${ssid}; ${password}`,
-                  });
-                  await WifiManager.connectToProtectedWifiSSID({
+              }
+              if (Platform.OS === "ios") {
+                const { status } =
+                  await Location.requestForegroundPermissionsAsync();
+                if (status === "granted") {
+                  connectToWifi({
                     ssid,
                     password,
+                    onFinally: () => {
+                      navigation.goBack();
+                    },
                   });
-                  eventConfigStore.send({
-                    type: "addWifiConfig",
-                    ssid,
-                    password,
-                  });
-                  connectionActor.send({ type: "retry" });
-                } catch {
+                } else {
                   Toast.show({
                     type: "error",
                     text1: `Unable to connect to ${ssid} WIFI`,
-                    text2: "Connection failed",
+                    text2: "Permission to access location was denied",
                   });
-                } finally {
-                  navigation.goBack();
                 }
-                Toast.show({
-                  type: "success",
-                  text1: `Connected to ${ssid} WIFI`,
-                });
-              } else {
-                Toast.show({
-                  type: "error",
-                  text1: `Unable to automatically connect to ${ssid} WIFI`,
-                  text2: "User denied location permission",
-                });
               }
             }
           } catch (e) {

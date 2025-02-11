@@ -2,7 +2,7 @@
   "expo": {
     "name": "TOUP Timer",
     "slug": "Timer",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -15,7 +15,15 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.theoneupgroup.timer"
+      "bundleIdentifier": "com.theoneupgroup.timer",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "This app requires access to the local network to connect to Wi-Fi networks.",
+        "NSLocationWhenInUseUsageDescription": "This app requires location access to find and connect to nearby Wi-Fi networks."
+      },
+      "entitlements": {
+        "com.apple.developer.networking.wifi-info": true,
+        "com.apple.developer.networking.HotspotConfiguration": true
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -45,10 +53,22 @@
         }
       ],
       [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
             "usesCleartextTraffic": true
+          },
+          "ios": {
+            "entitlements": {
+              "com.apple.developer.networking.wifi-info": true,
+              "com.apple.developer.networking.HotspotConfiguration": true
+            }
           }
         }
       ],

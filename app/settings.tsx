@@ -340,32 +340,17 @@ function ConnectionSettings() {
             <View>
               <Text>You connected to the wrong wifi network.</Text>
               <View className="flex gap-1">
-                {Platform.OS === "ios" && (
-                  <>
-                    <Text>
-                      Please connect to the WiFi network using SSID and password
-                      from the screen.
-                    </Text>
-                    <Button onPress={openWifiSettings}>
-                      <Text>Open WIFI settings to change the network</Text>
-                    </Button>
-                  </>
-                )}
-                {Platform.OS === "android" && (
-                  <>
-                    <Text>
-                      {" "}
-                      Please connect to the WiFi network using SSID and password
-                      from the screen or
-                    </Text>
-                    <Link href="/scanCode" asChild>
-                      <Button className="flex-row gap-2">
-                        <QrCode className="h-4 w-4 text-primary-foreground" />
-                        <Text>Scan the QR code from the screen</Text>
-                      </Button>
-                    </Link>
-                  </>
-                )}
+                <Text>
+                  {" "}
+                  Please connect to the WiFi network using SSID and password
+                  from the screen or
+                </Text>
+                <Link href="/scanCode" asChild>
+                  <Button className="flex-row gap-2">
+                    <QrCode className="h-4 w-4 text-primary-foreground" />
+                    <Text>Scan the QR code from the screen</Text>
+                  </Button>
+                </Link>
                 <Text>
                   To connect to the screen via a wired connection, please turn
                   off the WiFi
@@ -384,19 +369,6 @@ function ConnectionSettings() {
           )}
           {connectionType === "NONE" && (
             <>
-              <Text>No wired of WiFi connection available.</Text>
-              {Platform.OS === "ios" && (
-                <>
-                  <Text>
-                    Please connect to the WiFi network using SSID and password
-                    from the screen.
-                  </Text>
-                  <Button onPress={openWifiSettings}>
-                    <Text>Open WIFI settings to change the network</Text>
-                  </Button>
-                  <Text>Or connect to the screen by a wire</Text>
-                </>
-              )}
               {Platform.OS === "android" && (
                 <>
                   {knownLifeWifiNetworks.length !== 0 && (
@@ -462,21 +434,22 @@ function ConnectionSettings() {
                       )}
                     </View>
                   )}
-                  <Text>
-                    Please connect to the WiFi network using SSID and password
-                    from the screen or
-                  </Text>
-                  <Button onPress={openWifiSettings}>
-                    <Text>Open WIFI settings to change the network</Text>
-                  </Button>
-                  <Link href="/scanCode" asChild>
-                    <Button className="flex-row gap-2">
-                      <QrCode className="h-4 w-4 text-primary-foreground" />
-                      <Text>Scan the QR code from the screen</Text>
-                    </Button>
-                  </Link>
                 </>
               )}
+              <Text>No wired of WiFi connection available.</Text>
+              <Text>
+                Please connect to the WiFi network using SSID and password from
+                the screen or
+              </Text>
+              <Button onPress={openWifiSettings}>
+                <Text>Open WIFI settings to change the network</Text>
+              </Button>
+              <Link href="/scanCode" asChild>
+                <Button className="flex-row gap-2">
+                  <QrCode className="h-4 w-4 text-primary-foreground" />
+                  <Text>Scan the QR code from the screen</Text>
+                </Button>
+              </Link>
             </>
           )}
         </>

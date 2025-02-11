@@ -29,6 +29,11 @@ export const getConnectionType = async (): Promise<ConnectionType> => {
   }
 
   else if (Platform.OS === "ios") {
+    const ssid = await WifiManager.getCurrentWifiSSID()
+    if (knownWifiNetworks.map(network => network.ssid).includes(ssid)) {
+      return "SCREEN_WIFI"
+    }
+
     const netInfo = await NetInfo.fetch()
     if (netInfo.type === NetInfoStateType.wifi) {
       if (netInfo.details.ssid?.startsWith("TOUG")) {
@@ -46,6 +51,7 @@ export const getConnectionType = async (): Promise<ConnectionType> => {
       text1: "Can't get connection type",
       text2: "Unknown platform.",
     })
-    return "NONE"
   }
+
+  return "NONE"
 }
