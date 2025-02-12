@@ -36,19 +36,28 @@ const connectToWifi = async ({
       password,
     });
     connectionActor.send({ type: "retry" });
-  } catch {
+    const newSSID = await WifiManager.getCurrentWifiSSID();
+    if (newSSID === ssid) {
+      Toast.show({
+        type: "success",
+        text1: `Connected to ${ssid} WIFI`,
+      });
+      onFinally();
+    }
+  } catch (e) {
+    if (
+      typeof e === "object" &&
+      e !== null &&
+      "message" in e &&
+      e.message === "internal error."
+    )
+      return;
     Toast.show({
       type: "error",
       text1: `Unable to connect to ${ssid} WIFI`,
-      text2: "Connection failed",
+      text2: `Connection failed: ${e}`,
     });
-  } finally {
-    onFinally();
   }
-  Toast.show({
-    type: "success",
-    text1: `Connected to ${ssid} WIFI`,
-  });
 };
 
 export default function ScanCodeScreen() {
@@ -95,6 +104,7 @@ export default function ScanCodeScreen() {
                 text1: "Trying to connect to the network",
                 text2: `${ssid}; ${password}`,
               });
+              navigation.goBack()
               if (Platform.OS === "android") {
                 const granted = await PermissionsAndroid.request(
                   PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -129,10 +139,12 @@ export default function ScanCodeScreen() {
                     },
                   });
                 } else {
+                  navigation.goBack();
                   Toast.show({
                     type: "error",
                     text1: `Unable to connect to ${ssid} WIFI`,
-                    text2: "Permission to access location was denied",
+                    text2:
+                      "Permission to access location was denied. Open settings to grant permission.",
                   });
                 }
               }

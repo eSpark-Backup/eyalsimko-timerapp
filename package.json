@@ -63,7 +63,8 @@
     "tailwindcss-animate": "^1.0.7",
     "ws": "^8.18.0",
     "xstate": "^5.19.0",
-    "expo-location": "~18.0.6"
+    "expo-location": "~18.0.6",
+    "expo-dev-client": "~5.0.12"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
