@@ -49,6 +49,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+// import * as Application from "expo-application";
+import { ErrorBoundary } from "~/components/ErrorBoundary";
 
 function TimerPickerWithControls({
   initialValue,
@@ -528,6 +530,20 @@ function ConnectionSettings() {
   );
 }
 
+function VersionInfo() {
+  const Application = require("expo-application"); // TODO: remove this, uncomment the import
+  const appVersion = Application.nativeApplicationVersion;
+  const buildVersion = Application.nativeBuildVersion;
+
+  return (
+    <View className="pb-safe pt-safe items-center">
+      <Text>
+        Version: {appVersion} ({buildVersion})
+      </Text>
+    </View>
+  );
+}
+
 export default function SettingsScreen() {
   const initialAccordionTab = useLocalSearchParams<{ tab?: string }>().tab;
   const [currentTab, setCurrentTab] = useState<string | undefined>(
@@ -679,6 +695,9 @@ export default function SettingsScreen() {
           </AccordionItem>
         </Accordion>
       </View>
+      <ErrorBoundary fallback={null}>
+        <VersionInfo />
+      </ErrorBoundary>
     </ScrollView>
   );
 }
