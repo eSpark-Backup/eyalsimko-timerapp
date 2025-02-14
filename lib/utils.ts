@@ -24,10 +24,11 @@ export const getDurationObject = (duration: number): Duration => {
 }
 
 export const formatDuration = (duration: number) => {
+  const sign = duration < 0 ? "-" : "";
   const timeParts = [];
   const {
     hours, minutes, seconds
-  } = getDurationObject(duration)
+  } = getDurationObject(Math.abs(duration))
 
   if (hours !== undefined) {
     timeParts.push(hours.toString().padStart(2, "0"));
@@ -39,5 +40,5 @@ export const formatDuration = (duration: number) => {
     timeParts.push(seconds.toString().padStart(2, "0"));
   }
 
-  return timeParts.join(":");
+  return `${sign}${timeParts.join(":")}`;
 };
