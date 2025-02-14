@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createActorContext } from '@xstate/react';
 import { and, assign, fromCallback, fromEventObservable, setup } from 'xstate';
 import { connectionActor } from './connectionStore';
+import { eventConfigStore } from './eventConfig';
 
 type Idle = { timer: null }
 type Running = { timer: { elapsed: number, elapsedInMs: number, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number, message: string, messageIsVisible: boolean } }
@@ -243,12 +244,16 @@ export const timerStore = setup({
       }]),
       actions: assign({
         timer: ({ event }) => {
+          const blinkLength = eventConfigStore.getSnapshot().context.blinkLength
           connectionActor.send({
             type: "sendMessage", message: [
               { type: "stop" },
               {
                 type: "blink",
                 data: event.data.startBlinkingTime
+              }, {
+                type: "blink_length",
+                data: blinkLength ?? event.data.startBlinkingTime
               }, {
                 type: "reset",
                 data: event.data.countdownTime,
