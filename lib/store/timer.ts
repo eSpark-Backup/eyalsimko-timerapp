@@ -244,13 +244,15 @@ export const timerStore = setup({
       actions: assign({
         timer: ({ event }) => {
           connectionActor.send({
-            type: "sendMessage", message: [{
-              type: "blink",
-              data: event.data.startBlinkingTime
-            }, {
-              type: "reset",
-              data: event.data.countdownTime,
-            }]
+            type: "sendMessage", message: [
+              { type: "stop" },
+              {
+                type: "blink",
+                data: event.data.startBlinkingTime
+              }, {
+                type: "reset",
+                data: event.data.countdownTime,
+              }]
           })
           return {
             ...event.data,
