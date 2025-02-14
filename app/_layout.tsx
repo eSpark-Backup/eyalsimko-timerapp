@@ -10,7 +10,7 @@ import {
 import { Link, SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
-import { Platform, View } from "react-native";
+import { Platform, View, Text as NativeText } from "react-native";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { PortalHost } from "@rn-primitives/portal";
@@ -121,8 +121,8 @@ export default function RootLayout() {
               title: "",
               header: () => (
                 <View className="pt-safe w-full">
-                  <View className="p-4 flex-row justify-between gap-2 md:gap-12">
-                    <View className="flex shrink flex-row gap-2 md:gap-12 items-center">
+                  <View className="p-4 flex-row gap-2 md:gap-12">
+                    <View className="flex-1 flex-row gap-2 md:gap-12 items-center">
                       <CompanyLogo
                         className="text-primary"
                         width={117}
@@ -130,24 +130,27 @@ export default function RootLayout() {
                         strokeWidth={1}
                         viewBox="0 0 180 56"
                       />
-                      <Link
-                        href={{
-                          pathname: "/settings",
-                          params: {
-                            tab: "eventNameAndDescription",
-                          },
-                        }}
-                      >
-                        <View className="w-40 md:w-9/12">
-                          <Text
-                            numberOfLines={1}
-                            ellipsizeMode="tail"
-                            className="text-lg md:text-2xl font-semibold"
-                          >
-                            {`${eventName}: ${eventDescription}`}
-                          </Text>
-                        </View>
-                      </Link>
+                      <View className="flex-1">
+                        <Link
+                          href={{
+                            pathname: "/settings",
+                            params: {
+                              tab: "eventNameAndDescription",
+                            },
+                          }}
+                        >
+                          <View>
+                            <Text
+                              numberOfLines={1}
+                              ellipsizeMode="tail"
+                              className="text-lg md:text-2xl font-semibold"
+                            >
+                              {eventName}
+                              {eventDescription ? `: ${eventDescription}` : ""}
+                            </Text>
+                          </View>
+                        </Link>
+                      </View>
                     </View>
                     <View className="flex flex-row items-center sm:gap-4 md:gap-6">
                       <View

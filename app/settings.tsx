@@ -118,7 +118,7 @@ function EventNameSettings({
     initialEventDescription ?? ""
   );
 
-  const disableSubmit = eventName.length === 0 || eventDescription.length === 0;
+  const disableSubmit = eventName.length === 0;
 
   return (
     <View className="flex gap-4">
