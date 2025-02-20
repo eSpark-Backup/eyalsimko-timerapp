@@ -3,6 +3,7 @@ import { assign, createActor, fromCallback, fromPromise, setup } from 'xstate';
 import NetInfo from '@react-native-community/netinfo';
 import Toast from 'react-native-toast-message';
 import { Alert, AppState } from "react-native";
+import { sendUpdate } from "../timerModuleFirmware";
 
 // const wsConfigs = [
 //   { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
@@ -70,6 +71,7 @@ type Events =
   | { type: 'connectionLost' }
   | { type: 'retry' }
   | { type: 'sendMessage', message: WsMessage | WsMessage[] }
+  | { type: 'updateFirmware' }
 
 const getConnection = (config: Config): Promise<ConnectedState> => {
   const attemptId = Math.random().toString(36).substring(2, 15)
@@ -249,6 +251,11 @@ const connectionStore = setup({
         }
       }),
       on: {
+        updateFirmware: {
+          actions: ({ context }) => {
+            context.ws && sendUpdate(context.ws)
+          }
+        },
         disconnect: {
           target: 'DISCONNECTED',
         },

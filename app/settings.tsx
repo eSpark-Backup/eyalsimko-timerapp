@@ -568,6 +568,9 @@ export default function SettingsScreen() {
   );
 
   const timerActorRef = TimerContext.useActorRef();
+  const canUpdateFirmware = useMachineSelector(connectionActor, (state) =>
+    state.can({ type: "updateFirmware" })
+  );
 
   return (
     <ScrollView
@@ -690,6 +693,40 @@ export default function SettingsScreen() {
               >
                 <CircleAlert className="h-4 w-4 text-destructive-foreground" />
                 <Text>Clear event data</Text>
+              </Button>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="OTA-update">
+            <AccordionTrigger onPress={() => toggleTab("OTA-update")}>
+              <Text>OTA update</Text>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Button
+                disabled={!canUpdateFirmware}
+                variant={"destructive"}
+                className="flex-row gap-2"
+                onPress={() => {
+                  Alert.alert(
+                    "Update Timer module firmware",
+                    "Updating the timer module will reboot the device. Do you want to update?",
+                    [
+                      {
+                        text: "Cancel",
+                        style: "cancel",
+                        onPress: () => {},
+                      },
+                      {
+                        text: "Update",
+                        style: "destructive",
+                        onPress: () => {
+                          connectionActor.send({ type: "updateFirmware" });
+                        },
+                      },
+                    ]
+                  );
+                }}
+              >
+                <Text>Update Timer module firmware</Text>
               </Button>
             </AccordionContent>
           </AccordionItem>
