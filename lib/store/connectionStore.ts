@@ -2,11 +2,16 @@ import * as Sentry from "@sentry/react-native";
 import { assign, createActor, fromCallback, fromPromise, setup } from 'xstate';
 import NetInfo from '@react-native-community/netinfo';
 import Toast from 'react-native-toast-message';
-import { AppState } from "react-native";
+import { Alert, AppState } from "react-native";
+
+// const wsConfigs = [
+//   { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
+//   { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
+// ] as const
 
 const wsConfigs = [
-  { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
-  { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
+  { url: "ws://192.168.0.108:8000/ws", type: "LAN" },
+  { url: "ws://192.168.0.108:8001/ws", type: "WIFI" },
 ] as const
 
 const connectToServer = async () => {
@@ -150,17 +155,11 @@ const connectionStore = setup({
           }
         })
 
-        NetInfo.fetch().then((connection) => {
+        NetInfo.addEventListener((connection) => {
           if (connection.type === "none") {
-            NetInfo.addEventListener((connection) => {
-              if (connection.type === "none") {
-                setTimeout(() => reject(), 100)
-              } else {
-                resolve(undefined)
-              }
-            })
+            setTimeout(() => reject(), 10000)
           } else {
-            setTimeout(() => reject(undefined), 100)
+            resolve(undefined)
           }
         })
       })
