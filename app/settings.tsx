@@ -24,7 +24,7 @@ import { useColorScheme } from "~/lib/useColorScheme";
 import { Button } from "~/components/ui/button";
 import { useEffect, useState } from "react";
 import { Input } from "~/components/ui/input";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useNavigation } from "expo-router";
 import { Sun } from "~/lib/icons/Sun";
 import { MoonStar } from "~/lib/icons/MoonStar";
 import { SunMoon } from "~/lib/icons/SunMoon";
@@ -545,6 +545,7 @@ function VersionInfo() {
 }
 
 export default function SettingsScreen() {
+  const navigation = useNavigation();
   const initialAccordionTab = useLocalSearchParams<{ tab?: string }>().tab;
   const [currentTab, setCurrentTab] = useState<string | undefined>(
     initialAccordionTab
@@ -720,6 +721,7 @@ export default function SettingsScreen() {
                         style: "destructive",
                         onPress: () => {
                           connectionActor.send({ type: "updateFirmware" });
+                          navigation.goBack();
                         },
                       },
                     ]

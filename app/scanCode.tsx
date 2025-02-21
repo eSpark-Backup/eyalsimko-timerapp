@@ -6,7 +6,6 @@ import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import WifiManager from "react-native-wifi-reborn";
 import { useState } from "react";
-import * as Sentry from "@sentry/react-native";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import * as Location from "expo-location";
@@ -150,7 +149,6 @@ export default function ScanCodeScreen() {
               }
             }
           } catch (e) {
-            Sentry.captureException(e);
             Toast.show({
               type: "error",
               text1: `Unable to automatically connect to WIFI, ${result.data}`,

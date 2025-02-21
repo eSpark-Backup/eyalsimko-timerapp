@@ -1,19 +1,18 @@
-import * as Sentry from "@sentry/react-native";
 import { assign, createActor, fromCallback, fromPromise, setup } from 'xstate';
 import NetInfo from '@react-native-community/netinfo';
 import Toast from 'react-native-toast-message';
 import { Alert, AppState } from "react-native";
 import { sendUpdate } from "../timerModuleFirmware";
 
-const wsConfigs = [
-  { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
-  { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
-] as const
-
 // const wsConfigs = [
-//   { url: "ws://192.168.0.112:8000/ws", type: "LAN" },
-//   { url: "ws://192.168.0.112:8001/ws", type: "WIFI" },
+//   { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
+//   { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
 // ] as const
+
+const wsConfigs = [
+  { url: "ws://192.168.0.112:8000/ws", type: "LAN" },
+  { url: "ws://192.168.0.112:8001/ws", type: "WIFI" },
+] as const
 
 const connectToServer = async () => {
   return getConnection(wsConfigs[0]).catch(() => getConnection(wsConfigs[1]))
@@ -77,11 +76,9 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
   const attemptId = Math.random().toString(36).substring(2, 15)
   return new Promise((resolve, reject) => {
     try {
-      Sentry.captureMessage(`Trying to connect to ${config.url} via ${config.type}. Attempt id: ${attemptId}`, "debug")
       const ws = new WebSocket(config.url);
 
       const onOpen = () => {
-        Sentry.captureMessage(`Connection ${attemptId}: ws.onopen call`, "debug")
         // send reset and stop to set screen to blank state
         const initMessages = [{ type: "init" }, { type: "reset", data: 0 }, { type: "stop" }] as const
         initMessages.forEach(message => sendMessageOverWs(ws, message))
@@ -91,20 +88,17 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
 
       const timeout = setTimeout(() => {
         ws.close()
-        Sentry.captureMessage(`Connection ${attemptId}: timed out`, "error")
         reject(new Error("Have not recienved hello message"))
       }, 1000)
 
       ws.onerror = (err: Event) => {
         clearTimeout(timeout)
         const errWithCorrectType = err as unknown as WebSocketErrorEvent
-        Sentry.captureMessage(`Connection ${attemptId}: ws.onerror call ${errWithCorrectType.message}`, "error")
         reject(err)
       }
 
       const onHelloMessage = ({ data }: { data: unknown }) => {
         if (data === "hello") {
-          Sentry.captureMessage(`Connection ${attemptId}: "hello" received; Connection established`, "debug")
           clearTimeout(timeout)
           ws.removeEventListener('open', onOpen)
           ws.removeEventListener('message', onHelloMessage)
@@ -113,14 +107,11 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
             type: config.type,
             messageQueue: []
           })
-        } else {
-          Sentry.captureMessage(`Connection ${attemptId}: ${data} received`, "debug")
         }
       }
 
       ws.onmessage = onHelloMessage
     } catch (e) {
-      Sentry.captureMessage(`Connection ${attemptId}: exception received ${e}`, "error")
     }
   })
 }
@@ -137,8 +128,10 @@ const connectionStore = setup({
   },
   actors: {
     subscribeConnection: fromCallback(({ input, sendBack }: { input: WebSocket, sendBack: (event: Events) => void }) => {
-      return input.addEventListener('close', () => {
-        sendBack({ type: 'connectionLost' })
+      return input.addEventListener('close', (e) => {
+        if (e.code === 1001)
+          sendBack({ type: 'connectionLost' })
+
       })
     }),
     initialize: fromCallback(({ sendBack }) => {
@@ -165,10 +158,11 @@ const connectionStore = setup({
           }
         })
       })
-    })
+    }),
+    updateFirmware: fromPromise(({ input }: { input: WebSocket }) => sendUpdate(input)),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QGMD2A7dZkBcCWGAdAJIAiAMgKIDEe6e+AhgDZ4BeYA2gAwC6ioAA6pYDAugEgAHogCssgByEAzLICMANgBMahbI2KA7IYA0IAJ6IALN1mFuD7mq2HlTw1oUBfL2bSZsfCIAYQB5ADlwymCAFWJwgHFqCAwwQjoAN1QAazT-LFxxQjDI6LjEhEzUZEYg9B5eBslhUTrJGQQAWjU3QitDeUUtWS1uPWUNM0sEWW5lPo0FZwUFQwBONbU1jR8-DAK64oio2PiksAAnC9QLwkFmWoAzG4BbQnzAopKT8oTK9CyNTqDSaSBALTEGHaiDUsK0fVUVjWxnUqy0U0QnXUhAUyIMahGGgGVjUVh2vhAH0KIWOZTO1CpOEgoKEIkhEjBHQ03DW9jWqm0Sw0Gk26IsiFG8K0SORaxlujl5L2AWp6COpVOiWoj0YeGYzL4zTZbU5iD0vMWAx6-LU3A0yjWGIQykM3D6mgMVmUowUw0Mu0p+0+NI1MUopGSeFgjJZ4ON4mhCFJakII0MBjt3GGJOcTuGdm4hj0rhcS02mgDjK+tNi4eosDA6AgAFk4LBGDBYxCTaAOmp04Qix4Bi7lBN+wond1lCmXB4icoFA67ZWg6r1T861WMOQRDgu-GoaaECSrIQRboPWNlF6b07tIRpeMtA6x9LhUrAyrDqRiABlb4yjrOgxBYdguENMFuwTY95CUVRNB0PQDFWUxxWdF97EcNxZkWKxvApbc1UoAAlEjQhI6gLjAHALnMA9Whg3szQcQcPEvdQrC9WQrDzRcVA0W0xi0OUrE8NYfApdBUAgOBJCIo1GKPZiugnPoBjg4YfVkCYpyQtiPCXNNZGRRRV2-IoyCoRT2UTF87AUOZuH6NYeP7HjePQmwz19Fwxg0LiTKWcyDmrUMzhsntpEQRY3SsEzdCLXEuNWJ1FxTWYHAJfDSSWWR-UItdDkA2tSEipjopPMVpjWeFViRQxSRnODvRC4M1V-ACazDMqoMPDkVMXKVYQcG9FAmO1JnQ715hlDZ9BveL+za9dSPIkjyuUyrkSlLQ9ttGwMwdJ13MIftGs2G9atGKxJK8IA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QGMD2A7dZkBcCWGAxLGOhALJywCGMA2gAwC6ioADqrHvhqyAB6IAjAFYGADgB0ooQxHixQgEwBmJSIA0IAJ6IAtAHYALAckBOCwDYl4gzbMGHAXyda0mbD3SSAkgBEAGQBRQjx0bjxqABs8AC8wRhYkEA4uLz5BBD0VSyFJAxUjMwlLMxEhS1zNHURrS0klMyN5BgYlJRlLFzcMLFwCbwBhAHkAOVGgwYAVH1GAcUIIDDBJMIA3VABrFfc+r0kR8cmZ+YR11GRqL0TEvlSI3mTMvSMjJUlxHPa5ByUDO2qugQahUkgYojMsgURiEKk+3RAu08AwOYwm01mCzAACdsahsZI2FErgAzfEAW0kSP6GFRRwxp3Ol2uzFuyXu6SewhUckkhSE-x51iE4jMKi0QL0NhEkiMlgMolKIkqKnkCOp+0O6JOCw1kDZ7E4D3QGX06hlIgVBlKCjFopFEuEYkkIka4iM4gYHpFHpE6t6yNpWuOmMIJOoeCi+uYdyNnNAmXEqnMbSTctdrSEjoQb1M6nEsMVhSUliM-o8NKGaOOQT8hAArmwIFcwAAxPDY8kAd2o2ISMfZcYGpqyeQU8oVbTlQgcDpqo5UY5LShMpQMDBUZXLexRwemtcWeFgGoNKSHjwTiB5UiTBaMqpERXEllV2YUfOK8iKsJMZnl28DKt6SmA8SDIShYBoegB0NNJhy5YFSkkUoHwYSxPnlMwlGzbJSw+OV-hsWEDFsSw-VcREA0rOltQPDUBgCTgcFPDl4MvBARBEMwwTaOQUILcQFBwhVQUhIRxLFBgClLLoKPooNq33PxJAAVQABT8ABBECAH1Wx8AAlcgAHVNIMkIliwVZ0A2bYqSozVFJA5T1K03T9KM0zzLOGyLiuAYbhgs84IvAR9HXKQmlnUolDkeQs3nKVN3MUoZ1sBhISfJQAOovwfAAZT3ZzCD7E8gtY0LnkKWVijeGFckzEjszleocjMZ9LQLFQvhy-YggMgzhgMxZlms2ydgclF+sGgyfI2ZkAtZcrzxNBChCKd5uoqWQFXQjojBw+QP1UdaJDQ3IV16qaBqGwgcTxAkiVJCl7IrPqbtmpl-IwQKklg40R3E-5pHaddrX+STAX0MR3lEd13XKJo5CEK7aWm26+xwbFtBYlaRwsUF5QRvaTFdMxmvySEYefZoTHNFwKPQVAIDgPh5NW-74zCrIDGVcwil2rC4oLHDPTyMVac9P9jEE1HvH8YJYxCjnub0TjuJEuEKksL1OPFecv2QnIBUXEUFQ6OWaJDeYlYBhCpRscxpc4pMgbFbNOr5UiBXBXIHBUS2itrW2ueeOppFeeUbEaYUDsS148maZRbBFDdjBRuTJoU4Da0kAyVPGTEQ7Y1XmlMcd-lkFc-YMHCbAYcxyj+EULDFGxZJ6N7dyc3PXO0oI9MMkyzKCYvKv0IoZUKT5SLI3nyhwiojAaBVRTkT0TALQOe5cjT+8H0YCoACWDwdlZHNWSIjgjo7-fbmplRwyIcMidaKdCy0zrvaTywqd7HlWYcSzmEcK6TcBQRDdWwvOU2+RuqNT+I+aw5FO47jRh9ABgM0JSDhG0Xm5pHwFGEutWUhRlQVHaq0D0DMnBAA */
   id: 'connection',
   initial: 'IDLE',
   context: {
@@ -230,31 +224,37 @@ const connectionStore = setup({
       on: {
         connected: 'CONNECTED',
         failed: 'ERROR',
-      },
+      }
     },
     CONNECTED: {
+      initial: "RUNNING",
+      states: {
+        RUNNING: {
+        },
+        UPDATE_FIRMWARE: {
+          invoke: {
+            src: "updateFirmware",
+            input: ({ context }) => context.ws as WebSocket,
+            onDone: {
+              target: "#connection.DISCONNECTED",
+            }
+          },
+          exit: assign(({ context }) => {
+            context.ws?.close()
+            return {
+              ws: null,
+              type: null,
+            }
+          }),
+        },
+      },
       invoke: {
         src: 'subscribeConnection',
         input: ({ context }) => context.ws as WebSocket,
       },
-      exit: assign(({ context }) => {
-        if (context.ws) {
-          // send stop to hide timer to prevent the bug when timer is running while screen shows QR code
-          const messages = [{ type: "stop" }, { type: "disconnect" }] as const
-          messages.forEach(message => sendMessageOverWs(context.ws, message))
-        }
-        context.ws?.send("disconnect")
-        context.ws?.close()
-        return {
-          ws: null,
-          type: null,
-        }
-      }),
       on: {
         updateFirmware: {
-          actions: ({ context }) => {
-            context.ws && sendUpdate(context.ws)
-          }
+          target: "CONNECTED.UPDATE_FIRMWARE",
         },
         disconnect: {
           target: 'DISCONNECTED',
@@ -275,10 +275,23 @@ const connectionStore = setup({
               text1: 'Connection lost',
               text2: 'Connection with the module has been lost.\nCheck your lan/WiFi connection or does the module is running.',
             })
-
           }
         }
-      }
+      },
+      exit: assign(({ context }) => {
+        if (context.ws) {
+          // send stop to hide timer to prevent the bug when timer is running while screen shows QR code
+          const messages = [{ type: "stop" }, { type: "disconnect" }] as const
+          messages.forEach(message => sendMessageOverWs(context.ws, message))
+        }
+        context.ws?.send("disconnect")
+        context.ws?.close()
+        return {
+          ws: null,
+          type: null,
+        }
+      }),
+
     },
     DISCONNECTED: {
       on: {

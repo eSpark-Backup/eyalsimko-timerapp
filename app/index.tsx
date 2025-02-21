@@ -101,13 +101,6 @@ function SetTime({
   );
 }
 
-import * as Sentry from "@sentry/react-native";
-
-Sentry.init({
-  dsn: "https://e55938b017a8733dff0847fbbdaf6b8f@o4508733883744256.ingest.us.sentry.io/4508733889314816",
-  debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
-});
-
 export default function TimerScreen() {
   const speakerIndexStr = useLocalSearchParams<{ speakerIndex?: string }>()
     .speakerIndex;
