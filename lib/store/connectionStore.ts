@@ -4,15 +4,15 @@ import Toast from 'react-native-toast-message';
 import { Alert, AppState } from "react-native";
 import { sendUpdate } from "../timerModuleFirmware";
 
-// const wsConfigs = [
-//   { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
-//   { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
-// ] as const
-
 const wsConfigs = [
-  { url: "ws://192.168.0.112:8000/ws", type: "LAN" },
-  { url: "ws://192.168.0.112:8001/ws", type: "WIFI" },
+  { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
+  { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
 ] as const
+
+// const wsConfigs = [
+//   { url: "ws://192.168.0.112:8000/ws", type: "LAN" },
+//   { url: "ws://192.168.0.112:8001/ws", type: "WIFI" },
+// ] as const
 
 const connectToServer = async () => {
   return getConnection(wsConfigs[0]).catch(() => getConnection(wsConfigs[1]))
