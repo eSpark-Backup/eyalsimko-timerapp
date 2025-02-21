@@ -12,7 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.theoneupgroup.timer",
@@ -81,7 +83,8 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
       ],
-      "react-native-wifi-reborn"
+      "react-native-wifi-reborn",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true

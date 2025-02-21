@@ -67,7 +67,8 @@
     "tailwindcss": "3.3.5",
     "tailwindcss-animate": "^1.0.7",
     "ws": "^8.18.0",
-    "xstate": "^5.19.0"
+    "xstate": "^5.19.0",
+    "expo-asset": "~11.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",

@@ -11,8 +11,8 @@ const wsConfigs = [
 ] as const
 
 // const wsConfigs = [
-//   { url: "ws://192.168.0.108:8000/ws", type: "LAN" },
-//   { url: "ws://192.168.0.108:8001/ws", type: "WIFI" },
+//   { url: "ws://192.168.0.112:8000/ws", type: "LAN" },
+//   { url: "ws://192.168.0.112:8001/ws", type: "WIFI" },
 // ] as const
 
 const connectToServer = async () => {
