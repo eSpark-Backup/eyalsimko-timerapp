@@ -42,6 +42,11 @@ module.exports = {
           foreground: 'hsl(var(--card-foreground))',
         },
         brand: 'hsl(var(--brand))',
+        screenBackground: 'hsl(var(--background-brand))',
+        backgroundEllipsis1: 'hsl(var(--background-ellipsis-1))',
+        backgroundEllipsis2: 'hsl(var(--background-ellipsis-2))',
+        backgroundEllipsis3: 'hsl(var(--background-ellipsis-3))',
+        backgroundEllipsis4: 'hsl(var(--background-ellipsis-4))',
       },
       borderWidth: {
         hairline: hairlineWidth(),

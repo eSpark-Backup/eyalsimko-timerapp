@@ -24,6 +24,11 @@
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
     --brand: 24 95% 53%; /* Added brand orange color */
+    --background-brand: 0, 0%, 100%, 1;
+    --background-ellipsis-1: 213, 98%, 45%, 0.19;
+    --background-ellipsis-2: 245, 100%, 31%, 1;
+    --background-ellipsis-3: 259, 83%, 27%, 1;
+    --background-ellipsis-4: 147, 100%, 35%, 0.38;
   }
 
   .dark:root {
@@ -47,5 +52,6 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
     --brand: 24 95% 53%; /* Added brand orange color (same as light mode) */
+    --background-brand: 210, 100%, 5%, 1;
   }
 }
