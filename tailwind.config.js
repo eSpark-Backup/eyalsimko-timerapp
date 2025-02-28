@@ -42,12 +42,19 @@ module.exports = {
           foreground: 'hsl(var(--card-foreground))',
         },
         brand: 'hsl(var(--brand))',
+        cardBorder: 'hsl(var(--card-border-color))',
         screenBackground: 'hsl(var(--background-brand))',
         backgroundEllipsis1: 'hsl(var(--background-ellipsis-1))',
         backgroundEllipsis2: 'hsl(var(--background-ellipsis-2))',
         backgroundEllipsis3: 'hsl(var(--background-ellipsis-3))',
         backgroundEllipsis4: 'hsl(var(--background-ellipsis-4))',
+        buttonDefaultBackground: 'hsl(var(--button-default-background))',
+        buttonDefaultBorderColor: 'hsl(var(--button-default-border-color))',
+        "item-highlight": 'hsl(var(--item-highlight))',
+        "item": 'hsl(var(--item))',
+        "input-background": 'hsl(var(--input-background))',
       },
+
       borderWidth: {
         hairline: hairlineWidth(),
       },
@@ -64,6 +71,11 @@ module.exports = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+      },
+      fontSize: {
+        sm: 12,
+        md: 14,
+        lg: 16,
       },
     },
   },
