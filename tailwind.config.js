@@ -53,6 +53,10 @@ module.exports = {
         "item-highlight": 'hsl(var(--item-highlight))',
         "item": 'hsl(var(--item))',
         "input-background": 'hsl(var(--input-background))',
+        "main-light": 'hsl(var(--main-light))',
+        "timer-out-of-time": 'hsl(var(--timer-out-of-time))',
+        "countdown-out-of-time": 'hsl(var(--countdown-out-of-time))',
+        "highlight": 'hsl(var(--highlight))'
       },
 
       borderWidth: {
@@ -76,6 +80,8 @@ module.exports = {
         sm: 12,
         md: 14,
         lg: 16,
+        // timer: 80
+        '8xl': 80
       },
     },
   },

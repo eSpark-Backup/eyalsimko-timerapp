@@ -23,14 +23,14 @@ export const getDurationObject = (duration: number): Duration => {
   }
 }
 
-export const formatDuration = (duration: number) => {
+export const formatDuration = (duration: number, skipHours: boolean = false) => {
   const sign = duration < 0 ? "-" : "";
   const timeParts = [];
   const {
     hours, minutes, seconds
   } = getDurationObject(Math.abs(duration))
 
-  if (hours !== undefined) {
+  if (hours !== undefined && hours > 0 || !skipHours) {
     timeParts.push(hours.toString().padStart(2, "0"));
   }
   if (minutes !== undefined) {
@@ -42,3 +42,11 @@ export const formatDuration = (duration: number) => {
 
   return `${sign}${timeParts.join(":")}`;
 };
+
+export const formatCountdown = ({ countdownTime, elapsedTime }: { countdownTime: number, elapsedTime: number }) => {
+  if (countdownTime > 60 * 60) {
+    return formatDuration(elapsedTime, false);
+  } else {
+    return formatDuration(elapsedTime, true);
+  }
+}

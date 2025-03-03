@@ -35,6 +35,10 @@
     --item-highlight: 147, 100%, 35%, 0.25;
     --item: 0, 0%, 100%, 0.06;
     --input-background: 209, 59%, 8%, 1;
+    --main-light: 213, 82%, 69%, 1;
+    --timer-out-of-time: 349, 86%, 61%, 0.2;
+    --countdown-out-of-time: 349, 100%, 71%, 1;
+    --highlight: 213, 98%, 45%, 1;
   }
 
   .dark:root {
