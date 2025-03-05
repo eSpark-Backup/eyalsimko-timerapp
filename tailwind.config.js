@@ -56,7 +56,8 @@ module.exports = {
         "main-light": 'hsl(var(--main-light))',
         "timer-out-of-time": 'hsl(var(--timer-out-of-time))',
         "countdown-out-of-time": 'hsl(var(--countdown-out-of-time))',
-        "highlight": 'hsl(var(--highlight))'
+        "highlight": 'hsl(var(--highlight))',
+        "green-highlight": 'hsl(var(--green-highlight))'
       },
 
       borderWidth: {

@@ -10,6 +10,7 @@ import {
 import TimerControls, {
   TimerControlsHeader,
 } from "~/components/widgets/TimerControls";
+import TimersList, { TimersListHeader } from "~/components/widgets/TimersList";
 
 export default function TimerScreen() {
   const timer = {};
@@ -17,7 +18,9 @@ export default function TimerScreen() {
   return (
     <View className="flex-1 gap-[24] pt-[20] px-[32] pb-[34]">
       <View className="h-[360] flex-row gap-[24]">
-        <View className="flex-1 bg-green-300/10" />
+        <Card scrollable={true} header={<TimersListHeader />}>
+          <TimersList />
+        </Card>
         <View className="w-[335]">
           <Card spacing="small" borderColor={timer ? "active" : "default"}>
             <ActiveTimerWidget />

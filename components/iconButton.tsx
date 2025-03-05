@@ -9,6 +9,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        primary: "bg-highlight border border-cardBorder",
+        success: "bg-green-highlight border border-cardBorder",
         default:
           "bg-buttonDefaultBackground border border-buttonDefaultBorderColor web:hover:opacity-90 active:opacity-90",
       },
@@ -37,6 +39,8 @@ const iconSizes = {
 const iconVariants = cva("items-center justify-center", {
   variants: {
     variant: {
+      success: "color-primary",
+      primary: "color-primary",
       default: "color-primary",
     },
     size: {
