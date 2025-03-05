@@ -51,6 +51,15 @@ export default function TimersList() {
       timerName: "Goals of the evening",
       speakerIndex: 2,
     },
+    {
+      speakerName: "David",
+      countdownTime: 1000,
+      elapsedTime: 100,
+      startedAt: null,
+      flashStartTime: 60,
+      timerName: "Goals of the evening",
+      speakerIndex: 3,
+    },
   ];
   return (
     <View className="gap-[12]">

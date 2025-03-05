@@ -9,10 +9,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-highlight border border-cardBorder",
-        success: "bg-green-highlight border border-cardBorder",
+        primary: "bg-highlight",
+        success: "bg-green-highlight",
         default:
-          "bg-buttonDefaultBackground border border-buttonDefaultBorderColor web:hover:opacity-90 active:opacity-90",
+          "bg-buttonDefaultBackground web:hover:opacity-90 active:opacity-90",
       },
       size: {
         xs: "h-[24] w-[24]",
