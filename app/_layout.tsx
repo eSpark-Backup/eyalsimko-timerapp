@@ -32,6 +32,7 @@ import { cn } from "~/lib/utils";
 import { ToastProvider } from "~/components/ui/toast";
 import { LinearGradient } from "expo-linear-gradient";
 import Background from "~/components/Background";
+import { Header } from "~/components/header";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -277,6 +278,7 @@ export default function RootLayout() {
       <TimerSync />
       <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
         <StatusBar
+          hidden={true}
           style={isDarkColorScheme ? "light" : "dark"}
           networkActivityIndicatorVisible
         />
@@ -291,7 +293,7 @@ export default function RootLayout() {
               <Stack.Screen
                 name="index"
                 options={{
-                  header: () => null,
+                  header: () => <Header />,
                 }}
               />
             </Stack>

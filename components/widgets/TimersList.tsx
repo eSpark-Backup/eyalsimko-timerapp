@@ -58,7 +58,7 @@ export default function TimersList() {
         <View
           key={timer.speakerIndex}
           className={cn(
-            "flex-row rounded-[8] py-[12] px-[20] gap-[16]",
+            "flex-row items-center rounded-[8] py-[12] px-[20] gap-[16]",
             timer.speakerIndex === runningTimerIndex && "bg-item-highlight",
             timer.speakerIndex !== runningTimerIndex && "bg-item"
           )}
