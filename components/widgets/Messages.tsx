@@ -1,11 +1,12 @@
 import type React from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { Eye } from "~/lib/icons/Eye";
 import { Zap } from "~/lib/icons/Zap";
 import { Plus } from "~/lib/icons/Plus";
 import { Input } from "../ui/input";
+import { IconButton } from "../iconButton";
 
 interface Message {
   id: string;
@@ -53,8 +54,9 @@ export const MessageWidget: React.FC<MessageWidgetProps> = ({
           }`}
         >
           <Input size="small" value={message.text} />
-          <View className="items-end">
-            <Button size="sm" onPress={onShowPress} icon={Eye}>
+          <View className="justify-end flex-row gap-[12]">
+            <IconButton size="xs" icon={Eye} />
+            <Button size="xs" onPress={onShowPress} icon={Eye}>
               <Text>Show</Text>
             </Button>
           </View>

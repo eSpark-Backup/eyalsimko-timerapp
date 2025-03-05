@@ -7,13 +7,16 @@ import {
   MessageWidget,
   MessageWidgetHeader,
 } from "~/components/widgets/Messages";
+import TimerControls, {
+  TimerControlsHeader,
+} from "~/components/widgets/TimerControls";
 
 export default function TimerScreen() {
   const timer = {};
-  // return null;
+
   return (
     <View className="flex-1 gap-[24] pt-[20] px-[32] pb-[34]">
-      <View className="flex-1 flex-row gap-[24]">
+      <View className="h-[360] flex-row gap-[24]">
         <View className="flex-1 bg-green-300/10" />
         <View className="w-[335]">
           <Card spacing="small" borderColor={timer ? "active" : "default"}>
@@ -27,7 +30,11 @@ export default function TimerScreen() {
             <MessageWidget />
           </Card>
         </View>
-        <View className="flex-1 bg-green-300/10"></View>
+        <View className="flex-1">
+          <Card scrollable={true} header={<TimerControlsHeader />}>
+            <TimerControls />
+          </Card>
+        </View>
       </View>
     </View>
   );

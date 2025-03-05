@@ -112,7 +112,7 @@ export const ActiveTimerWidget = () => {
   const timer = {
     speakerName: "David",
     countdownTime: 1000,
-    elapsedTime: 1000,
+    elapsedTime: 100,
     timerName: "Goals of the evening",
   };
 
