@@ -16,14 +16,14 @@ const buttonVariants = cva(
         destructive: "bg-destructive web:hover:opacity-90 active:opacity-90",
         outline:
           "border border-input bg-background web:hover:bg-accent web:hover:text-accent-foreground active:bg-accent",
-        secondary: "bg-secondary web:hover:opacity-80 active:opacity-80",
+        secondary: "bg-transparent web:hover:opacity-80 active:opacity-80",
         ghost:
           "web:hover:bg-accent web:hover:text-accent-foreground active:bg-accent",
       },
       size: {
         xs: "h-[24] gap-[8] rounded-[4] px-[12]",
         sm: "h-[32] gap-[8] rounded-[8] px-[12]",
-        default: "h-[44] px-4 py-2 native:h-12 native:px-5 native:py-3",
+        default: "h-[36] gap-[8] px-[12]",
         lg: "h-[48] rounded-md px-8 native:h-14",
       },
     },
@@ -36,7 +36,7 @@ const buttonVariants = cva(
 
 const iconSizes = {
   xs: 12,
-  default: 12,
+  default: 20,
   sm: 12,
   lg: 12,
   icon: 12,
@@ -49,13 +49,13 @@ const iconVariants = cva("items-center justify-center", {
       primary: "color-primary",
       destructive: "",
       outline: "",
-      secondary: "",
+      secondary: "text-primary/60",
       ghost: "",
       link: "",
     },
     size: {
       xs: "h-[12] w-[12]",
-      default: "",
+      default: "h-[20] w-[20]",
       sm: "h-[12] w-[12]",
       lg: "",
     },
@@ -75,8 +75,7 @@ const buttonTextVariants = cva(
         primary: "text-primary",
         destructive: "text-destructive-foreground",
         outline: "group-active:text-accent-foreground",
-        secondary:
-          "text-secondary-foreground group-active:text-secondary-foreground",
+        secondary: "text-primary/60 group-active:text-secondary-foreground",
         ghost: "group-active:text-accent-foreground",
       },
       size: {

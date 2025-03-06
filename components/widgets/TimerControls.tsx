@@ -11,29 +11,11 @@ let timer = {
   countdownTime: 1000,
   elapsedTime: 100,
   flashStartTime: 60,
+  flashLength: 25,
   timerName: "Goals of the evening",
   speakerIndex: 0,
 };
 // timer = null;
-
-export const TimerControlsHeader = () => {
-  if (!timer) return null;
-  return (
-    <View className="flex-row justify-between items-center">
-      <Button size="sm">
-        <Text>-1m</Text>
-      </Button>
-      <View className="flex-row gap-[24] items-center">
-        <IconButton size="sm" icon={Pause} />
-        <IconButton size="lg" icon={Pause} />
-        <IconButton size="sm" icon={Pause} />
-      </View>
-      <Button size="sm">
-        <Text>+1m</Text>
-      </Button>
-    </View>
-  );
-};
 
 export default function TimerControls() {
   const [blackoutActive, setBlackoutActive] = useState(false);
@@ -42,11 +24,24 @@ export default function TimerControls() {
   if (!timer) return null;
 
   return (
-    <View className="flex-col gap-[20]">
+    <View className="flex-col gap-[16]">
+      <View className="flex-row justify-between items-center">
+        <Button size="sm">
+          <Text>-1m</Text>
+        </Button>
+        <View className="flex-row gap-[24] items-center">
+          <IconButton size="sm" icon={Pause} />
+          <IconButton size="lg" icon={Pause} />
+          <IconButton size="sm" icon={Pause} />
+        </View>
+        <Button size="sm">
+          <Text>+1m</Text>
+        </Button>
+      </View>
       <View className="flex-row justify-between">
         {/* TODO: revisit all text and set 20pt line height*/}
-        <Text className="font-normal leading-6">Countdown Timer</Text>
-        <Text className="font-normal leading-6">
+        <Text className="text-md font-normal leading-6">Countdown Timer</Text>
+        <Text className="text-md font-normal leading-6">
           {formatCountdown({
             countdownTime: timer.countdownTime,
             elapsedTime: timer.countdownTime,
@@ -57,6 +52,12 @@ export default function TimerControls() {
         <Text className="font-normal leading-6">Flash Timer</Text>
         <Text className="font-normal leading-6">
           {formatDuration(timer.flashStartTime, true)}
+        </Text>
+      </View>
+      <View className="flex-row justify-between items-center">
+        <Text className="font-normal leading-6">Flash Length</Text>
+        <Text className="font-normal leading-6">
+          {formatDuration(timer.flashLength, true)}
         </Text>
       </View>
       <View className="flex-row justify-between items-center">

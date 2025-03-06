@@ -291,10 +291,10 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen
-                name="index"
                 options={{
                   header: () => <Header />,
                 }}
+                name="index"
               />
             </Stack>
           </View>

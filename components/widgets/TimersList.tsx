@@ -39,7 +39,7 @@ export default function TimersList() {
       elapsedTime: 100,
       flashStartTime: 60,
       startedAt: null,
-      timerName: "Goals of the evening",
+      timerName: "Welcome to the Pawnee Townhall",
       speakerIndex: 1,
     },
     {

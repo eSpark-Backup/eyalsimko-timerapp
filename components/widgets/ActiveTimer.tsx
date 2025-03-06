@@ -124,8 +124,8 @@ export const ActiveTimerWidget = () => {
         <CompanyLogo
           viewBox="0 0 95 20"
           height={20}
-          width={95}
-          strokeWidth={1}
+          width={94.7}
+          strokeWidth={0}
         />
         <Text className="text-lg font-semibold text-main-light">
           {timer.speakerName}
