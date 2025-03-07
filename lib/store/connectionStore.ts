@@ -1,18 +1,26 @@
+import z from 'zod'
 import { assign, createActor, fromCallback, fromPromise, setup } from 'xstate';
 import NetInfo from '@react-native-community/netinfo';
 import Toast from 'react-native-toast-message';
 import { Alert, AppState } from "react-native";
 import { sendUpdate } from "../timerModuleFirmware";
 
-const wsConfigs = [
-  { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
-  { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
-] as const
+const recoverMessageSchema = z.object({
+  time_left: z.number(),
+  blink_start_time: z.number(),
+  blink_length: z.number(),
+}).transform(({ time_left, blink_start_time, blink_length }) => ({ elapsed: time_left, startBlinkingTime: blink_start_time }))
+export type RecoverMessage = z.infer<typeof recoverMessageSchema>
 
 // const wsConfigs = [
-//   { url: "ws://192.168.0.112:8000/ws", type: "LAN" },
-//   { url: "ws://192.168.0.112:8001/ws", type: "WIFI" },
+//   { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
+//   { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
 // ] as const
+
+const wsConfigs = [
+  { url: "ws://192.168.0.111232:8001", type: "LAN" },
+  { url: "ws://192.168.0.112:8001", type: "WIFI" },
+] as const
 
 const connectToServer = async () => {
   return getConnection(wsConfigs[0]).catch(() => getConnection(wsConfigs[1]))
@@ -21,7 +29,7 @@ const connectToServer = async () => {
 type Config = typeof wsConfigs[number]
 
 type NonConnectedState = { ws: null, type: null, messageQueue: WsMessage[] }
-type ConnectedState = { ws: WebSocket, type: Config["type"], messageQueue: [] }
+export type ConnectedState = { ws: WebSocket, type: Config["type"], messageQueue: [], timerInit?: RecoverMessage }
 
 type WsMessage = {
   type: "shutdown", // done
@@ -73,15 +81,14 @@ type Events =
   | { type: 'updateFirmware' }
 
 const getConnection = (config: Config): Promise<ConnectedState> => {
-  const attemptId = Math.random().toString(36).substring(2, 15)
   return new Promise((resolve, reject) => {
     try {
       const ws = new WebSocket(config.url);
 
       const onOpen = () => {
         // send reset and stop to set screen to blank state
-        const initMessages = [{ type: "init" }, { type: "reset", data: 0 }, { type: "stop" }] as const
-        initMessages.forEach(message => sendMessageOverWs(ws, message))
+        const initMessage = { type: "init" } as const
+        sendMessageOverWs(ws, initMessage)
       }
 
       ws.onopen = onOpen
@@ -97,11 +104,34 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
         reject(err)
       }
 
-      const onHelloMessage = ({ data }: { data: unknown }) => {
+      const onMessage = ({ data }: { data: unknown }) => {
+        if (typeof data === "string" && data.split(':')[0] === "recover") {
+          const { data: timerInit } = recoverMessageSchema.safeParse(JSON.parse(data.substring(data.indexOf(':') + 1)))
+          if (timerInit)
+            resolve({
+              ws,
+              type: config.type,
+              messageQueue: [],
+              timerInit,
+            })
+          else {
+            Toast.show({
+              type: "error",
+              text1: "Timer recovery failed",
+              text2: "There was a timer running on the Timer module, but timer recovery failed.",
+            })
+            resolve({
+              ws,
+              type: config.type,
+              messageQueue: []
+            })
+
+          }
+        }
         if (data === "hello") {
           clearTimeout(timeout)
           ws.removeEventListener('open', onOpen)
-          ws.removeEventListener('message', onHelloMessage)
+          ws.removeEventListener('message', onMessage)
           resolve({
             ws,
             type: config.type,
@@ -110,7 +140,7 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
         }
       }
 
-      ws.onmessage = onHelloMessage
+      ws.onmessage = onMessage
     } catch (e) {
     }
   })
@@ -129,9 +159,8 @@ const connectionStore = setup({
   actors: {
     subscribeConnection: fromCallback(({ input, sendBack }: { input: WebSocket, sendBack: (event: Events) => void }) => {
       return input.addEventListener('close', (e) => {
-        if (e.code === 1001)
+        if (e.code !== 1000)
           sendBack({ type: 'connectionLost' })
-
       })
     }),
     initialize: fromCallback(({ sendBack }) => {
@@ -213,7 +242,8 @@ const connectionStore = setup({
             return {
               ws: event.output.ws,
               type: event.output.type,
-              messageQueue: []
+              messageQueue: [],
+              timerInit: event.output.timerInit
             } as const
           })
         },

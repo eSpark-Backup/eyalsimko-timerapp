@@ -1,7 +1,8 @@
+import z from 'zod'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createActorContext } from '@xstate/react';
 import { and, assign, fromCallback, fromEventObservable, setup } from 'xstate';
-import { connectionActor } from './connectionStore';
+import { ConnectedState, connectionActor, RecoverMessage } from './connectionStore';
 import { eventConfigStore } from './eventConfig';
 
 type Idle = { timer: null }
@@ -53,6 +54,9 @@ type Events = SetupEvent | {
   type: "showMessage"
 } | {
   type: "hideMessage"
+} | {
+  type: "recover",
+  data: RecoverMessage
 }
 
 export const timerStore = setup({
@@ -77,6 +81,16 @@ export const timerStore = setup({
           sendBack({ type: "reset" })
         }
       })
+    }),
+    waitForRecovery: fromCallback(({ sendBack }) => {
+      connectionActor.subscribe(snapshot => {
+        if (snapshot.matches("CONNECTED")) {
+          const context = connectionActor.getSnapshot().context as ConnectedState
+          if (context.timerInit) {
+            sendBack({ type: "recover", data: context.timerInit })
+          }
+        }
+      })
     })
   },
   guards: {
@@ -91,6 +105,29 @@ export const timerStore = setup({
   },
   states: {
     IDLE: {
+      invoke: {
+        src: 'waitForRecovery',
+      },
+      on: {
+        recover: {
+          target: 'ACTIVE.running',
+          actions: assign({
+            timer: ({ event }) => {
+              const newTimer: Running['timer'] = {
+                speakerIndex: -0,
+                elapsed: Math.floor(event.data.elapsed),
+                elapsedInMs: Math.floor(event.data.elapsed * 1000),
+                speakerName: "",
+                countdownTime: 0,
+                message: "",
+                messageIsVisible: false,
+                startBlinkingTime: event.data.startBlinkingTime,
+              }
+              return newTimer
+            }
+          })
+        }
+      }
     },
     ACTIVE: {
       invoke: {

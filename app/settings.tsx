@@ -333,129 +333,129 @@ function ConnectionSettings() {
       setIsConnectingToWifi(false);
     }
   };
-
   return (
     <View className="flex gap-4">
-      {isConnectionError && (
-        <>
-          {connectionType === "SCREEN_WIFI" && (
-            <View>
-              <Text>You connected to the wrong wifi network.</Text>
-              <View className="flex gap-1">
+      {isConnectionError ||
+        (isConnecting && (
+          <>
+            {connectionType === "SCREEN_WIFI" && (
+              <View>
+                <Text>You connected to the wrong wifi network.</Text>
+                <View className="flex gap-1">
+                  <Text>
+                    {" "}
+                    Please connect to the WiFi network using SSID and password
+                    from the screen or
+                  </Text>
+                  <Link href="/scanCode" asChild>
+                    <Button className="flex-row gap-2">
+                      <QrCode className="h-4 w-4 text-primary-foreground" />
+                      <Text>Scan the QR code from the screen</Text>
+                    </Button>
+                  </Link>
+                  <Text>
+                    To connect to the screen via a wired connection, please turn
+                    off the WiFi
+                  </Text>
+                  <Button onPress={openWifiSettings}>
+                    <Text>Open WIFI settings to turn WiFi off</Text>
+                  </Button>
+                </View>
+              </View>
+            )}
+            {connectionType === "LAN" && (
+              <Text>
+                You used a wired connection, but the app can't reach the screen.
+                Please make sure you've connected to the screen by wire.
+              </Text>
+            )}
+            {connectionType === "NONE" && (
+              <>
+                {Platform.OS === "android" && (
+                  <>
+                    {knownLifeWifiNetworks.length !== 0 && (
+                      <View className="gap-1">
+                        <Text>Screen WIFI is available.</Text>
+                        {knownLifeWifiNetworks.length === 1 ? (
+                          <Button
+                            disabled={isConnectingToWifi}
+                            onPress={() => {
+                              connectToWifi(knownLifeWifiNetworks[0]);
+                            }}
+                          >
+                            <Text>
+                              {isConnectingToWifi
+                                ? "Connecting..."
+                                : `Connect to the ${knownLifeWifiNetworks[0].ssid}`}
+                            </Text>
+                          </Button>
+                        ) : (
+                          <Select
+                            disabled={isConnectingToWifi}
+                            onValueChange={(option) => {
+                              const wifiNetwork = knownLifeWifiNetworks.find(
+                                (network) => network.ssid === option?.value
+                              );
+                              if (wifiNetwork && !isConnectingToWifi) {
+                                connectToWifi(wifiNetwork);
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-[250px]">
+                              <SelectValue
+                                className="text-foreground text-sm native:text-lg"
+                                placeholder={
+                                  isConnecting
+                                    ? "Connecting..."
+                                    : "Connect to TOUG Wifi"
+                                }
+                              />
+                            </SelectTrigger>
+                            <SelectContent
+                              insets={{
+                                top: insets.top,
+                                bottom: insets.bottom,
+                                left: 12,
+                                right: 12,
+                              }}
+                              className="w-[250px]"
+                            >
+                              <SelectGroup>
+                                {knownLifeWifiNetworks.map(({ ssid }) => (
+                                  <SelectItem
+                                    key={ssid}
+                                    label={ssid}
+                                    value={ssid}
+                                  >
+                                    {ssid}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </View>
+                    )}
+                  </>
+                )}
+                <Text>No wired of WiFi connection available.</Text>
                 <Text>
-                  {" "}
                   Please connect to the WiFi network using SSID and password
                   from the screen or
                 </Text>
+                <Button onPress={openWifiSettings}>
+                  <Text>Open WIFI settings to change the network</Text>
+                </Button>
                 <Link href="/scanCode" asChild>
                   <Button className="flex-row gap-2">
                     <QrCode className="h-4 w-4 text-primary-foreground" />
                     <Text>Scan the QR code from the screen</Text>
                   </Button>
                 </Link>
-                <Text>
-                  To connect to the screen via a wired connection, please turn
-                  off the WiFi
-                </Text>
-                <Button onPress={openWifiSettings}>
-                  <Text>Open WIFI settings to turn WiFi off</Text>
-                </Button>
-              </View>
-            </View>
-          )}
-          {connectionType === "LAN" && (
-            <Text>
-              You used a wired connection, but the app can't reach the screen.
-              Please make sure you've connected to the screen by wire.
-            </Text>
-          )}
-          {connectionType === "NONE" && (
-            <>
-              {Platform.OS === "android" && (
-                <>
-                  {knownLifeWifiNetworks.length !== 0 && (
-                    <View className="gap-1">
-                      <Text>Screen WIFI is available.</Text>
-                      {knownLifeWifiNetworks.length === 1 ? (
-                        <Button
-                          disabled={isConnectingToWifi}
-                          onPress={() => {
-                            connectToWifi(knownLifeWifiNetworks[0]);
-                          }}
-                        >
-                          <Text>
-                            {isConnectingToWifi
-                              ? "Connecting..."
-                              : `Connect to the ${knownLifeWifiNetworks[0].ssid}`}
-                          </Text>
-                        </Button>
-                      ) : (
-                        <Select
-                          disabled={isConnectingToWifi}
-                          onValueChange={(option) => {
-                            const wifiNetwork = knownLifeWifiNetworks.find(
-                              (network) => network.ssid === option?.value
-                            );
-                            if (wifiNetwork && !isConnectingToWifi) {
-                              connectToWifi(wifiNetwork);
-                            }
-                          }}
-                        >
-                          <SelectTrigger className="w-[250px]">
-                            <SelectValue
-                              className="text-foreground text-sm native:text-lg"
-                              placeholder={
-                                isConnecting
-                                  ? "Connecting..."
-                                  : "Connect to TOUG Wifi"
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent
-                            insets={{
-                              top: insets.top,
-                              bottom: insets.bottom,
-                              left: 12,
-                              right: 12,
-                            }}
-                            className="w-[250px]"
-                          >
-                            <SelectGroup>
-                              {knownLifeWifiNetworks.map(({ ssid }) => (
-                                <SelectItem
-                                  key={ssid}
-                                  label={ssid}
-                                  value={ssid}
-                                >
-                                  {ssid}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </View>
-                  )}
-                </>
-              )}
-              <Text>No wired of WiFi connection available.</Text>
-              <Text>
-                Please connect to the WiFi network using SSID and password from
-                the screen or
-              </Text>
-              <Button onPress={openWifiSettings}>
-                <Text>Open WIFI settings to change the network</Text>
-              </Button>
-              <Link href="/scanCode" asChild>
-                <Button className="flex-row gap-2">
-                  <QrCode className="h-4 w-4 text-primary-foreground" />
-                  <Text>Scan the QR code from the screen</Text>
-                </Button>
-              </Link>
-            </>
-          )}
-        </>
-      )}
+              </>
+            )}
+          </>
+        ))}
       {isConnected && (
         <View className="flex flex-row gap-4">
           <Button
@@ -511,7 +511,6 @@ function ConnectionSettings() {
           </Button>
         </View>
       )}
-      {isConnecting && <Text>Connecting...</Text>}
       {isDisconnected && (
         <View className="flex flex-row gap-2">
           {canReconnect && (
