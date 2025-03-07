@@ -59,7 +59,9 @@ module.exports = {
         "highlight": 'hsl(var(--highlight))',
         "green-highlight": 'hsl(var(--green-highlight))'
       },
-
+      lineHeight: {
+        'normal': 1.4285,
+      },
       borderWidth: {
         hairline: hairlineWidth(),
       },

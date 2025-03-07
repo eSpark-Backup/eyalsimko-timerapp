@@ -42,8 +42,8 @@ export default function TimerControls() {
       </View>
       <View className="flex-row justify-between">
         {/* TODO: revisit all text and set 20pt line height*/}
-        <Text className="text-md font-normal leading-6">Countdown Timer</Text>
-        <Text className="text-md font-normal leading-6">
+        <Text className="text-md font-normal">Countdown Timer</Text>
+        <Text className="text-md font-normal">
           {formatCountdown({
             countdownTime: timer.countdownTime,
             elapsedTime: timer.countdownTime,
@@ -51,19 +51,19 @@ export default function TimerControls() {
         </Text>
       </View>
       <View className="flex-row justify-between items-center">
-        <Text className="font-normal leading-6">Flash Timer</Text>
-        <Text className="font-normal leading-6">
+        <Text className="font-normal ">Flash Timer</Text>
+        <Text className="font-normal ">
           {formatDuration(timer.flashStartTime, true)}
         </Text>
       </View>
       <View className="flex-row justify-between items-center">
-        <Text className="font-normal leading-6">Flash Length</Text>
-        <Text className="font-normal leading-6">
+        <Text className="font-normal ">Flash Length</Text>
+        <Text className="font-normal ">
           {formatDuration(timer.flashLength, true)}
         </Text>
       </View>
       <View className="flex-row justify-between items-center">
-        <Text className="font-normal leading-6">Glow Effect</Text>
+        <Text className="font-normal ">Glow Effect</Text>
         <Button
           size="sm"
           variant={glowActive ? "primary" : "default"}
@@ -73,7 +73,7 @@ export default function TimerControls() {
         </Button>
       </View>
       <View className="flex-row justify-between items-center">
-        <Text className="font-normal leading-6">Blackout Screen</Text>
+        <Text className="font-normal ">Blackout Screen</Text>
         <Button
           size="sm"
           variant={blackoutActive ? "primary" : "default"}
@@ -83,9 +83,9 @@ export default function TimerControls() {
         </Button>
       </View>
       <View className="flex-row justify-between items-center">
-        <Text className="font-normal leading-6">Elapsed Time</Text>
+        <Text className="font-normal ">Elapsed Time</Text>
         <View className="border-highlight border py-[8] px-[12] rounded-[8]">
-          <Text className="font-normal leading-6">
+          <Text className="font-normal ">
             {formatCountdown({
               countdownTime: timer.countdownTime,
               elapsedTime: timer.elapsedTime,
