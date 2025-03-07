@@ -5,6 +5,8 @@ import { Pause } from "~/lib/icons/Pause";
 import { formatCountdown, formatDuration } from "~/lib/utils";
 import { useState } from "react";
 import { IconButton } from "../iconButton";
+import { SkipBack } from "~/lib/icons/SkipBack";
+import { SkipForward } from "~/lib/icons/SkipForward";
 
 let timer = {
   speakerName: "David",
@@ -30,9 +32,9 @@ export default function TimerControls() {
           <Text>-1m</Text>
         </Button>
         <View className="flex-row gap-[24] items-center">
-          <IconButton size="sm" icon={Pause} />
+          <IconButton size="sm" icon={SkipBack} />
           <IconButton size="lg" icon={Pause} />
-          <IconButton size="sm" icon={Pause} />
+          <IconButton size="sm" icon={SkipForward} />
         </View>
         <Button size="sm">
           <Text>+1m</Text>

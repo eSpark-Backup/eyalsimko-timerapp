@@ -7,12 +7,12 @@ import { Zap } from "~/lib/icons/Zap";
 import { Plus } from "~/lib/icons/Plus";
 import { Input } from "../ui/input";
 import { IconButton } from "../iconButton";
+import { Trash } from "~/lib/icons/Trash";
+import { Move } from "~/lib/icons/Move";
 
 interface Message {
   id: string;
   text: string;
-  type: "action" | "info";
-  showAction?: boolean;
 }
 
 interface MessageWidgetProps {
@@ -38,27 +38,31 @@ export const MessageWidgetHeader = () => {
 
 export const MessageWidget: React.FC<MessageWidgetProps> = ({
   messages = [
-    { id: "1", text: "WRAP UP!!!", type: "action", showAction: true },
+    { id: "1", text: "WRAP UP!!!", type: "action" },
     { id: "2", text: "Hold Mic closer to mouth", type: "info" },
     { id: "3", text: "VIDEO PLAYING!!", type: "info" },
   ],
   onShowPress,
 }) => {
+  const activeMessageId = "1";
   return (
     <View className="gap-[20]">
       {messages.map((message) => (
         <View
           key={message.id}
           className={`rounded-[12] p-[12] gap-[8] ${
-            message.type === "action" ? "bg-item-highlight" : "bg-item"
+            message.id === activeMessageId ? "bg-item-highlight" : "bg-item"
           }`}
         >
           <Input size="small" value={message.text} />
-          <View className="justify-end flex-row gap-[12]">
-            <IconButton size="xs" icon={Eye} />
-            <Button size="xs" onPress={onShowPress} icon={Eye}>
-              <Text>Show</Text>
-            </Button>
+          <View className="justify-between items-center flex-row gap-[12]">
+            <Move color="hsla(213, 5%, 57%, 1)" size={16} />
+            <View className="flex-row gap-[12]">
+              <IconButton border size="xs" icon={Trash} />
+              <Button size="xs" onPress={onShowPress} icon={Eye}>
+                <Text>{message.id === activeMessageId ? "Hide" : "Show"}</Text>
+              </Button>
+            </View>
           </View>
         </View>
       ))}

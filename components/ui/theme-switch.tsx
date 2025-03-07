@@ -7,6 +7,7 @@ import Animated, {
   useDerivedValue,
   withTiming,
 } from "react-native-reanimated";
+import { Moon } from "~/lib/icons/Moon";
 import { SunMoon } from "~/lib/icons/SunMoon";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";
@@ -73,7 +74,7 @@ const ThemeSwitchNative = React.forwardRef<
               "h-[34] w-[34] items-center justify-center rounded-full bg-highlight"
             }
           >
-            <SunMoon size={18} className="text-primary" />
+            <Moon size={18} className="text-primary" />
           </SwitchPrimitives.Thumb>
         </Animated.View>
       </SwitchPrimitives.Root>

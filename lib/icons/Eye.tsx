@@ -1,4 +1,31 @@
-import { Eye } from "lucide-react-native";
+import { createLucideIcon, LucideIcon } from "lucide-react-native";
 import { iconWithClassName } from "./iconWithClassName";
-iconWithClassName(Eye);
+
+const RawEye = createLucideIcon("Eye", [
+  [
+    "path",
+    {
+      d: "M6.00023 7.99899C7.10438 7.99899 7.99948 7.10389 7.99948 5.99974C7.99948 4.89558 7.10438 4.00049 6.00023 4.00049C4.89607 4.00049 4.00098 4.89558 4.00098 5.99974C4.00098 7.10389 4.89607 7.99899 6.00023 7.99899Z",
+      fill: "white",
+      key: "0",
+    },
+  ],
+  [
+    "path",
+    {
+      d: "M11.6334 4.70985C10.8582 3.44732 9.09484 1.3291 5.99999 1.3291C2.90514 1.3291 1.14179 3.44732 0.366579 4.70985C-0.122193 5.50041 -0.122193 6.49932 0.366579 7.28991C1.14179 8.55244 2.90514 10.6707 5.99999 10.6707C9.09484 10.6707 10.8582 8.55244 11.6334 7.28991C12.1222 6.49932 12.1222 5.50041 11.6334 4.70985ZM5.99999 8.99875C4.34376 8.99875 3.0011 7.6561 3.0011 5.99987C3.0011 4.34364 4.34376 3.00098 5.99999 3.00098C7.65622 3.00098 8.99888 4.34364 8.99888 5.99987C8.99721 7.65542 7.65554 8.99709 5.99999 8.99875Z",
+      fill: "white",
+      key: "1",
+    },
+  ],
+]);
+
+iconWithClassName(RawEye);
+
+type Props = Omit<React.ComponentProps<LucideIcon>, "viewBox">;
+
+const Eye = (props: Props) => (
+  <RawEye strokeWidth={0} viewBox="0 0 12 12" {...props} />
+);
+
 export { Eye };

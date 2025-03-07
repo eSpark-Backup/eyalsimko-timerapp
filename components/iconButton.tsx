@@ -64,17 +64,19 @@ type ButtonProps = Omit<
 > &
   VariantProps<typeof buttonVariants> & {
     icon: React.ComponentType<IconProps>;
+    border?: boolean;
   };
 
 const IconButton = React.forwardRef<
   React.ElementRef<typeof Pressable>,
   ButtonProps
->(({ className, variant, size, icon: Icon, ...props }, ref) => {
+>(({ className, border = false, variant, size, icon: Icon, ...props }, ref) => {
   return (
     <Pressable
       className={cn(
         props.disabled && "opacity-50 web:pointer-events-none",
-        buttonVariants({ variant, size, className })
+        buttonVariants({ variant, size, className }),
+        border && "border border-buttonDefaultBorderColor"
       )}
       ref={ref}
       role="button"

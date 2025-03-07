@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { Wifi } from "~/lib/icons/Wifi";
 import { Switch } from "./ui/theme-switch";
 import { useState } from "react";
+import { Wired } from "~/lib/icons/Wired";
 
 export const Header = () => {
   const [isDarkColorScheme, setIsDarkColorScheme] = useState(true);
@@ -19,7 +20,7 @@ export const Header = () => {
         />
         <View className="flex-row gap-[24] items-center">
           <View className="flex-row gap-[8]">
-            <Button variant="secondary" icon={Wifi}>
+            <Button variant="secondary" icon={Wired}>
               <Text>Wired</Text>
             </Button>
             <Button variant="secondary" icon={Wifi}>

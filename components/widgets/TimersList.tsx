@@ -5,6 +5,12 @@ import { Plus } from "~/lib/icons/Plus";
 import { Eye } from "~/lib/icons/Eye";
 import { cn, formatCountdown } from "~/lib/utils";
 import { IconButton } from "../iconButton";
+import { Move } from "~/lib/icons/Move";
+import { Pause } from "~/lib/icons/Pause";
+import { Play } from "~/lib/icons/Play";
+import { Restart } from "~/lib/icons/Restart";
+import { More } from "~/lib/icons/More";
+
 export const TimersListHeader = () => {
   return (
     <View className="flex-row justify-between items-center">
@@ -72,7 +78,7 @@ export default function TimersList() {
             timer.speakerIndex !== runningTimerIndex && "bg-item"
           )}
         >
-          <Eye color="hsla(213, 5%, 57%, 1)" className="h-[16]" />
+          <Move color="hsla(213, 5%, 57%, 1)" size={16} />
           <View className="flex-1 flex-row items-center justify-between">
             <View className="flex-row items-center gap-[16]">
               <Text
@@ -111,12 +117,12 @@ export default function TimersList() {
             </View>
             <View className="flex-row gap-[16] self-end">
               {timer.speakerIndex === runningTimerIndex ? (
-                <IconButton size="sm" variant="primary" icon={Eye} />
+                <IconButton size="sm" variant="success" icon={Pause} />
               ) : (
-                <IconButton size="sm" variant="success" icon={Eye} />
+                <IconButton size="sm" variant="primary" icon={Play} />
               )}
-              <IconButton size="sm" icon={Eye} />
-              <IconButton size="sm" icon={Eye} />
+              <IconButton size="sm" icon={Restart} />
+              <IconButton size="sm" icon={More} />
             </View>
           </View>
         </View>
