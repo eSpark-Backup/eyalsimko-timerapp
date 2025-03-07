@@ -11,6 +11,25 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { cn, formatCountdown } from "~/lib/utils";
 
+/*
+position: absolute;
+width: 197px;
+height: 80px;
+left: calc(50% - 197px/2);
+top: calc(50% - 80px/2 - 9.66px);
+
+font-family: 'Poppins';
+font-style: normal;
+font-weight: 500;
+font-size: 80px;
+line-height: 80px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+*/
+
 const GradientProgressBar = ({
   width,
   height,
@@ -112,7 +131,7 @@ export const ActiveTimerWidget = () => {
   const timer = {
     speakerName: "David",
     countdownTime: 1000,
-    elapsedTime: 100,
+    elapsedTime: 1000,
     timerName: "Goals of the evening",
   };
 
@@ -133,8 +152,9 @@ export const ActiveTimerWidget = () => {
       </View>
       <View className="flex-1 items-center justify-center">
         <Text
+          // style={{ fontFamily: "Poppins" }}
           className={cn(
-            "text-8xl font-medium leading-none",
+            "text-8xl font-poppins font-medium",
             timer.elapsedTime < 0 && "text-countdown-out-of-time",
             timer.elapsedTime >= 0 && "text-primary"
           )}

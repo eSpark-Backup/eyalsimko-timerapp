@@ -82,7 +82,13 @@
         }
       ],
       "react-native-wifi-reborn",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-font",
+        {
+          "fonts": ["assets/fonts/Poppins-Regular.ttf"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

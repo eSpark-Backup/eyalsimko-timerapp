@@ -19,7 +19,7 @@ export default function TimerScreen() {
         <Card scrollable={true} header={<TimersListHeader />}>
           <TimersList />
         </Card>
-        <View className="w-[335]">
+        <View style={{ width: 360 }}>
           <Card spacing="small" borderColor={timer ? "active" : "default"}>
             <ActiveTimerWidget />
           </Card>
