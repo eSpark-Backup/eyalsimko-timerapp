@@ -1,7 +1,16 @@
-#start avahi demon to get the controltimerabc.local
-#for now use ip address
-#http://192.168.0.11:8000/
+#=================
+#CaroTechSolutions
+#
+#This file runs a tkinter gui to display the main timer program
+#A websocket is established in the background for communication to app.
+#To simplify firmware updates to one file, do not separate into multiple files
+#================
 
+
+
+#========
+#Imports
+#========
 import asyncio
 import websockets
 import http.server
@@ -19,10 +28,16 @@ import os
 import json
 import hashlib
 
-PATH_PROGRAM_DIRECTORY = "/home/pi/OneUpGroup"
-VERSION_NUM = 1.1
 
-#Wifi Information
+
+PATH_PROGRAM_DIRECTORY = "/home/pi/OneUpGroup"
+PATH_LOGO = "NexTime_just_logo.png"
+PATH_BACKGROUND = "NexTime_full_logo.png"
+VERSION_NUM = 1.3
+
+#============
+#Keep wifi data in file on device so it doesn't need to be sent in firmware update
+#The app has no way of knowing which device we are actually updating.
 def getWifiDataFromFile():
     with open(f"{PATH_PROGRAM_DIRECTORY}/web_config.txt", "r") as f:
         data = f.readline().strip()
@@ -31,15 +46,16 @@ def getWifiDataFromFile():
 
 
 WIFI_SSID, WIFI_PASS = getWifiDataFromFile()
-#WIFI_SSID = "TOUG-PVT2"
-#WIFI_PASS = "EQW85ALG"
+#==============
 
 
-
+#===============
 #Global variables for Tkinter
+#===============
 root = None
 lblTimer = None
 imgLogo = None
+imgBackground = None
 imgQRCode = None
 lblWifiSSID = None
 lblWifiPASS = None
@@ -48,68 +64,80 @@ top_rect = None
 bottom_rect = None
 canvas = None
 
-#global variables for webserver
+#===========
+#Global variables for webserver
+#===========
 httpd = None
 websocket_server = None
 http_thread  = None
 websocket_thread = None
 websocket_loop = None
 lock = threading.Lock()
-stop_event_timer = threading.Event()
-is_firmware_update = False
+async_lock = asyncio.Lock()
 
+#===========
 # HTTP server
+#Serve blank page on 8000
+#Start websocket on 80001
+#========
 PORT = 8000
 
-#global for toggling blinkers
+#========
+#Global variables for controlling threads - Timer Thread, and Blink Flashers Thread
+#==========
 stop_event_blink = threading.Event()
+stop_event_timer = threading.Event()
 toggle_thread = None
-
-isBlinking = False
-isLogoShowing = False
 timer_thread = None
 timer_running = False
-showTimer = True
+is_blinking = False
+GUI_REFRESH_DELAY = 100
+
+#=======
+#Global Variables for timer and display
+isLogoShowing = False
+isBlackoutMode = False
+showTimer = True #used to see if we should show timer or message
 strCurrentTime = ""
 current_timer = 0
-time_left = 120
+current_msg = ""
+time_left = 60*60
 blink_start_time = -1
 blink_length = 15
-BLINK_SPEED = 0.5
+BLINK_SPEED = 0.5 #the red flashers on the side blink speed. this amount is delayed between blinks in seconds
+#=====
+#Global font sizes
+#=====
 FONT_SIZE = 900
 FONT_SIZE_1LINES = 430
-FONT_SIZE_2LINES = 350
-FONT_SIZE_3LINES = 250
-FONT_SIZE_4LINES = 150
 FONT_SIZE_VERSION = 30
-is_timer_up = -1
+current_font_size = FONT_SIZE
 
-LINE_LENGTH = 12
 
 def change_font_size(label, new_size):
+    global current_font_size
+    
+    if current_font_size == new_size:
+        return
+    #font will jump on screen if you don't clear before chaning size
+    label.config(text="")
     current_font = label.cget("font")
     font_family = current_font.split()[0]
     label.config(font=(font_family,new_size))
-
-def wrap_text_by_space(text):
-    global LINE_LENGTH
-    words = text.split()
-    wrapped_text = ""
-    current_line = ""
-    for word in words:
-        if len(current_line) + len(word) + 1 > LINE_LENGTH:
-            wrapped_text += current_line.strip() + '\n'
-            current_line = word + " "
-        else:
-            current_line += word + " "
-    wrapped_text += current_line.strip()
-    return wrapped_text
+    current_font_size = new_size
 
 
 # WebSocket handler
 async def handle_websocket(websocket, path):
-    global lblTimer, time_left, timer_running, blink_start_time, blink_length,isBlinking, showTimer,strCurrentTime, isLogoShowing
+    global lblTimer, time_left, timer_running, blink_start_time, blink_length,is_blinking, showTimer,strCurrentTime, isLogoShowing, current_timer, current_msg, isBlackoutMode
     print("WebSocket connection established")
+    #Todo if timer is running when this happens send the time back
+    
+    with lock:
+        if timer_running:
+            json_data = { "time_left":time_left,"blink_start_time":blink_start_time, "blink_length":blink_length}
+            msg = f"recover:{json.dumps(json_data)}"
+            await websocket.send(msg)
     try:
         async for message in websocket:
             print(f"Received message: {message}")
@@ -117,18 +145,22 @@ async def handle_websocket(websocket, path):
                 await websocket.send(f"hello")
                 await websocket.send(f"version:{VERSION_NUM}")
                 await asyncio.to_thread(removeLogo)
+            #This was intended for a button in the app to blink the side flashers
+            #I don't know if we actually need this
             elif message == "b":
-                if isBlinking:
+                if is_blinking:
                     stop_color_toggle()
                 else:
                     start_color_toggle()
             elif "reset:" in message:
                 if isLogoShowing:
                     removeLogo()
-                #removeLogo()
+                
                 #stop any current tiemr
                 timer_running = False
+                showTimer = True
                 stop_event_timer.set()
+                stop_color_toggle()
                 #parse msg
                 current_timer = int(message.split(":")[1])
                 #time left is used for timer
@@ -144,22 +176,26 @@ async def handle_websocket(websocket, path):
                     change_font_size(lblTimer,FONT_SIZE)
                     lblTimer.config(text=time_formatted)
             elif message == "start":
+                print(f"Got timer start msg: {time.monotonic()}")
                 lblTimer.config(fg="green")
                 start_countdown_timer()
                 await websocket.send("start")
             elif message == "pause":
+                async with async_lock:
+                    current_timer = time_left
                 stop_countdown_timer()
                 stop_color_toggle()
                 print("Pause timer")
             elif message == "resume":
+                #start countdown timer without resetting time_left so it continues
                 start_countdown_timer()
                 print("Resume timer")
             elif message == "stop":
+                #stop timer and blinking
                 timer_running = False
                 stop_event_timer.set()
-                stop_event_blink.set()
                 lblTimer.config(text="")
-                if isBlinking:
+                if is_blinking:
                     stop_color_toggle()
             elif "blink:" in message:
                 blink_start_time = int(message.split(":")[1])
@@ -169,25 +205,13 @@ async def handle_websocket(websocket, path):
                 print(f"Blink Length set to {blink_length}")
             elif "msg:" in message:
                 showTimer = False
-                msg = message.split(":")[1]
-                lblTimer.config(text = "")
-                #change the font size based on the length
-                if len(msg) < 12:
-                    change_font_size(lblTimer, FONT_SIZE_1LINES)
-                elif len(msg) < 20:
-                    change_font_size(lblTimer, FONT_SIZE_2LINES)
-                elif len(msg) < 30:
-                    change_font_size(lblTimer, FONT_SIZE_3LINES)
-                else:
-                    change_font_size(lblTimer, FONT_SIZE_4LINES)
-                msg = wrap_text_by_space(msg)
-                lblTimer.config(text = msg)
+                current_msg = message.split(":")[1]
+                showMessage(current_msg)
             elif message == "hide":
                 #show the timer again
                 showTimer = True
-                lblTimer.config(text = "")
-                #change_font_size(lblTimer, FONT_SIZE)
-                #lblTimer.config(text=strCurrentTime)
+                current_msg = ""
+                lblTimer.config(text = "")                               
             elif message == "shutdown":
                 stop_color_toggle()
                 stop_countdown_timer()
@@ -202,17 +226,86 @@ async def handle_websocket(websocket, path):
                 print("Receiving firmware...")
                 data = json.loads(message)
                 await receive_firmware(websocket,data)
+            elif "blackout:" in message:
+                val = message.split(":")[1]
+                async with async_lock:
+                    if val == "on":                        
+                        isBlackoutMode = True
+                        removeTimerScreen()
+                        #stop_color_toggle()
+                        ##to avoid tracking multiple states in and out with blackout or message mode, just change font to black so all states are kept but you don't see it on screen
+                        #lblTimer.config(fg="black")
+                    elif val == "off":
+                        isBlackoutMode = False
+                        showTimerScreen()
+                        #when coming out of blackout mode we could be less than zero so change text color accordingly                    
+                        #if int(time_left) <= 0:
+                        #    lblTimer.config(fg="red")
+                        #else:
+                        #    lblTimer.config(fg="green")
 
 
     except websockets.exceptions.ConnectionClosed:
         print("Connection dropped")
-        lblTimer.config(text = "")
-        showLogo()
+        #lblTimer.config(text = "")
+        #showLogo()
         #todo add stop blinking here
-        stop_color_toggle()
-        stop_countdown_timer()
+        #stop_color_toggle()
+        #stop_countdown_timer()
+
+def showMessage(msg):
+    global current_font_size
+    lblTimer.config(text = "")
+    test_font = font.Font(size=FONT_SIZE)
+    
+    #calculate biggest size possible
+    MIN_FONT_SIZE = 150
+    MAX_WIDTH = 3480
+    test_lbl = tk.Label(root,text=msg,font=test_font,wraplength=MAX_WIDTH, justify="center")
+    test_lbl.update_idletasks()
+    
+    #assume one word then change after
+    max_font = 0
+    words = msg.split()
+    
+    #if only 1 word no need to calculate
+    if len(words) == 1:
+        max_font = FONT_SIZE_1LINES
+    else:
+        for i in range(0,len(words)):
+            new_text = ' '.join(words[:i]) + "\n" + ' '.join(words[i:])        
+            #print("----Trying this text---")
+            #print(new_text)
+            
+            size = 600
+            #start at largest size and keep decreasing until it fits
+            while size > MIN_FONT_SIZE:
+                #print(f"Trying size {size}")
+                test_font.configure(size=size)
+                test_lbl.config(font = test_font)
+                test_lbl.config(text = msg)
+                text_width = test_lbl.winfo_reqwidth()
+                text_height = test_lbl.winfo_reqheight()
+                #print(f"{text_width} x {text_height}")
+                
+                #if it fits on screen stop trying
+                if text_height <= 1500 and text_width <= 3480:
+                    #print(f"Font that fits: {size}")
+                    if size > max_font:
+                        max_font = size
+                    break
+                
+                size -= 100
+    test_font.configure(size=max_font)
+    current_font_size = max_font
+    lblTimer.config(font=test_font)
+    lblTimer.config(text=msg)
+    test_lbl.destroy()
+        
+    lblTimer.config(text = msg)
 
 
+#This function receives the new firmware, saves it, adjusts the auto start script, and reboots
 async def receive_firmware(websocket,metadata):
     filename = metadata["filename"]
     expected_size = metadata["size"]
@@ -243,8 +336,6 @@ async def receive_firmware(websocket,metadata):
                 update_percent = int((received_size/expected_size) * 100)
                 print(f"Received {received_size} of {expected_size} : {update_percent}")
                 lblShutdown.config(text=f"Updating to firmware v{version_num} : {update_percent}%")
-                time.sleep(0.1)
-            #TODO? stop if we received expected size?
     except asyncio.TimeoutError:
         print("Error: Firmware update timed out!")
         return
@@ -253,10 +344,7 @@ async def receive_firmware(websocket,metadata):
         print(f"Error file size mismatch - expected {expected_size} but got {received_size}")
         return
 
-    #print("---File data---")
-    #print(file_data)
-    #print("\n\n")
-
+    #make sure checksum matches
     checksum = hashlib.sha256(file_data).hexdigest()
     if checksum != expected_checksum:
         print("Error checksum mismatch!")
@@ -266,11 +354,11 @@ async def receive_firmware(websocket,metadata):
         return
 
 
-    #check folder structure is correct
+    #check folder structure is correct, this folder would have to be there for program to run in first place but check anyway
     if not os.path.exists(PATH_PROGRAM_DIRECTORY):
         os.mkdirs(PATH_PROGRAM_DIRECTORY)
 
-    #TODO make sure this folder exists? I think all files will move there eventually
+    
     with open(f"{PATH_PROGRAM_DIRECTORY}/{filename}", "wb") as f:
         f.write(file_data)
 
@@ -286,7 +374,7 @@ async def receive_firmware(websocket,metadata):
     os.system("sudo reboot now")
 
 
-
+#The start script runs on boot and should point to the new firmware file
 def update_startup_script(filename):
     file_data = f"""
 #!/bin/bash
@@ -328,19 +416,13 @@ def start_websocket_server(loop):
     start_server = websockets.serve(handle_websocket, "0.0.0.0", PORT + 1)
     websocket_server = loop.run_until_complete(start_server)
     print(f"Serving WebSocket on port {PORT + 1}")
-    #asyncio.get_event_loop().run_until_complete(websocket_server)
-    #asyncio.get_event_loop().run_forever()
-    #loop.run_until_complete(websocket_server)
     loop.run_forever()
 
-#close the webserver correctly on ctrl+c
+#close the webserver correctly on ctrl+c, for development
 def signal_handler(sig, frame):
     print("Shutting down gracefully...")
     if httpd:
         httpd.shutdown()
-    #if websocket_server:
-        #asyncio.get_event_loop().stop()
-        #websocket_server.ws_server.close()
     if websocket_loop and websocket_loop.is_running():
         for task in asyncio.all_tasks(loop=websocket_loop):
             task.cancel()
@@ -358,54 +440,82 @@ def on_closing():
     signal_handler(signal.SIGINT,None)
     root.quit()  # You can perform any cleanup tasks here
 
+#toggle red flashers to black and vice versa
 def toggle_color():
-    global canvas, isBlinking
+    global canvas, is_blinking, isBlackoutMode
     """Function to toggle the color of the top_rect every second."""
     print("Started blinking...")
     while not stop_event_blink.is_set():
+        '''
+        #if we're in blackout mode should always be black
+        if isBlackoutMode:
+            canvas.itemconfig(top_rect, fill="black")
+            canvas.itemconfig(bottom_rect, fill="black")
+        else:   
+        '''         
         # Toggle between black and red
         new_color = "black" if canvas.itemcget(top_rect, "fill") == "red" else "red"
         canvas.itemconfig(top_rect, fill=new_color)
         canvas.itemconfig(bottom_rect, fill=new_color)
-        # Wait for 1 second
+        # Wait for next blink
         time.sleep(BLINK_SPEED)
+    #if we exit this loop turn them off
+    canvas.itemconfig(top_rect, fill="black")
+    canvas.itemconfig(bottom_rect, fill="black")
 
+#start toggling flashers
 def start_color_toggle():
     """Start the color toggle in a separate thread."""
-    global toggle_thread, isBlinking
-
+    global toggle_thread, is_blinking
+    
     #we should not start another blink if it's already blinking
-    if isBlinking:
+    if is_blinking:
         print("Flashers already blinking")
         return
 
-    isBlinking = True
+    is_blinking = True
     stop_event_blink.clear()
     toggle_thread = threading.Thread(target=toggle_color, daemon=True)
     toggle_thread.start()
 
+#stop toggling flashers
 def stop_color_toggle():
-    global isBlinking, canvas
-    isBlinking = False
+    global is_blinking, canvas
+    print("stop color toggle")
+    
+    is_blinking = False
     stop_event_blink.set()
     canvas.itemconfig(top_rect, fill="black")
     canvas.itemconfig(bottom_rect, fill="black")
-    """Signal the thread to stop and wait for it to finish."""
-    #toggle_thread.join()  # Wait for the thread to complete
     print("Stopped blinking...")
 
+
+def removeTimerScreen():
+    global lblTimer
+    lblTimer.place_forget()
+    stop_color_toggle()
+    
+def showTimerScreen():
+    global lblTimer
+    lblTimer.place(relx=0.5, rely=0.5, anchor='center')
+    
+
+#remove default screen with logo and qr code
 def removeLogo():
-    global imgLogo, lblWifiSSID, imgQRCode, lblWifiPASS, isLogoShowing, lblVersionNum
+    global imgLogo, lblWifiSSID, imgQRCode, lblWifiPASS, isLogoShowing, lblVersionNum, lblTimer
     isLogoShowing = False
     imgLogo.place_forget()
     lblWifiSSID.place_forget()
     lblWifiPASS.place_forget()
     imgQRCode.place_forget()
     lblVersionNum.place_forget()
+    lblTimer.place(relx=0.5, rely=0.5, anchor='center')
 
+#show default screen with logo and qrcode
 def showLogo():
-    global imgLogo, lblWifiSSID, imgQRCode, lblWifiPASS, isLogoShowing, lblVersionNum
+    global imgLogo, lblWifiSSID, imgQRCode, lblWifiPASS, isLogoShowing, lblVersionNum, lblTimer
     isLogoShowing = True
+    lblTimer.place_forget()
     imgLogo.place(relx=0.5, rely=0.5, anchor='center')
     lblWifiSSID.place(relx=0.15, rely=0.45, anchor='center')
     imgQRCode.place(relx=0.85,rely=0.5,anchor="center")
@@ -444,10 +554,11 @@ def start_tkinter_gui():
 
     root = tk.Tk()
     root.wm_attributes('-fullscreen','true')
-    # Set the window size to 800x600 pixels
-    #root.geometry("3840x1600") #heigth 1100
-    #root.geometry("2400x1100")
-
+    #For debugging use this so you can see terminal
+    #root.geometry("3840x1100") 
+    
+    CANVAS_WIDTH = 3840
+    CANVAS_HEIGHT = 1100
 
     # Set the background color to black
     root.configure(bg="black")
@@ -455,7 +566,7 @@ def start_tkinter_gui():
     root.config(cursor="none")
 
     # Create a canvas
-    canvas = tk.Canvas(root, bg="black", highlightthickness=0)
+    canvas = tk.Canvas(root, width=CANVAS_WIDTH, height = CANVAS_HEIGHT, bg="black", highlightthickness=0)
     canvas.pack(fill="both", expand=True)
 
     # Update the window to ensure it gets the correct dimensions
@@ -473,7 +584,7 @@ def start_tkinter_gui():
     top_rect_y = 0
     bottom_rect_y = window_height - 50
 
-    lblTimer = tk.Label(root,text="", fg="green", bg="black")
+    lblTimer = tk.Label(root,text="", fg="green", bg="black", wraplength=3480)
     # Center the label in the window both horizontally and vertically
     lblTimer.place(relx=0.5, rely=0.5, anchor='center')
 
@@ -487,9 +598,6 @@ def start_tkinter_gui():
         rect_width, rect_height,
         fill="black", outline="")
 
-    # Change the background color of the top_rect to black
-    #canvas.itemconfig(top_rect, fill="black")
-
     bottom_rect = canvas.create_rectangle(
         (window_width - rect_width) , 0,
         window_width , rect_height,
@@ -502,18 +610,29 @@ def start_tkinter_gui():
     lblVersionNum.place(relx=0.95, rely=0.95, anchor='center')
     lblVersionNum.config(font=font.Font(size=FONT_SIZE_VERSION))
 
+
+    #put the background on
+    #img_back = Image.open(f"{PATH_PROGRAM_DIRECTORY}/{PATH_BACKGROUND}")
+    #photo_back = ImageTk.PhotoImage(img_back)
+    #create label to display image
+    #imgBackground = tk.Label(root,image=photo_back,bg="black")
+    #imgBackground.place(relx=0.5, rely=0.5, anchor='center')
+
     #put the logo on
-    #TODO change to root path
-    img = Image.open("/home/pi/Documents/Eyal/oneup_logo_white.png")
-    #resiz image
+    img = Image.open(f"{PATH_PROGRAM_DIRECTORY}/{PATH_LOGO}")
+    #img = img.convert("RGBA")
+    print(f"Image mode: {img.mode}")
+    #resize image
     new_width = int(root.winfo_screenwidth() * 0.4)
     width_percent = (new_width / float(img.size[0]))
     new_height = int((float(img.size[1]) * float(width_percent)))
     resizedImg = img.resize((new_width,new_height), Image.Resampling.LANCZOS)
     photo = ImageTk.PhotoImage(resizedImg)
     #create label to display image
-    imgLogo = tk.Label(root,image=photo,bg="black")
+    imgLogo = tk.Label(root,image=photo, bg="black")
     imgLogo.place(relx=0.5, rely=0.5, anchor='center')
+    #canvas.create_image(10,10,image=photo)
+    
 
     #make qrcode label
     qr_image = generate_qr_code()
@@ -522,10 +641,12 @@ def start_tkinter_gui():
     imgQRCode = tk.Label(root,image=tk_image,bg="black")
     imgQRCode.place(relx=0.85,rely=0.5,anchor="center")
     #setup wifi label
+    #to confirm PI is setup correctly get hostname rather than use WIFI variable
     hostname = socket.gethostname()
     lblWifiSSID =tk.Label(root,text=f"SSID:{hostname}", fg="white", bg="black")
     lblWifiSSID.config(font=font.Font(size=70))
     lblWifiSSID.place(relx=0.15, rely=0.45, anchor='center')
+    #canvas.create_window(0.15 * CANVAS_WIDTH,0.45 * CANVAS_HEIGHT,window=lblWifiSSID,anchor="center")
 
     lblWifiPASS =tk.Label(root,text=f"PSWD:{WIFI_PASS}", fg="white", bg="black")
     #lblWifiPASS =tk.Label(root,text="TEST", fg="white", bg="black")
@@ -537,19 +658,25 @@ def start_tkinter_gui():
     root.bind('<Escape>', lambda e: signal_handler(signal.SIGINT,None))
     # Bind the custom function to the window close event
     root.protocol("WM_DELETE_WINDOW", on_closing)
-
+    
+    
+    #testing text
+    #removeLogo();
+    #showMessage("Hold mic closer to mouth")
+    #time_left = 60*60
+    #lblTimer.config(fg="green")
+    #change_font_size(lblTimer,FONT_SIZE)
+    #start_countdown_timer()
     root.mainloop()
 
 def start_countdown_timer():
     global timer_running, time_left, timer_thread
     if not timer_running:
-        # Set the timer duration (in seconds)
-        #time_left = int(lblTimer.cget("text"))  # Assuming lblTimer starts with the countdown time
         timer_running = True
-        #timer_thread = threading.Thread(target=countdown_timer, daemon=True)
         stop_event_timer.clear()
         timer_thread = threading.Thread(target=clock_countdown, daemon=True)
         timer_thread.start()
+        update_gui_time()
 
 def stop_countdown_timer():
     global timer_running
@@ -557,27 +684,44 @@ def stop_countdown_timer():
     stop_event_timer.set()
 
 def update_gui_time():
-    global time_left, lblTimer, timer_running, showTimer, strCurrentTime
+    global time_left, lblTimer, timer_running, showTimer, strCurrentTime, root, isBlackoutMode
+    #print(f"UpdateGui: blackout:{isBlackoutMode}  showTimer:{showTimer}")
+    with lock:
+        if not timer_running:
+            return;
+        if isBlackoutMode:            
+            root.after(GUI_REFRESH_DELAY,update_gui_time)
+            return
+        
+    
     #we ned a show time so that we can negate the time when we turn it red and show it counting up
-    time_to_show = time_left
-    #if negative time make it positive and turn it red
-    if time_left <= 0 and showTimer:
-        time_to_show = -time_left
-        lblTimer.config(text="")
-        lblTimer.config(fg="red")
+    with lock:
+        time_to_show = abs(round(time_left))
+        
+        
+        #we can show messages or enter blackout mode while the "timer is up"
+        #if we're at 0 or less make text red
+        if int(time_left) <= 0 and lblTimer.cget("fg") != "red":
+            #if timer color is not green already switch it
+            lblTimer.config(fg="red")
+            
+        #if we're in the 4 seconds after timer is up and we haven't shown Time is up yet show it
+        if int(time_left) <= 0 and int(time_left) > -4:
+            showTimer = False
+            #if text is not correct yet fix it
+            if lblTimer.cget("text") != "Time is up!":
+                #font will jump if you dont clear it first
+                lblTimer.config(text="")
+                change_font_size(lblTimer,FONT_SIZE_1LINES  )
+                lblTimer.config(text="Time is up!")
+            #if we are not blinking yet blink
+            if not is_blinking:
+                start_color_toggle()
+        elif int(time_left) <= -4:
+            showTimer = True
+            if is_blinking:
+                stop_color_toggle()
 
-    #check if we should show Time is up
-    if time_left == 0 or time_left == -2:
-        change_font_size(lblTimer, FONT_SIZE_1LINES)
-        lblTimer.config(text="Time is up!")
-        #show red bars
-        canvas.itemconfig(top_rect, fill="red")
-        canvas.itemconfig(bottom_rect, fill="red")
-    elif time_left == -1 or time_left == -3:
-        lblTimer.config(text="")
-        canvas.itemconfig(top_rect, fill="black")
-        canvas.itemconfig(bottom_rect, fill="black")
-    else:
         #grab minutes seconds
         minutes, seconds = divmod(time_to_show, 60)
         #format the time
@@ -585,32 +729,38 @@ def update_gui_time():
         strCurrentTime = time_formatted
         if lblTimer and showTimer:
             #fix the font size if we just came out of a message
-            current_font = lblTimer.cget("font")
-            font_size = int(current_font.split()[1])
-            if font_size != FONT_SIZE:
-                change_font_size(lblTimer,FONT_SIZE)
+            #todo store global current font, check if it's not size for timer and only change then
+            change_font_size(lblTimer,FONT_SIZE)
             lblTimer.config(text=time_formatted)
-    #check if we should start/stop blinking
-    if blink_start_time != -1:
-        #if we are in the range of blinking and the color toggle isn't currently running then start it
-        if time_left <= blink_start_time and time_left >= blink_start_time - blink_length and not isBlinking:
-            start_color_toggle()
-        #if we are below the blink range and still blinking, turn off
-        elif time_left < blink_start_time - blink_length and isBlinking:
-            stop_color_toggle()
+        #check if we should start/stop blinking, we blink for a bit when you hit zero so this only needs to happen before 0 hit
+        if blink_start_time != -1 and int(time_left) > 0:
+            #if we are in the range of blinking and the color toggle isn't currently running then start it
+            if time_left <= blink_start_time and time_left >= blink_start_time - blink_length and not is_blinking:
+                start_color_toggle()
+            #if we are below the blink range and still blinking, turn off
+            elif time_left < blink_start_time - blink_length and is_blinking:
+                stop_color_toggle()
+            
+    root.after(GUI_REFRESH_DELAY,update_gui_time)
+            
+        
 
 def clock_countdown():
-    global time_left, timer_running
+    global time_left, timer_running, current_timer
+    #local_time = time_left
+    #prev_local_time = time_left
+    #timer_start_time = time.monotonic() - .2
+    #tick_start= time.monotonic()
+    #print(f"Timer Starting: {tick_start}")
+    timer_start_time = time.monotonic() 
     while not stop_event_timer.is_set():
         if timer_running:
+            #tick_start = time.monotonic()  
+            #time.sleep(0.01)
+            elapsed = time.monotonic() - timer_start_time
             with lock:
-                time_left -=1
-                threading.Thread(target=update_gui_time).start()
-            #we can't just full second delay here because we may get a pause then start command back to back and miss the stop of the timer actually starting 2 timers
-            for _ in range(10):
-                if stop_event_timer.is_set():
-                    return
-                time.sleep(0.1)
+                #time_left = time.monotonic() - tick_start
+                time_left = current_timer - elapsed
 
 
 

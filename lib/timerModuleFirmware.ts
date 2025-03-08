@@ -2,7 +2,7 @@ import { createHash } from "sha256-uint8array";
 import { Asset } from "expo-asset";
 import { readAsStringAsync } from "expo-file-system";
 
-const version = 1.11
+const version = 1.3
 const filename = `oneUpTimer_v${version}.py`
 
 export const sendUpdate = async (ws: WebSocket) => {
