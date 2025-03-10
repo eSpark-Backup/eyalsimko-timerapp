@@ -10,6 +10,23 @@ import { Pause } from "~/lib/icons/Pause";
 import { Play } from "~/lib/icons/Play";
 import { Restart } from "~/lib/icons/Restart";
 import { More } from "~/lib/icons/More";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { Trash } from "~/lib/icons/Trash";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Edit } from "~/lib/icons/Edit";
 
 export const TimersListHeader = () => {
   return (
@@ -67,6 +84,15 @@ export default function TimersList() {
       speakerIndex: 3,
     },
   ];
+  const insets = useSafeAreaInsets();
+
+  const contentInsets = {
+    top: insets.top,
+    bottom: insets.bottom,
+    left: 12,
+    right: 12,
+  };
+
   return (
     <View className="gap-[12]">
       {timers.map((timer) => (
@@ -122,7 +148,34 @@ export default function TimersList() {
                 <IconButton size="sm" variant="primary" icon={Play} />
               )}
               <IconButton size="sm" icon={Restart} />
-              <IconButton size="sm" icon={More} />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <IconButton size="sm" icon={More} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  avoidCollisions={true}
+                  align="end"
+                  alignOffset={-32 - 6}
+                  sideOffset={-32 - 12}
+                  insets={contentInsets}
+                  className="w-[148]"
+                >
+                  <DropdownMenuGroup className="gap-[8]">
+                    <DropdownMenuItem>
+                      <View className="flex-1 flex-row justify-between items-center">
+                        <Text className="text-sm font-normal">Edit</Text>
+                        <Edit size={16} />
+                      </View>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <View className="flex-1 flex-row justify-between items-center">
+                        <Text className="text-sm font-normal">Delete</Text>
+                        <Trash size={16} />
+                      </View>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </View>
           </View>
         </View>
