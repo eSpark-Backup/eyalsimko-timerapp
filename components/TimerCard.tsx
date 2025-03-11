@@ -96,7 +96,7 @@ function Countdown() {
     timer.elapsed === null ? timer.countdownTime : Math.abs(timer.elapsed);
 
   const blinkPeriod = (
-    <Text className="text-xl">
+    <Text className="text-xxl">
       Blink from {formatDuration(blinkTimePeriod.start)} till{" "}
       {formatDuration(blinkTimePeriod.end)}
     </Text>
@@ -107,7 +107,7 @@ function Countdown() {
   return (
     <View className="flex flex-col md:flex-row md:landscape:flex-col gap-2 md:gap-4 items-baseline">
       <View className="flex flex-row gap-1 items-baseline">
-        <Text className="text-xl">
+        <Text className="text-xxl">
           Timer {timer.speakerIndex + 1}: {timer.speakerName}:
         </Text>
         <View className="flex flex-row gap-0.5"></View>

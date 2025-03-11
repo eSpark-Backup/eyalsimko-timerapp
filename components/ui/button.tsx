@@ -11,25 +11,30 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-buttonDefaultBackground border border-buttonDefaultBorderColor web:hover:opacity-90 active:opacity-90",
-        primary: "bg-highlight border border-cardBorder",
+          "bg-buttonDefaultBackground border-buttonDefaultBorderColor web:hover:opacity-90 active:opacity-90",
+        primary: "bg-highlight border-cardBorder",
         destructive: "bg-destructive web:hover:opacity-90 active:opacity-90",
         outline:
-          "border border-input bg-background web:hover:bg-accent web:hover:text-accent-foreground active:bg-accent",
+          "border-input bg-background web:hover:bg-accent web:hover:text-accent-foreground active:bg-accent",
         secondary: "bg-transparent web:hover:opacity-80 active:opacity-80",
         ghost:
           "web:hover:bg-accent web:hover:text-accent-foreground active:bg-accent",
+      },
+      border: {
+        none: "",
+        default: "border",
       },
       size: {
         xs: "h-[24] gap-[8] rounded-[4] px-[12]",
         sm: "h-[32] gap-[8] rounded-[8] px-[12]",
         default: "h-[36] gap-[8] px-[12]",
-        lg: "h-[48] rounded-md px-8 native:h-14",
+        lg: "h-[44] rounded-[8] px-8 native:h-14",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      border: "default",
     },
   }
 );
@@ -106,35 +111,40 @@ type ButtonProps = Omit<
 const Button = React.forwardRef<
   React.ElementRef<typeof Pressable>,
   ButtonProps
->(({ className, variant, size, children, icon: Icon, ...props }, ref) => {
-  return (
-    <TextClassContext.Provider
-      value={cn(
-        props.disabled && "web:pointer-events-none",
-        buttonTextVariants({ variant, size })
-      )}
-    >
-      <Pressable
-        className={cn(
-          props.disabled && "opacity-50 web:pointer-events-none",
-          buttonVariants({ variant, size, className })
+>(
+  (
+    { className, border, variant, size, children, icon: Icon, ...props },
+    ref
+  ) => {
+    return (
+      <TextClassContext.Provider
+        value={cn(
+          props.disabled && "web:pointer-events-none",
+          buttonTextVariants({ variant, size })
         )}
-        ref={ref}
-        role="button"
-        {...props}
       >
-        {children}
-        {Icon && (
-          <Icon
-            height={iconSizes[size ?? "default"]}
-            width={iconSizes[size ?? "default"]}
-            className={iconVariants({ variant, size })}
-          />
-        )}
-      </Pressable>
-    </TextClassContext.Provider>
-  );
-});
+        <Pressable
+          className={cn(
+            props.disabled && "opacity-50 web:pointer-events-none",
+            buttonVariants({ variant, size, className, border })
+          )}
+          ref={ref}
+          role="button"
+          {...props}
+        >
+          {children}
+          {Icon && (
+            <Icon
+              height={iconSizes[size ?? "default"]}
+              width={iconSizes[size ?? "default"]}
+              className={iconVariants({ variant, size })}
+            />
+          )}
+        </Pressable>
+      </TextClassContext.Provider>
+    );
+  }
+);
 Button.displayName = "Button";
 
 export { Button, buttonTextVariants, buttonVariants };

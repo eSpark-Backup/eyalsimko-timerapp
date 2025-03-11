@@ -56,11 +56,13 @@ module.exports = {
         "item-highlight": 'hsl(var(--item-highlight))',
         "item": 'hsl(var(--item))',
         "input-background": 'hsl(var(--input-background))',
+        "input-background-modal": 'hsl(var(--input-background-modal))',
         "main-light": 'hsl(var(--main-light))',
         "timer-out-of-time": 'hsl(var(--timer-out-of-time))',
         "countdown-out-of-time": 'hsl(var(--countdown-out-of-time))',
         "highlight": 'hsl(var(--highlight))',
-        "green-highlight": 'hsl(var(--green-highlight))'
+        "green-highlight": 'hsl(var(--green-highlight))',
+        "modal-background": 'hsl(var(--modal-background))'
       },
       lineHeight: {
         'normal': 1.4285,
@@ -86,6 +88,8 @@ module.exports = {
         sm: 12,
         md: 14,
         lg: 16,
+        xl: 20,
+        xxl: 24,
         // timer: 80
         '8xl': 80
       },
