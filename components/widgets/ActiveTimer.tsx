@@ -98,11 +98,6 @@ function ProgressBar({
 }) {
   const containerRef = useRef<View>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
-  useEffect(() => {
-    containerRef.current?.measure((x, y, width) => {
-      setContainerWidth(width);
-    });
-  }, []);
 
   if (elapsedTime < 0) {
     return <View className="h-[12] rounded-full bg-timer-out-of-time"></View>;
@@ -111,7 +106,8 @@ function ProgressBar({
       <View
         className="h-[12] rounded-full"
         onLayout={(event) => {
-          setContainerWidth(event.nativeEvent.layout.width);
+          event.nativeEvent.layout.width &&
+            setContainerWidth(event.nativeEvent.layout.width);
         }}
         ref={containerRef}
       >

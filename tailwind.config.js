@@ -62,7 +62,7 @@ module.exports = {
         "countdown-out-of-time": 'hsl(var(--countdown-out-of-time))',
         "highlight": 'hsl(var(--highlight))',
         "green-highlight": 'hsl(var(--green-highlight))',
-        "modal-background": 'hsl(var(--modal-background))'
+        "modal-background": 'hsl(var(--modal-background))',
       },
       lineHeight: {
         'normal': 1.4285,
@@ -89,7 +89,8 @@ module.exports = {
         md: 14,
         lg: 16,
         xl: 20,
-        xxl: 24,
+        2xl: 24,
+        3xl: 28,
         // timer: 80
         '8xl': 80
       },

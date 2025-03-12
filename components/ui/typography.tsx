@@ -72,7 +72,7 @@ const H4 = React.forwardRef<TextRef, SlottableTextProps>(
         role="heading"
         aria-level="4"
         className={cn(
-          "web:scroll-m-20 text-xxl text-foreground font-semibold tracking-tight web:select-text",
+          "web:scroll-m-20 text-2xl text-foreground font-semibold tracking-tight web:select-text",
           className
         )}
         ref={ref}
@@ -145,7 +145,7 @@ const Lead = React.forwardRef<TextRef, SlottableTextProps>(
     return (
       <Component
         className={cn(
-          "text-xxl text-muted-foreground web:select-text",
+          "text-2xl text-muted-foreground web:select-text",
           className
         )}
         ref={ref}
@@ -163,7 +163,7 @@ const Large = React.forwardRef<TextRef, SlottableTextProps>(
     return (
       <Component
         className={cn(
-          "text-xxl text-foreground font-semibold web:select-text",
+          "text-2xl text-foreground font-semibold web:select-text",
           className
         )}
         ref={ref}

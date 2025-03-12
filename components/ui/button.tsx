@@ -14,6 +14,7 @@ const buttonVariants = cva(
           "bg-buttonDefaultBackground border-buttonDefaultBorderColor web:hover:opacity-90 active:opacity-90",
         primary: "bg-highlight border-cardBorder",
         destructive: "bg-destructive web:hover:opacity-90 active:opacity-90",
+        "destructive-muted": "web:hover:opacity-90 active:opacity-90",
         outline:
           "border-input bg-background web:hover:bg-accent web:hover:text-accent-foreground active:bg-accent",
         secondary: "bg-transparent web:hover:opacity-80 active:opacity-80",
@@ -53,6 +54,7 @@ const iconVariants = cva("items-center justify-center", {
       default: "color-primary",
       primary: "color-primary",
       destructive: "",
+      "destructive-muted": "",
       outline: "",
       secondary: "text-primary/60",
       ghost: "",
@@ -79,6 +81,7 @@ const buttonTextVariants = cva(
         default: "text-primary",
         primary: "text-primary",
         destructive: "text-destructive-foreground",
+        "destructive-muted": "text-destructive-foreground",
         outline: "group-active:text-accent-foreground",
         secondary: "text-primary/60 group-active:text-secondary-foreground",
         ghost: "group-active:text-accent-foreground",
@@ -128,6 +131,13 @@ const Button = React.forwardRef<
             props.disabled && "opacity-50 web:pointer-events-none",
             buttonVariants({ variant, size, className, border })
           )}
+          style={{
+            ...(variant === "destructive-muted"
+              ? {
+                  backgroundColor: "hsla(349, 86%, 61%, 0.25)",
+                }
+              : {}),
+          }}
           ref={ref}
           role="button"
           {...props}

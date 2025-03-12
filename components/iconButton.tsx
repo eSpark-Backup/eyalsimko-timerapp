@@ -13,12 +13,14 @@ const buttonVariants = cva(
         success: "bg-green-highlight",
         default:
           "bg-buttonDefaultBackground web:hover:opacity-90 active:opacity-90",
+        outline: "bg-transparent",
       },
       size: {
         xs: "h-[24] w-[24]",
         sm: "h-[32] w-[32]",
         default: "h-[44] w-[44]",
         lg: "h-[48] w-[48]",
+        xl: "h-[24] w-[24]",
       },
     },
     defaultVariants: {
@@ -33,6 +35,7 @@ const iconSizes = {
   default: 12,
   sm: 12,
   lg: 18,
+  xl: 24,
   icon: 12,
 };
 
@@ -48,6 +51,7 @@ const iconVariants = cva("items-center justify-center", {
       default: "",
       sm: "h-[12] w-[12]",
       lg: "",
+      xl: "",
     },
   },
   defaultVariants: {

@@ -77,7 +77,7 @@ const DialogContent = React.forwardRef<
         <DialogPrimitive.Content
           ref={ref}
           className={cn(
-            "max-w-lg web:cursor-default bg-modal-background p-[24] web:duration-200 rounded-[20]",
+            "web:cursor-default bg-modal-background p-[24] web:duration-200 rounded-[20]",
             open
               ? "web:animate-in web:fade-in-0 web:zoom-in-95"
               : "web:animate-out web:fade-out-0 web:zoom-out-95",
@@ -113,7 +113,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-xxlg native:text-xxl text-foreground font-semibold leading-none tracking-tight",
+      "text-2xlg native:text-2xl text-foreground font-semibold leading-none tracking-tight",
       className
     )}
     {...props}

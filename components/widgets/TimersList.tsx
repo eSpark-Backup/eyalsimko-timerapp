@@ -94,7 +94,9 @@ function TimerModals({
               <View className="justify-center items-center gap-[20]">
                 <TrashDanger className="text-transparent" size={60} />
                 <View className="items-center gap-[12]">
-                  <Text className="text-xxl font-semibold">Delete Timer?</Text>
+                  <Text className="text-2xl text-primary font-semibold">
+                    Delete Timer?
+                  </Text>
                   <Text className="text-lg text-primary/60">
                     Are you sure you want to delete this timer?
                   </Text>
