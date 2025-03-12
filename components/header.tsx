@@ -29,6 +29,8 @@ import { Help } from "~/lib/icons/Help";
 import { IconButton } from "./iconButton";
 import { Close } from "~/lib/icons/Close";
 import { TrashDanger } from "~/lib/icons/TrashDanger";
+import { Settings } from "~/lib/icons/Settings";
+import { Logs } from "~/lib/icons/Logs";
 
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
@@ -291,16 +293,19 @@ export const Header = () => {
                     <Text className="text-sm font-normal">
                       General Settings
                     </Text>
+                    <Settings size={20} />
                   </View>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <View className="flex-1 flex-row justify-between items-center">
                     <Text className="text-sm font-normal">Logs</Text>
+                    <Logs size={20} />
                   </View>
                 </DropdownMenuItem>
                 <DropdownMenuItem onPress={() => setModal({ type: "help" })}>
                   <View className="flex-1 flex-row justify-between items-center">
                     <Text className="text-sm font-normal">Help</Text>
+                    <Help size={20} />
                   </View>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
