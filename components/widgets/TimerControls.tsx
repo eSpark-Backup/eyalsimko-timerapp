@@ -7,6 +7,7 @@ import { useState } from "react";
 import { IconButton } from "../iconButton";
 import { SkipBack } from "~/lib/icons/SkipBack";
 import { SkipForward } from "~/lib/icons/SkipForward";
+import { Switch } from "../ui/switch";
 
 let timer = {
   speakerName: "David",
@@ -64,23 +65,17 @@ export default function TimerControls() {
       </View>
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Glow Effect</Text>
-        <Button
-          size="sm"
-          variant={glowActive ? "primary" : "default"}
-          onPress={() => setGlowActive(!glowActive)}
-        >
-          <Text>Glow</Text>
-        </Button>
+        <Switch
+          checked={glowActive}
+          onCheckedChange={() => setGlowActive(!glowActive)}
+        />
       </View>
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Blackout Screen</Text>
-        <Button
-          size="sm"
-          variant={blackoutActive ? "primary" : "default"}
-          onPress={() => setBlackoutActive(!blackoutActive)}
-        >
-          <Text>Blackout</Text>
-        </Button>
+        <Switch
+          checked={blackoutActive}
+          onCheckedChange={() => setBlackoutActive(!blackoutActive)}
+        />
       </View>
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Elapsed Time</Text>

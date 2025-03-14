@@ -42,6 +42,7 @@
     --highlight: 213, 98%, 45%, 1;
     --green-highlight: 147, 46%, 37%, 1;
     --modal-background: 210, 100%, 5%, 1;
+    --toggle-disabled: 0, 0%, 100%, 0.3;
   }
 
   .dark:root {

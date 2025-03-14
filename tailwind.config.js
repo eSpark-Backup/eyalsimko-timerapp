@@ -63,6 +63,7 @@ module.exports = {
         "highlight": 'hsl(var(--highlight))',
         "green-highlight": 'hsl(var(--green-highlight))',
         "modal-background": 'hsl(var(--modal-background))',
+        "toggle-disabled": 'hsl(var(--toggle-disabled))',
       },
       lineHeight: {
         'normal': 1.4285,
