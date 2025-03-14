@@ -40,6 +40,7 @@ import {
 import React from "react";
 import { TrashDanger } from "~/lib/icons/TrashDanger";
 import { Input } from "../ui/input";
+import { getLocale } from "~/lib/locale";
 
 export const TimersListHeader = () => {
   const [modal, setModal] = React.useState<ModalState | null>(null);
@@ -180,7 +181,7 @@ function TimerModals({
   );
 }
 
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
+const dateFormatter = new Intl.DateTimeFormat(getLocale(), {
   timeStyle: "medium",
 });
 

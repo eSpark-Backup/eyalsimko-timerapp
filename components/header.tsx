@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { Text } from "./ui/text";
 import { CompanyLogo } from "~/lib/icons/CompanyLogo";
 import { Button } from "./ui/button";
@@ -31,10 +31,57 @@ import { Close } from "~/lib/icons/Close";
 import { TrashDanger } from "~/lib/icons/TrashDanger";
 import { Settings } from "~/lib/icons/Settings";
 import { Logs } from "~/lib/icons/Logs";
+import { GreenDot, RedDot } from "~/lib/icons/LogDots";
+import { getLocale } from "~/lib/locale";
 
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
-type Modal = { type: "settings" } | { type: "help" } | { type: "deleteData" };
+type Log = {
+  type: "connectionLost" | "connectionRecovered";
+  date: Date;
+};
+
+const logs: Log[] = [
+  {
+    type: "connectionRecovered",
+    date: new Date("2023-07-01T04:12:00.000Z"),
+  },
+  {
+    type: "connectionLost",
+    date: new Date("2023-07-02T03:42:00.000Z"),
+  },
+  {
+    type: "connectionRecovered",
+    date: new Date("2023-07-03T02:11:00.000Z"),
+  },
+];
+
+type LogType = Log["type"];
+
+const logToText = (log: Log) => {
+  const map: Record<LogType, { title: string; description: string }> = {
+    connectionLost: {
+      title: "Connection lost",
+      description:
+        "App can not connect to the Timer module. Please check your connection.",
+    },
+    connectionRecovered: {
+      title: "Connection recovered",
+      description: "Connection restored. Resuming normal operation.",
+    },
+  };
+  return map[log.type];
+};
+
+const timerFormatter = Intl.DateTimeFormat(getLocale(), {
+  timeStyle: "medium",
+});
+
+type Modal =
+  | { type: "settings" }
+  | { type: "help" }
+  | { type: "deleteData" }
+  | { type: "logs" };
 
 function HeaderModals({
   modal,
@@ -218,6 +265,54 @@ function HeaderModals({
           </View>
         </DialogContent>
       </Dialog>
+      <Dialog open={modal?.type === "logs"} onOpenChange={() => setModal(null)}>
+        <DialogContent className="w-[464] gap-[40]">
+          <DialogHeader className="flex-row justify-center relative">
+            <Text className="text-xl text-center font-semibold">Logs</Text>
+            <View className="absolute right-0 top-1">
+              <IconButton
+                variant="outline"
+                size="xl"
+                icon={Close}
+                onPress={() => setModal(null)}
+              />
+            </View>
+          </DialogHeader>
+          <View>
+            {logs.map((log, index) => (
+              <View key={index} className="flex-row">
+                <View className="w-[65] mr-[6] items-center">
+                  <Text className="text-sm font-semibold leading-none">
+                    {timerFormatter.format(log.date)}
+                  </Text>
+                </View>
+                <View className="w-[21] mr-[16] items-center relative">
+                  <View className="w-[3] flex-1 bg-buttonDefaultBorderColor" />
+                  <View className="absolute top-[-2]">
+                    {log.type === "connectionLost" && <RedDot size={16} />}
+                    {log.type === "connectionRecovered" && (
+                      <GreenDot size={16} />
+                    )}
+                  </View>
+                </View>
+                <View
+                  className={cn(
+                    "flex-1 gap-[4]",
+                    index !== logs.length - 1 && "mb-[24]"
+                  )}
+                >
+                  <Text className="font-semibold leading-none">
+                    {logToText(log).title}
+                  </Text>
+                  <Text className="text-sm text-muted-foreground">
+                    {logToText(log).description}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -296,7 +391,7 @@ export const Header = () => {
                     <Settings size={20} />
                   </View>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onPress={() => setModal({ type: "logs" })}>
                   <View className="flex-1 flex-row justify-between items-center">
                     <Text className="text-sm font-normal">Logs</Text>
                     <Logs size={20} />

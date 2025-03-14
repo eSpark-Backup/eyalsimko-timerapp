@@ -89,9 +89,8 @@ module.exports = {
         md: 14,
         lg: 16,
         xl: 20,
-        2xl: 24,
-        3xl: 28,
-        // timer: 80
+        "2xl": 24,
+        "3xl": 28,
         '8xl': 80
       },
     },
