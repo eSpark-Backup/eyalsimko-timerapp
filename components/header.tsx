@@ -33,6 +33,7 @@ import { Settings } from "~/lib/icons/Settings";
 import { Logs } from "~/lib/icons/Logs";
 import { GreenDot, RedDot } from "~/lib/icons/LogDots";
 import { getLocale } from "~/lib/locale";
+import { TimeInput } from "./ui/time-input";
 
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
@@ -119,6 +120,7 @@ function HeaderModals({
       ],
     },
   ];
+  const [length, setLength] = React.useState(60);
   return (
     <>
       <Dialog
@@ -137,14 +139,22 @@ function HeaderModals({
                 <Text className="text-lg font-semibold">Flash Settings</Text>
                 <View className="flex-row gap-[20]">
                   <View className="flex-1">
-                    <Input
+                    <TimeInput
+                      value={0}
+                      onChange={() => {}}
                       size="default"
                       label="Start Time"
                       background="modal"
                     />
                   </View>
                   <View className="flex-1">
-                    <Input size="default" label="Length" background="modal" />
+                    <TimeInput
+                      size="default"
+                      background="modal"
+                      value={length}
+                      onChange={setLength}
+                      label="Length"
+                    />
                   </View>
                 </View>
               </View>

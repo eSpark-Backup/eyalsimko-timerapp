@@ -9,6 +9,9 @@ import {
   Platform,
   Easing,
   useAnimatedValue,
+  NativeSyntheticEvent,
+  TextInputSubmitEditingEventData,
+  TextInputFocusEventData,
 } from "react-native";
 import { cn } from "~/lib/utils";
 
@@ -30,12 +33,14 @@ const variants = cva("border-2", {
 });
 
 interface FloatingLabelInputProps
-  extends Omit<TextInputProps, "placeholder">,
+  extends TextInputProps,
     VariantProps<typeof variants> {
   label: string;
 }
 
-const Input = React.forwardRef<TextInput, FloatingLabelInputProps>(
+export type TextInputRef = TextInput & { blurAndRemoveFocus: () => void };
+
+const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
   (
     {
       className,
@@ -43,15 +48,20 @@ const Input = React.forwardRef<TextInput, FloatingLabelInputProps>(
       size,
       background,
       label,
-      onChangeText,
-      defaultValue,
+      value,
+      placeholder,
       ...props
     },
     ref
   ) => {
-    const valueRef = React.useRef(defaultValue ?? "");
+    const inputRef = React.useRef<TextInput>(null);
+    const isControlled = value !== undefined;
+    const valueRef = React.useRef(props.defaultValue ?? "");
+    const isFilled = isControlled
+      ? value.length > 0
+      : valueRef.current.length > 0;
     const [isFocused, setIsFocused] = React.useState(false);
-    const isFilledOrFocused = isFocused || valueRef.current.length > 0;
+    const isFilledOrFocused = isFocused || isFilled;
     const labelFloating = useAnimatedValue(isFilledOrFocused ? 1 : 0);
 
     React.useEffect(() => {
@@ -83,28 +93,52 @@ const Input = React.forwardRef<TextInput, FloatingLabelInputProps>(
         : "hsla(213, 5%, 57%, 0.5)",
     };
 
-    const handleFocus = () => setIsFocused(true);
-    const handleBlur = () => setIsFocused(false);
+    const onSubmitEditing = (
+      e: NativeSyntheticEvent<TextInputSubmitEditingEventData>
+    ) => {
+      if (props.onSubmitEditing) props.onSubmitEditing(e);
+      valueRef.current = e.nativeEvent.text;
+    };
+
+    const handleFocus = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+      if (props.onFocus) props.onFocus(e);
+      setIsFocused(true);
+    };
+    const handleBlur = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+      if (props.onBlur) props.onBlur(e);
+      setIsFocused(false);
+    };
+
+    React.useImperativeHandle(ref, () =>
+      inputRef.current
+        ? {
+            ...inputRef.current,
+            blurAndRemoveFocus: () => {
+              inputRef.current?.blur();
+              setIsFocused(false);
+            },
+          }
+        : (undefined as any)
+    );
+
     return (
       <View className="relative">
         <Animated.Text style={[styles.label, labelStyle]}>
           {label}
         </Animated.Text>
         <TextInput
-          onSubmitEditing={(e) => {
-            console.log("submit", e.nativeEvent.text);
-            valueRef.current = e.nativeEvent.text;
-          }}
-          ref={ref}
-          defaultValue={defaultValue}
+          value={value}
+          ref={inputRef}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onSubmitEditing={onSubmitEditing}
           className={cn(
             "web:flex web:w-full border-transparent native:leading-[1.25] text-foreground placeholder:text-muted-foreground web:ring-offset-background file:border-0 file:bg-transparent file:font-medium web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2",
             isFocused && "border-highlight",
             props.editable === false && "opacity-50 web:cursor-not-allowed",
             variants({ size, className, background })
           )}
+          placeholder={isFilledOrFocused ? placeholder : undefined}
           {...props}
         />
       </View>
