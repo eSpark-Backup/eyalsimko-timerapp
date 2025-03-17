@@ -1,7 +1,15 @@
 import * as DialogPrimitive from "@rn-primitives/dialog";
 import * as React from "react";
-import { Platform, StyleSheet, View, type ViewProps } from "react-native";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  type ViewProps,
+} from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { Text } from "./text";
 import { X } from "~/lib/icons/X";
 import { cn } from "~/lib/utils";
 
@@ -66,30 +74,95 @@ const DialogOverlay = Platform.select({
   default: DialogOverlayNative,
 });
 
+type ScrollableContentProps =
+  | { scrollable?: false }
+  | {
+      scrollable: true;
+      height: number;
+      header: React.ReactNode;
+    };
+
 const DialogContent = React.forwardRef<
   DialogPrimitive.ContentRef,
-  DialogPrimitive.ContentProps & { portalHost?: string }
->(({ className, children, portalHost, ...props }, ref) => {
+  DialogPrimitive.ContentProps & {
+    portalHost?: string;
+  } & ScrollableContentProps
+>(({ className, children, portalHost, style = {}, ...props }, ref) => {
   const { open } = DialogPrimitive.useRootContext();
-  return (
-    <DialogPortal hostName={portalHost}>
-      <DialogOverlay>
-        <DialogPrimitive.Content
-          ref={ref}
-          className={cn(
-            "web:cursor-default bg-modal-background p-[24] web:duration-200 rounded-[20]",
-            open
-              ? "web:animate-in web:fade-in-0 web:zoom-in-95"
-              : "web:animate-out web:fade-out-0 web:zoom-out-95",
-            className
-          )}
-          {...props}
-        >
-          {children}
-        </DialogPrimitive.Content>
-      </DialogOverlay>
-    </DialogPortal>
-  );
+  const [maxContentHeight, setMaxContentHeight] = React.useState(0);
+  const headerRef = React.useRef<View>(null);
+
+  if (!props.scrollable) {
+    return (
+      <DialogPortal hostName={portalHost}>
+        <DialogOverlay>
+          <DialogPrimitive.Content
+            ref={ref}
+            className={cn(
+              "web:cursor-default bg-modal-background px-[24] pt-[24] pb-[40] web:duration-200 rounded-[20]",
+              open
+                ? "web:animate-in web:fade-in-0 web:zoom-in-95"
+                : "web:animate-out web:fade-out-0 web:zoom-out-95",
+              className
+            )}
+            {...props}
+          >
+            {children}
+          </DialogPrimitive.Content>
+        </DialogOverlay>
+      </DialogPortal>
+    );
+  }
+  if (props.scrollable) {
+    const { height, ...restProps } = props;
+    return (
+      <DialogPortal hostName={portalHost}>
+        <DialogOverlay>
+          <DialogPrimitive.Content
+            ref={ref}
+            className={cn(
+              "web:cursor-default bg-modal-background web:duration-200 rounded-[20]",
+              open
+                ? "web:animate-in web:fade-in-0 web:zoom-in-95"
+                : "web:animate-out web:fade-out-0 web:zoom-out-95",
+              className
+            )}
+            style={[
+              style,
+              {
+                maxHeight: height,
+              },
+            ]}
+            {...restProps}
+          >
+            <View
+              className="pt-[24] px-[24]"
+              onLayout={(e) => {
+                console.log("onLayout", e.nativeEvent.layout.height);
+                e.nativeEvent.layout.height &&
+                  setMaxContentHeight(
+                    props.height - e.nativeEvent.layout.height
+                  );
+              }}
+              ref={headerRef}
+            >
+              {props.header}
+            </View>
+            {maxContentHeight && (
+              <ScrollView
+                className="pb-[40] px-[12] mx-[12]"
+                style={{
+                  maxHeight: maxContentHeight,
+                }}
+              >
+                <Pressable>{children}</Pressable>
+              </ScrollView>
+            )}
+          </DialogPrimitive.Content>
+        </DialogOverlay>
+      </DialogPortal>
+    );
+  }
 });
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 

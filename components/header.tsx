@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { Text } from "./ui/text";
 import { CompanyLogo } from "~/lib/icons/CompanyLogo";
 import { Button } from "./ui/button";
@@ -210,8 +210,11 @@ function HeaderModals({
         </DialogContent>
       </Dialog>
       <Dialog open={modal?.type === "help"} onOpenChange={() => setModal(null)}>
-        <DialogContent style={{ width: 718, maxHeight: 744 }}>
-          <View style={{ gap: 30 }}>
+        <DialogContent
+          scrollable
+          height={744}
+          style={{ width: 718 }}
+          header={
             <DialogHeader className="flex-row justify-center relative">
               <Text className="text-3xl text-center font-semibold">Help</Text>
               <Help size={32} className="text-primary-foreground" />
@@ -224,14 +227,17 @@ function HeaderModals({
                 />
               </View>
             </DialogHeader>
+          }
+        >
+          <View className="gap-[32] pt-[30]">
             {helpContent.map(({ title, text }, index) => (
               <View key={index} className="gap-[12]">
-                <Text className="text-lg font-semibold">{title}</Text>
-                {text.map((textChunk, textChinkIndex) => (
-                  <Text className="text-muted-foreground" key={textChinkIndex}>
-                    {textChunk}
-                  </Text>
-                ))}
+                <Text className="text-xl leading-[1.5] font-semibold">
+                  {title}
+                </Text>
+                <Text className="text-md leading-[1.5] text-muted-foreground">
+                  {text.join("\n\n")}
+                </Text>
               </View>
             ))}
           </View>
@@ -276,19 +282,25 @@ function HeaderModals({
         </DialogContent>
       </Dialog>
       <Dialog open={modal?.type === "logs"} onOpenChange={() => setModal(null)}>
-        <DialogContent className="w-[464] gap-[40]">
-          <DialogHeader className="flex-row justify-center relative">
-            <Text className="text-xl text-center font-semibold">Logs</Text>
-            <View className="absolute right-0 top-1">
-              <IconButton
-                variant="outline"
-                size="xl"
-                icon={Close}
-                onPress={() => setModal(null)}
-              />
-            </View>
-          </DialogHeader>
-          <View>
+        <DialogContent
+          className="w-[464]"
+          scrollable
+          height={744}
+          header={
+            <DialogHeader className="flex-row justify-center relative">
+              <Text className="text-xl text-center font-semibold">Logs</Text>
+              <View className="absolute right-0 top-1">
+                <IconButton
+                  variant="outline"
+                  size="xl"
+                  icon={Close}
+                  onPress={() => setModal(null)}
+                />
+              </View>
+            </DialogHeader>
+          }
+        >
+          <View className="pt-[40]">
             {logs.map((log, index) => (
               <View key={index} className="flex-row">
                 <View className="w-[65] mr-[6] items-center">
