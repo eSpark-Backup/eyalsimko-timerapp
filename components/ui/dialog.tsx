@@ -103,6 +103,7 @@ const DialogContent = React.forwardRef<
               open
                 ? "web:animate-in web:fade-in-0 web:zoom-in-95"
                 : "web:animate-out web:fade-out-0 web:zoom-out-95",
+
               className
             )}
             {...props}
@@ -122,6 +123,7 @@ const DialogContent = React.forwardRef<
             ref={ref}
             className={cn(
               "web:cursor-default bg-modal-background web:duration-200 rounded-[20]",
+              maxContentHeight === 0 && "opacity-0",
               open
                 ? "web:animate-in web:fade-in-0 web:zoom-in-95"
                 : "web:animate-out web:fade-out-0 web:zoom-out-95",
@@ -148,16 +150,14 @@ const DialogContent = React.forwardRef<
             >
               {props.header}
             </View>
-            {maxContentHeight && (
-              <ScrollView
-                className="pb-[40] px-[12] mx-[12]"
-                style={{
-                  maxHeight: maxContentHeight,
-                }}
-              >
-                <Pressable>{children}</Pressable>
-              </ScrollView>
-            )}
+            <ScrollView
+              className="pb-[40] px-[12] mx-[12]"
+              style={{
+                maxHeight: maxContentHeight,
+              }}
+            >
+              <Pressable>{children}</Pressable>
+            </ScrollView>
           </DialogPrimitive.Content>
         </DialogOverlay>
       </DialogPortal>

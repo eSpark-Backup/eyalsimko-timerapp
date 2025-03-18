@@ -39,25 +39,36 @@ const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
 type Log = {
   type: "connectionLost" | "connectionRecovered";
+  connectionType: "LAN" | "WIFI";
   date: Date;
 };
 
 const logs: Log[] = [
   {
     type: "connectionRecovered",
+    connectionType: "LAN",
     date: new Date("2023-07-01T04:12:00.000Z"),
   },
   {
     type: "connectionLost",
+    connectionType: "WIFI",
     date: new Date("2023-07-02T03:42:00.000Z"),
   },
   {
     type: "connectionRecovered",
+    connectionType: "WIFI",
     date: new Date("2023-07-03T02:11:00.000Z"),
   },
 ];
 
 type LogType = Log["type"];
+
+const connectionTypeToText = (
+  connectionType: Log["connectionType"]
+): string => {
+  if (connectionType === "LAN") return "wired";
+  return "wireless";
+};
 
 const logToText = (log: Log) => {
   const map: Record<LogType, { title: string; description: string }> = {
@@ -67,8 +78,10 @@ const logToText = (log: Log) => {
         "App can not connect to the Timer module. Please check your connection.",
     },
     connectionRecovered: {
-      title: "Connection recovered",
-      description: "Connection restored. Resuming normal operation.",
+      title: "Connected",
+      description: `Connection successful - ${connectionTypeToText(
+        log.connectionType
+      )} connection has been initiated.`,
     },
   };
   return map[log.type];
