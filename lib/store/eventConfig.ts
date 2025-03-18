@@ -3,11 +3,15 @@ type Message = {
   content: string,
 }
 
-type Event = {
+export type Event = {
   id: string
   name: string
-  blinkingStartTime: number | null
-  countDownTime: number | null
+  description: string,
+  speakerName: string,
+  countdownTime: number
+  blinkingStartTime: number
+  blinkLength: number
+  startedAt: Date | null
 }
 
 type WiFiConfig = {
@@ -90,20 +94,32 @@ export const eventConfigStore = createStore({
         ]
       }
     },
-    addEvent: (context, event: Event) => {
+    addEvent: (context, { event }: { event: Omit<Event, 'id' | 'startedAt'> }) => {
       return {
-        events: [...context.events, event]
+        events: [...context.events, {
+          id: generateId(),
+          startedAt: null,
+          ...event
+        }]
       }
     },
-    updateEvent: (context, event: Event) => {
+    updateEvent: (context, { event }: { event: Omit<Event, 'startedAt'> }) => {
       const index = context.events.findIndex(event => event.id === event.id)
       if (index === -1) return context
       return {
         events: [
           ...context.events.slice(0, index),
-          event,
+          {
+            startedAt: context.events[index].startedAt,
+            ...event
+          },
           ...context.events.slice(index + 1)
         ]
+      }
+    },
+    deleteEvent: (context, { event: deletedEvent }: { event: Event }) => {
+      return {
+        events: context.events.filter(event => event.id !== deletedEvent.id)
       }
     },
     initialize: (context, state: State) => {

@@ -1,8 +1,8 @@
 import { View } from "react-native";
+import { useForm, Controller } from "react-hook-form";
 import { Text } from "~/components/ui/text";
 import { Button } from "../ui/button";
 import { Plus } from "~/lib/icons/Plus";
-import { Eye } from "~/lib/icons/Eye";
 import { cn, formatCountdown } from "~/lib/utils";
 import { IconButton } from "../iconButton";
 import { Move } from "~/lib/icons/Move";
@@ -15,15 +15,8 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import Animated, { FadeIn } from "react-native-reanimated";
 import { Trash } from "~/lib/icons/Trash";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Edit } from "~/lib/icons/Edit";
@@ -31,16 +24,16 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger,
 } from "../ui/dialog";
 import React from "react";
 import { TrashDanger } from "~/lib/icons/TrashDanger";
 import { Input } from "../ui/input";
 import { getLocale } from "~/lib/locale";
+import { eventConfigStore, Event } from "~/lib/store/eventConfig";
+import { useSelector } from "@xstate/store/react";
+import { TimeInput } from "../ui/time-input";
 
 export const TimersListHeader = () => {
   const [modal, setModal] = React.useState<ModalState | null>(null);
@@ -57,22 +50,186 @@ export const TimersListHeader = () => {
   );
 };
 
-function TimerForm() {
+const getFormData = (event: Event): FormData => {
+  return {
+    name: event.name,
+    description: event.description,
+    speakerName: event.speakerName,
+    countdownTime: event.countdownTime,
+    blinkingStartTime: event.blinkingStartTime,
+    blinkLength: event.blinkLength,
+  };
+};
+
+type FormData = Omit<Event, "id" | "startedAt">;
+function TimerForm({
+  initialValues,
+  renderFooter,
+  closeModal,
+  onSubmit,
+}: {
+  initialValues?: FormData;
+  renderFooter: (submitButton: React.ReactNode) => React.ReactNode;
+  onSubmit: (data: FormData) => void;
+  closeModal: () => void;
+}) {
+  const defaultBlinkingStartTime = useSelector(
+    eventConfigStore,
+    (state) => state.context.blinkingStartTime
+  );
+  const defaultBlinkLength = useSelector(
+    eventConfigStore,
+    (state) => state.context.blinkLength
+  );
+  const {
+    getValues,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    defaultValues: {
+      name: initialValues?.name ?? "",
+      description: initialValues?.description ?? "",
+      speakerName: initialValues?.speakerName ?? "",
+      countdownTime: initialValues?.countdownTime ?? undefined,
+      blinkingStartTime:
+        initialValues?.blinkingStartTime ??
+        defaultBlinkingStartTime ??
+        undefined,
+      blinkLength:
+        initialValues?.blinkLength ?? defaultBlinkLength ?? undefined,
+    },
+  });
+  const submit = handleSubmit((data) => {
+    console.log(data);
+    onSubmit(data);
+    closeModal();
+  });
+
   return (
-    <View className="gap-[20]">
-      <Input background="modal" label="Event Name" />
-      <Input background="modal" label="Event Description" />
-      <Input background="modal" label="Speaker Name" />
-      <Input background="modal" label="Duration" />
-      <View className="flex-row gap-[20]">
-        <View className="flex-1">
-          <Input background="modal" label="Flash Time" />
-        </View>
-        <View className="flex-1">
-          <Input background="modal" label="Flash Length" />
+    <>
+      <View className="gap-[20]">
+        <Controller
+          control={control}
+          rules={{
+            required: true,
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              background="modal"
+              label="Event Name"
+              // onBlur={onBlur}
+              onSubmitEditing={(e) => onChange(e.nativeEvent.text)}
+              defaultValue={value}
+            />
+          )}
+          name="name"
+        />
+        <Controller
+          control={control}
+          rules={{
+            required: true,
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              background="modal"
+              label="Event Description"
+              onBlur={onBlur}
+              onSubmitEditing={(e) => onChange(e.nativeEvent.text)}
+              defaultValue={value}
+            />
+          )}
+          name="description"
+        />
+        <Controller
+          control={control}
+          rules={{
+            required: true,
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              background="modal"
+              label="Speaker Name"
+              onBlur={onBlur}
+              onSubmitEditing={(e) => onChange(e.nativeEvent.text)}
+              defaultValue={value}
+            />
+          )}
+          name="speakerName"
+        />
+        <Controller
+          control={control}
+          rules={{
+            required: true,
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TimeInput
+              background="modal"
+              label="Duration"
+              onBlur={onBlur}
+              onChange={onChange}
+              value={value}
+            />
+          )}
+          name="countdownTime"
+        />
+        <View className="flex-row gap-[20]">
+          <View className="flex-1">
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TimeInput
+                  background="modal"
+                  label="Flash Time"
+                  onBlur={onBlur}
+                  onChange={onChange}
+                  value={value}
+                />
+              )}
+              name="blinkingStartTime"
+            />
+          </View>
+          <View className="flex-1">
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TimeInput
+                  background="modal"
+                  label="Flash Length"
+                  onBlur={onBlur}
+                  onChange={onChange}
+                  value={value}
+                />
+              )}
+              name="blinkLength"
+            />
+          </View>
         </View>
       </View>
-    </View>
+      {renderFooter(
+        <Button
+          size="lg"
+          border="none"
+          variant="primary"
+          onPress={(e) => {
+            console.log(
+              "onSubmit",
+              JSON.stringify(errors, null, 2),
+              JSON.stringify(getValues(), null, 2)
+            );
+            submit(e);
+          }}
+        >
+          <Text>Add Timer</Text>
+        </Button>
+      )}
+    </>
   );
 }
 
@@ -112,7 +269,14 @@ function TimerModals({
                   </Button>
                 </DialogClose>
                 <Button
-                  onPress={() => setModal(null)}
+                  onPress={() => {
+                    if (modal?.type !== "delete") return;
+                    eventConfigStore.send({
+                      type: "deleteEvent",
+                      event: modal.event,
+                    });
+                    setModal(null);
+                  }}
                   size="lg"
                   variant="destructive"
                 >
@@ -131,22 +295,37 @@ function TimerModals({
                 Edit Timer
               </Text>
             </DialogHeader>
-            <TimerForm />
-            <DialogFooter>
-              <View className="flex-row justify-between">
-                <Button size="lg" border="none" onPress={() => setModal(null)}>
-                  <Text>Cancel</Text>
-                </Button>
-                <Button
-                  size="lg"
-                  border="none"
-                  variant="primary"
-                  onPress={() => setModal(null)}
-                >
-                  <Text>Save Changes</Text>
-                </Button>
-              </View>
-            </DialogFooter>
+            {modal?.type === "edit" && (
+              <TimerForm
+                initialValues={getFormData(modal.event)}
+                closeModal={() => setModal(null)}
+                onSubmit={(data) => {
+                  eventConfigStore.send({
+                    type: "updateEvent",
+                    event: {
+                      id: modal.event.id,
+                      ...data,
+                    },
+                  });
+                }}
+                renderFooter={(submitButton) => {
+                  return (
+                    <DialogFooter>
+                      <View className="flex-row justify-between">
+                        <Button
+                          size="lg"
+                          border="none"
+                          onPress={() => setModal(null)}
+                        >
+                          <Text>Cancel</Text>
+                        </Button>
+                        {submitButton}
+                      </View>
+                    </DialogFooter>
+                  );
+                }}
+              />
+            )}
           </View>
         </DialogContent>
       </Dialog>
@@ -158,22 +337,31 @@ function TimerModals({
                 Add New Timer
               </Text>
             </DialogHeader>
-            <TimerForm />
-            <DialogFooter>
-              <View className="flex-row justify-between">
-                <Button size="lg" border="none" onPress={() => setModal(null)}>
-                  <Text>Cancel</Text>
-                </Button>
-                <Button
-                  size="lg"
-                  border="none"
-                  variant="primary"
-                  onPress={() => setModal(null)}
-                >
-                  <Text>Add Timer</Text>
-                </Button>
-              </View>
-            </DialogFooter>
+            <TimerForm
+              onSubmit={(data) => {
+                eventConfigStore.send({
+                  type: "addEvent",
+                  event: data,
+                });
+              }}
+              closeModal={() => setModal(null)}
+              renderFooter={(submitButton) => {
+                return (
+                  <DialogFooter>
+                    <View className="flex-row justify-between">
+                      <Button
+                        size="lg"
+                        border="none"
+                        onPress={() => setModal(null)}
+                      >
+                        <Text>Cancel</Text>
+                      </Button>
+                      {submitButton}
+                    </View>
+                  </DialogFooter>
+                );
+              }}
+            />
           </View>
         </DialogContent>
       </Dialog>
@@ -185,62 +373,22 @@ const dateFormatter = new Intl.DateTimeFormat(getLocale(), {
   timeStyle: "medium",
 });
 
-type Timer = unknown;
-
 type ModalState =
   | {
       type: "add";
     }
   | {
       type: "delete";
-      timer: Timer;
+      event: Event;
     }
   | {
       type: "edit";
-      timer: Timer;
+      event: Event;
     };
 
 export default function TimersList() {
-  const runningTimerIndex = 0;
-  const timers = [
-    {
-      speakerName: "David",
-      countdownTime: 1000,
-      elapsedTime: 100,
-      flashStartTime: 60,
-      timerName: "Goals of the evening",
-      startedAt: new Date(),
-      speakerIndex: 0,
-      description: "Moves around a lot",
-    },
-    {
-      speakerName: "David",
-      countdownTime: 1000,
-      elapsedTime: 100,
-      flashStartTime: 60,
-      startedAt: null,
-      timerName: "Welcome to the Pawnee Townhall",
-      speakerIndex: 1,
-    },
-    {
-      speakerName: "David",
-      countdownTime: 1000,
-      elapsedTime: 100,
-      startedAt: null,
-      flashStartTime: 60,
-      timerName: "Goals of the evening",
-      speakerIndex: 2,
-    },
-    {
-      speakerName: "David",
-      countdownTime: 1000,
-      elapsedTime: 100,
-      startedAt: null,
-      flashStartTime: 60,
-      timerName: "Goals of the evening",
-      speakerIndex: 3,
-    },
-  ];
+  const events = useSelector(eventConfigStore, (state) => state.context.events);
+  const runningTimerId = events[0]?.id;
   const insets = useSafeAreaInsets();
 
   const contentInsets = {
@@ -256,13 +404,13 @@ export default function TimersList() {
     <>
       <TimerModals modal={modal} setModal={setModal} />
       <View className="gap-[12]">
-        {timers.map((timer) => (
+        {events.map((event, index) => (
           <View
-            key={timer.speakerIndex}
+            key={event.id}
             className={cn(
               "flex-row items-center rounded-[8] py-[12] px-[20] gap-[16]",
-              timer.speakerIndex === runningTimerIndex && "bg-item-highlight",
-              timer.speakerIndex !== runningTimerIndex && "bg-item"
+              event.id === runningTimerId && "bg-item-highlight",
+              event.id !== runningTimerId && "bg-item"
             )}
           >
             <Move color="hsla(213, 5%, 57%, 1)" size={16} />
@@ -272,38 +420,38 @@ export default function TimersList() {
                   style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
                   className="text-md w-[20]"
                 >
-                  {timer.speakerIndex + 1}
+                  {index + 1}
                 </Text>
                 <Text className="color-primary text-md w-[100]">
-                  {timer.startedAt ? dateFormatter.format(timer.startedAt) : ""}
+                  {event.startedAt ? dateFormatter.format(event.startedAt) : ""}
                 </Text>
                 <View className="w-[60]">
                   <Text className="color-primary">
                     {formatCountdown({
-                      countdownTime: timer.countdownTime,
-                      elapsedTime: timer.countdownTime,
+                      countdownTime: event.countdownTime,
+                      elapsedTime: event.countdownTime,
                     })}
                   </Text>
                 </View>
                 <View className="gap-[4]">
                   <View className="flex-row gap-[12]">
-                    <Text>{timer.timerName}</Text>
+                    <Text>{event.name}</Text>
                     <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>
-                      {timer.speakerName}
+                      {event.speakerName}
                     </Text>
                   </View>
-                  {timer.description && (
+                  {event.description && (
                     <Text
                       style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
                       className="text-sm"
                     >
-                      {timer.description}
+                      {event.description}
                     </Text>
                   )}
                 </View>
               </View>
               <View className="flex-row gap-[16] self-end">
-                {timer.speakerIndex === runningTimerIndex ? (
+                {event.id === runningTimerId ? (
                   <IconButton size="sm" variant="success" icon={Pause} />
                 ) : (
                   <IconButton size="sm" variant="primary" icon={Play} />
@@ -323,7 +471,7 @@ export default function TimersList() {
                   >
                     <DropdownMenuGroup className="gap-[8]">
                       <DropdownMenuItem
-                        onPress={() => setModal({ type: "edit", timer })}
+                        onPress={() => setModal({ type: "edit", event })}
                       >
                         <View className="flex-1 flex-row justify-between items-center">
                           <Text className="text-sm font-normal">Edit</Text>
@@ -331,7 +479,7 @@ export default function TimersList() {
                         </View>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onPress={() => setModal({ type: "delete", timer })}
+                        onPress={() => setModal({ type: "delete", event })}
                       >
                         <View className="flex-1 flex-row justify-between items-center">
                           <Text className="text-sm font-normal">Delete</Text>

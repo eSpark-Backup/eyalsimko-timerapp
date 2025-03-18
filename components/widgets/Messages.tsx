@@ -13,11 +13,6 @@ import { useSelector } from "@xstate/store/react";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { useState } from "react";
 
-interface Message {
-  id: string;
-  text: string;
-}
-
 export const MessageWidgetHeader = () => {
   const [isFlashing, setIsFlashing] = useState(false);
   return (
@@ -51,7 +46,7 @@ export const MessageWidget = () => {
     eventConfigStore,
     (state) => state.context.messages
   );
-  const activeMessageId = messages[0].id;
+  const activeMessageId = messages[0]?.id;
   return (
     <View className="gap-[20]">
       {messages.map((message) => (

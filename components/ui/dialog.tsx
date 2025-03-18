@@ -140,7 +140,6 @@ const DialogContent = React.forwardRef<
             <View
               className="pt-[24] px-[24]"
               onLayout={(e) => {
-                console.log("onLayout", e.nativeEvent.layout.height);
                 e.nativeEvent.layout.height &&
                   setMaxContentHeight(
                     props.height - e.nativeEvent.layout.height

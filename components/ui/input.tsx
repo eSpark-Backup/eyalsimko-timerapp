@@ -50,6 +50,10 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
       label,
       value,
       placeholder,
+      onBlur,
+      onFocus,
+      onSubmitEditing,
+      onChangeText,
       ...props
     },
     ref
@@ -60,7 +64,11 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
     const isFilled = isControlled
       ? value.length > 0
       : valueRef.current.length > 0;
-    const [isFocused, setIsFocused] = React.useState(false);
+    const [isFocused, _setIsFocused] = React.useState(false);
+    const setIsFocused = (isFocused: boolean) => {
+      console.log("setIsFocused", isFocused);
+      _setIsFocused(isFocused);
+    };
     const isFilledOrFocused = isFocused || isFilled;
     const labelFloating = useAnimatedValue(isFilledOrFocused ? 1 : 0);
 
@@ -93,19 +101,34 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
         : "hsla(213, 5%, 57%, 0.5)",
     };
 
-    const onSubmitEditing = (
+    const handleSubmitEditing = (
       e: NativeSyntheticEvent<TextInputSubmitEditingEventData>
     ) => {
-      if (props.onSubmitEditing) props.onSubmitEditing(e);
+      console.log("onSubmitEditing");
+      if (onSubmitEditing) onSubmitEditing(e);
       valueRef.current = e.nativeEvent.text;
     };
 
+    const handleChangeText = (text: string) => {
+      if (onChangeText) onChangeText(text);
+      valueRef.current = text;
+    };
+
     const handleFocus = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
-      if (props.onFocus) props.onFocus(e);
+      if (onFocus) onFocus(e);
       setIsFocused(true);
     };
     const handleBlur = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
-      if (props.onBlur) props.onBlur(e);
+      if (onBlur) {
+        onBlur(e);
+      }
+      if (onSubmitEditing) {
+        onSubmitEditing({
+          nativeEvent: {
+            text: valueRef.current,
+          },
+        } as NativeSyntheticEvent<TextInputSubmitEditingEventData>);
+      }
       setIsFocused(false);
     };
 
@@ -114,6 +137,9 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
         ? {
             ...inputRef.current,
             blurAndRemoveFocus: () => {
+              handleBlur(
+                null as unknown as NativeSyntheticEvent<TextInputFocusEventData>
+              );
               inputRef.current?.blur();
               setIsFocused(false);
             },
@@ -131,7 +157,8 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
           ref={inputRef}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          onSubmitEditing={onSubmitEditing}
+          onSubmitEditing={handleSubmitEditing}
+          onChangeText={handleChangeText}
           className={cn(
             "web:flex web:w-full border-transparent native:leading-[1.25] text-foreground placeholder:text-muted-foreground web:ring-offset-background file:border-0 file:bg-transparent file:font-medium web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2",
             isFocused && "border-highlight",

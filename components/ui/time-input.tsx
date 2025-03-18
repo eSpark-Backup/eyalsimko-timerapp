@@ -1,16 +1,22 @@
 import * as React from "react";
-import { TextInput } from "react-native";
+import {
+  NativeSyntheticEvent,
+  TextInput,
+  TextInputFocusEventData,
+} from "react-native";
 import { Input, TextInputRef } from "~/components/ui/input";
 
 interface TimeInputProps
   extends Omit<React.ComponentProps<typeof Input>, "value" | "onChange"> {
-  value: number; // value in seconds
+  value: number | undefined; // value in seconds
   onChange: (newValue: number) => void;
 }
 
-const TimeInput = ({ value, onChange, ...props }: TimeInputProps) => {
+const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
   const ref = React.useRef<TextInputRef>(null);
-  const [localValue, setLocalValue] = React.useState(() => formatTime(value));
+  const [localValue, setLocalValue] = React.useState(() =>
+    value !== undefined ? formatTime(value) : ""
+  );
 
   // Format seconds into HH:mm:ss
   function formatTime(totalSeconds: number): string {
@@ -48,7 +54,6 @@ const TimeInput = ({ value, onChange, ...props }: TimeInputProps) => {
       // Minutes validation
       if (cleaned.length >= 3) {
         const minutes = cleaned.slice(3, 5);
-        console.log(minutes);
         if (parseInt(minutes[0], 10) > 5) {
           formatted = localValue;
         }
@@ -57,7 +62,6 @@ const TimeInput = ({ value, onChange, ...props }: TimeInputProps) => {
       // Seconds validation
       if (cleaned.length >= 6) {
         const seconds = cleaned.slice(6, 9);
-        console.log(seconds);
         if (parseInt(seconds[0], 10) > 5) {
           formatted = localValue;
         }
@@ -76,7 +80,8 @@ const TimeInput = ({ value, onChange, ...props }: TimeInputProps) => {
   }
 
   // Update parent when input is complete
-  function handleBlur() {
+  function handleBlur(e: NativeSyntheticEvent<TextInputFocusEventData>) {
+    if (onBlur) onBlur(e);
     const seconds = timeToSeconds(localValue);
     onChange(seconds);
     setLocalValue(formatTime(seconds));
@@ -84,7 +89,7 @@ const TimeInput = ({ value, onChange, ...props }: TimeInputProps) => {
 
   // Update local value when parent value changes
   React.useEffect(() => {
-    setLocalValue(formatTime(value));
+    setLocalValue(value !== undefined ? formatTime(value) : "");
   }, [value]);
 
   return (
