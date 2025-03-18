@@ -35,7 +35,7 @@ const variants = cva("border-2", {
 interface FloatingLabelInputProps
   extends TextInputProps,
     VariantProps<typeof variants> {
-  label: string;
+  label?: string;
 }
 
 export type TextInputRef = TextInput & { blurAndRemoveFocus: () => void };

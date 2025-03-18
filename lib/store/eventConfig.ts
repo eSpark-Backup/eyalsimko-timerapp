@@ -1,5 +1,11 @@
-type Speaker = {
-  name: string | null
+type Message = {
+  id: string,
+  content: string,
+}
+
+type Event = {
+  id: string
+  name: string
   blinkingStartTime: number | null
   countDownTime: number | null
 }
@@ -10,45 +16,44 @@ type WiFiConfig = {
 }
 
 type State = {
-  eventName: string | null
-  eventDescription: string | null
-  defaultBlinkingStartTime: number | null
+  blinkingStartTime: number | null
   blinkLength: number | null
-  speakers: Speaker[]
-  screenWifiConfig: WiFiConfig[]
+  events: Event[]
+  screenWifiConfig: WiFiConfig[],
+  messages: Message[]
 }
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useSelector } from '@xstate/react'
 import { createStore } from '@xstate/store';
-import { useEffect } from 'react'
 import { connectionActor } from './connectionStore'
 
 const initialState: State = {
-  eventName: null,
-  eventDescription: null,
-  defaultBlinkingStartTime: null,
+  blinkingStartTime: null,
   blinkLength: null,
-  speakers: [],
+  events: [],
   screenWifiConfig: [],
+  messages: [],
 }
+
+const generateId = () => Math.random().toString(36)
 
 export const eventConfigStore = createStore({
   context: initialState,
   on: {
-    setEventName: (context, { eventName, eventDescription }: Pick<State, 'eventDescription' | 'eventName'>) => ({
-      eventDescription,
-      eventName
-    }),
-    setDefaultBlinkingStartTime: (context, { defaultBlinkingStartTime }: Pick<State, 'defaultBlinkingStartTime'>) => ({
-      defaultBlinkingStartTime
-    }),
     setBlinkLength: (context, { blinkLength }: Pick<State, 'blinkLength'>) => {
       if (blinkLength)
         connectionActor.send({ type: "sendMessage", message: { type: "blink_length", data: blinkLength } })
 
       return {
         blinkLength
+      }
+    },
+    setBlinkingStartTime: (context, { blinkingStartTime }: Pick<State, 'blinkingStartTime'>) => {
+      if (blinkingStartTime)
+        connectionActor.send({ type: "sendMessage", message: { type: "blink_length", data: blinkingStartTime } })
+
+      return {
+        blinkingStartTime
       }
     },
     addWifiConfig: (context, { ssid, password }: WiFiConfig) => {
@@ -61,40 +66,44 @@ export const eventConfigStore = createStore({
         ]
       }
     },
-    addSpeaker: (context) => {
+    addMessage: (context) => {
       return {
-        speakers: [...context.speakers, {
-          name: null,
-          blinkingStartTime: null,
-          countDownTime: null
+        messages: [...context.messages, {
+          id: generateId(),
+          content: '',
         }]
       }
     },
-    setSpeakerName: (context, { speakerIndex, name }: { speakerIndex: number } & Pick<Speaker, 'name'>) => {
-      const speakers = context.speakers.map((speaker, index) => index === speakerIndex ? {
-        ...speaker,
-        name,
-      } : speaker);
+    removeMessage: (context, { message }: { message: Message }) => {
       return {
-        speakers
+        messages: context.messages.filter(msg => msg.id !== message.id)
       }
     },
-    setSpeakerContDownTime: (context, { speakerIndex, countDownTime }: { speakerIndex: number } & Pick<Speaker, 'countDownTime'>) => {
-      const speakers = context.speakers.map((speaker, index) => index === speakerIndex ? {
-        ...speaker,
-        countDownTime,
-      } : speaker);
+    editMessage: (context, { updatedMessage }: { updatedMessage: Message }) => {
+      const index = context.messages.findIndex(message => message.id === updatedMessage.id)
+      if (index === -1) return context
       return {
-        speakers
+        messages: [
+          ...context.messages.slice(0, index),
+          updatedMessage,
+          ...context.messages.slice(index + 1)
+        ]
       }
     },
-    setSpeakerBlinkingStartTime: (context, { speakerIndex, blinkingStartTime }: { speakerIndex: number } & Pick<Speaker, 'blinkingStartTime'>) => {
-      const speakers = context.speakers.map((speaker, index) => index === speakerIndex ? {
-        ...speaker,
-        blinkingStartTime,
-      } : speaker);
+    addEvent: (context, event: Event) => {
       return {
-        speakers
+        events: [...context.events, event]
+      }
+    },
+    updateEvent: (context, event: Event) => {
+      const index = context.events.findIndex(event => event.id === event.id)
+      if (index === -1) return context
+      return {
+        events: [
+          ...context.events.slice(0, index),
+          event,
+          ...context.events.slice(index + 1)
+        ]
       }
     },
     initialize: (context, state: State) => {
@@ -125,25 +134,3 @@ AsyncStorage.getItem(snapshotKey)
 eventConfigStore.subscribe(snapshot => {
   AsyncStorage.setItem(snapshotKey, JSON.stringify(snapshot.context))
 })
-
-export const useSpeaker = (speakerIndex: number): Speaker | undefined => {
-  const speaker = useSelector(
-    eventConfigStore,
-    (state) => state.context.speakers[speakerIndex]
-  );
-  useEffect(() => {
-    if (!speaker) {
-      eventConfigStore.send({ type: "addSpeaker" });
-    }
-  }, [speaker, speakerIndex]);
-
-  return speaker
-}
-
-export const useIsLastSpeaker = (speakerIndex: number): boolean => {
-  const speakers = useSelector(
-    eventConfigStore,
-    (state) => state.context.speakers
-  );
-  return speakers.length - 1 === speakerIndex;
-}

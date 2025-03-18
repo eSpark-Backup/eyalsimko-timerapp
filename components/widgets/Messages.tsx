@@ -9,26 +9,36 @@ import { Input } from "../ui/input";
 import { IconButton } from "../iconButton";
 import { Trash } from "~/lib/icons/Trash";
 import { Move } from "~/lib/icons/Move";
+import { useSelector } from "@xstate/store/react";
+import { eventConfigStore } from "~/lib/store/eventConfig";
+import { useState } from "react";
 
 interface Message {
   id: string;
   text: string;
 }
 
-interface MessageWidgetProps {
-  messages?: Message[];
-  onShowPress?: () => void;
-}
-
 export const MessageWidgetHeader = () => {
+  const [isFlashing, setIsFlashing] = useState(false);
   return (
     <View className="flex-row items-baseline justify-between">
       <Text className="text-lg font-semibold">Messages</Text>
       <View className="flex-row gap-[12]">
-        <Button size="sm" icon={Zap}>
+        <Button
+          size="sm"
+          variant={isFlashing ? "primary" : "default"}
+          icon={Zap}
+          onPress={() => setIsFlashing(!isFlashing)}
+        >
           <Text>Flash</Text>
         </Button>
-        <Button size="sm" icon={Plus}>
+        <Button
+          size="sm"
+          icon={Plus}
+          onPress={() => {
+            eventConfigStore.send({ type: "addMessage" });
+          }}
+        >
           <Text>Add New Message</Text>
         </Button>
       </View>
@@ -36,15 +46,12 @@ export const MessageWidgetHeader = () => {
   );
 };
 
-export const MessageWidget: React.FC<MessageWidgetProps> = ({
-  messages = [
-    { id: "1", text: "WRAP UP!!!", type: "action" },
-    { id: "2", text: "Hold Mic closer to mouth", type: "info" },
-    { id: "3", text: "VIDEO PLAYING!!", type: "info" },
-  ],
-  onShowPress,
-}) => {
-  const activeMessageId = "1";
+export const MessageWidget = () => {
+  const messages = useSelector(
+    eventConfigStore,
+    (state) => state.context.messages
+  );
+  const activeMessageId = messages[0].id;
   return (
     <View className="gap-[20]">
       {messages.map((message) => (
@@ -54,12 +61,35 @@ export const MessageWidget: React.FC<MessageWidgetProps> = ({
             message.id === activeMessageId ? "bg-item-highlight" : "bg-item"
           }`}
         >
-          <Input size="small" value={message.text} />
+          <Input
+            size="small"
+            maxLength={40}
+            defaultValue={message.content}
+            onSubmitEditing={(event) => {
+              eventConfigStore.send({
+                type: "editMessage",
+                updatedMessage: {
+                  ...message,
+                  content: event.nativeEvent.text,
+                },
+              });
+            }}
+          />
           <View className="justify-between items-center flex-row gap-[12]">
             <Move color="hsla(213, 5%, 57%, 1)" size={16} />
             <View className="flex-row gap-[12]">
-              <IconButton border size="xs" icon={Trash} />
-              <Button size="xs" onPress={onShowPress} icon={Eye}>
+              <IconButton
+                border
+                size="xs"
+                icon={Trash}
+                onPress={() => {
+                  eventConfigStore.send({
+                    type: "removeMessage",
+                    message,
+                  });
+                }}
+              />
+              <Button size="xs" onPress={() => {}} icon={Eye}>
                 <Text>{message.id === activeMessageId ? "Hide" : "Show"}</Text>
               </Button>
             </View>

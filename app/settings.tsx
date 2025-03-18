@@ -70,7 +70,7 @@ function TimerPickerWithControls({
       <TimerPicker
         Haptics={Haptics}
         styles={{
-          theme: colorScheme === "system" ? undefined : colorScheme,
+          theme: colorScheme,
           backgroundColor: "transparent",
         }}
         initialValue={state}
@@ -104,14 +104,8 @@ function EventNameSettings({
   onSubmit: () => void;
   onReset: () => void;
 }) {
-  const initialEventName = useSelector(
-    eventConfigStore,
-    (state) => state.context.eventName
-  );
-  const initialEventDescription = useSelector(
-    eventConfigStore,
-    (state) => state.context.eventDescription
-  );
+  const initialEventName = "Name";
+  const initialEventDescription = "Description";
 
   const [eventName, setEventName] = useState(initialEventName ?? "");
   const [eventDescription, setEventDescription] = useState(
@@ -139,11 +133,11 @@ function EventNameSettings({
         <Button
           onPress={() => {
             onSubmit();
-            eventConfigStore.send({
-              type: "setEventName",
-              eventName,
-              eventDescription,
-            });
+            // eventConfigStore.send({
+            //   type: "setEventName",
+            //   eventName,
+            //   eventDescription,
+            // });
           }}
           disabled={disableSubmit}
           className="flex-1"
@@ -155,11 +149,11 @@ function EventNameSettings({
             setEventDescription("");
             setEventName("");
             onReset();
-            eventConfigStore.send({
-              type: "setEventName",
-              eventName: null,
-              eventDescription: null,
-            });
+            // eventConfigStore.send({
+            //   type: "setEventName",
+            //   eventName: null,
+            //   eventDescription: null,
+            // });
           }}
           className="flex-1"
         >
@@ -554,7 +548,7 @@ export default function SettingsScreen() {
   };
   const defaultBlinkingStartTime = useSelector(
     eventConfigStore,
-    (state) => state.context.defaultBlinkingStartTime
+    (state) => state.context.blinkingStartTime
   );
   const blinkLength = useSelector(
     eventConfigStore,
@@ -613,17 +607,17 @@ export default function SettingsScreen() {
                 initialValue={defaultBlinkingStartTime}
                 reset={() => {
                   setCurrentTab("");
-                  eventConfigStore.send({
-                    type: "setDefaultBlinkingStartTime",
-                    defaultBlinkingStartTime: null,
-                  });
+                  // eventConfigStore.send({
+                  //   type: "setDefaultBlinkingStartTime",
+                  //   defaultBlinkingStartTime: null,
+                  // });
                 }}
                 submit={(value) => {
                   setCurrentTab("");
-                  eventConfigStore.send({
-                    type: "setDefaultBlinkingStartTime",
-                    defaultBlinkingStartTime: value,
-                  });
+                  // eventConfigStore.send({
+                  //   type: "setDefaultBlinkingStartTime",
+                  //   defaultBlinkingStartTime: value,
+                  // });
                 }}
               />
             </AccordionContent>

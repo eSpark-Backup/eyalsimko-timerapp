@@ -45,6 +45,7 @@ const iconVariants = cva("items-center justify-center", {
       success: "color-primary",
       primary: "color-primary",
       default: "color-primary",
+      outline: "color-primary",
     },
     size: {
       xs: "h-[12] w-[12]",

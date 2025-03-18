@@ -16,11 +16,6 @@ import * as Haptics from "expo-haptics"; // for haptic feedback
 import { TimerCard } from "~/components/TimerCard";
 import { cn, formatDuration, getDurationObject } from "~/lib/utils";
 import { Progress } from "~/components/ui/progress";
-import {
-  eventConfigStore,
-  useIsLastSpeaker,
-  useSpeaker,
-} from "~/lib/store/eventConfig";
 import { useSelector } from "@xstate/react";
 import { Link, useLocalSearchParams } from "expo-router";
 import { ArrowRight } from "~/lib/icons/ArrowRight";
@@ -105,39 +100,28 @@ export default function TimerScreen() {
   const speakerIndexStr = useLocalSearchParams<{ speakerIndex?: string }>()
     .speakerIndex;
   const speakerIndex = parseInt(speakerIndexStr ?? "0");
-  const defaultBlinkingStartTime = useSelector(
-    eventConfigStore,
-    (state) => state.context.defaultBlinkingStartTime
-  );
+  const defaultBlinkingStartTime = 10;
 
-  const speaker = useSpeaker(speakerIndex);
-
-  const speakerName = speaker?.name ?? "";
-  const setSpeakerName = (name: string) => {
-    eventConfigStore.send({
-      type: "setSpeakerName",
-      speakerIndex,
-      name,
-    });
-  };
-  const countDown = speaker?.countDownTime ?? null;
+  const speakerName = "";
+  const setSpeakerName = "Kek";
+  const countDown = null;
   const setCountDown = (countDown: number) => {
-    eventConfigStore.send({
-      type: "setSpeakerContDownTime",
-      speakerIndex,
-      countDownTime: countDown,
-    });
+    // eventConfigStore.send({
+    //   type: "setSpeakerContDownTime",
+    //   speakerIndex,
+    //   countDownTime: countDown,
+    // });
   };
-  const blinkingStartTime = speaker?.blinkingStartTime ?? null;
+  const blinkingStartTime = null;
   const setBlinkingStartTime = (blinkingStartTime: number) => {
-    eventConfigStore.send({
-      type: "setSpeakerBlinkingStartTime",
-      speakerIndex,
-      blinkingStartTime,
-    });
+    // eventConfigStore.send({
+    //   type: "setSpeakerBlinkingStartTime",
+    //   speakerIndex,
+    //   blinkingStartTime,
+    // });
   };
 
-  const isLastSpeaker = useIsLastSpeaker(speakerIndex);
+  const isLastSpeaker = false;
 
   const effectiveBlinkingStartTime =
     blinkingStartTime ?? defaultBlinkingStartTime;
@@ -211,7 +195,7 @@ export default function TimerScreen() {
                     <Input
                       placeholder="Speaker Name"
                       value={speakerName}
-                      onChangeText={setSpeakerName}
+                      onChangeText={() => {}}
                       style={{
                         fontSize: 21,
                         lineHeight: 28,

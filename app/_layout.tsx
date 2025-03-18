@@ -107,12 +107,8 @@ export default function RootLayout() {
     });
   }, []);
 
-  const eventName =
-    useSelector(eventConfigStore, (state) => state.context.eventName) ??
-    "Event";
-  const eventDescription =
-    useSelector(eventConfigStore, (state) => state.context.eventDescription) ??
-    "Description";
+  const eventName = "Event";
+  const eventDescription = "Description";
 
   const isConnected = useMachineSelector(connectionActor, (state) =>
     state.matches("CONNECTED")
@@ -249,23 +245,11 @@ export default function RootLayout() {
                   <View className="hidden md:flex">
                     <ThemeToggle />
                   </View>
-                  <Link href="/help" asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-primary-foreground"
-                    >
-                      <CircleHelp className="h-5 w-5 text-primary" />
-                    </Button>
+                  <Link href="/help">
+                    <Text>Help</Text>
                   </Link>
-                  <Link href="/settings" asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-primary-foreground"
-                    >
-                      <MoreVertical className="h-5 w-5 text-primary" />
-                    </Button>
+                  <Link href="/settings">
+                    <Text>Settings</Text>
                   </Link>
                 </View>
               </View>
@@ -352,7 +336,7 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     flexWrap: "wrap",
-    ...StyleSheet.absoluteFill,
+    // ...StyleSheet.absoluteFill,
   },
   box: {
     width: "25%",
