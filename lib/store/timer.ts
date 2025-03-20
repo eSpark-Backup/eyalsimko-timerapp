@@ -5,30 +5,37 @@ import { and, assign, fromCallback, fromEventObservable, setup } from 'xstate';
 import { ConnectedState, connectionActor, RecoverMessage } from './connectionStore';
 import { eventConfigStore } from './eventConfig';
 
-type Idle = { timer: null }
-type Running = { timer: { elapsed: number, elapsedInMs: number, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number, message: string, messageIsVisible: boolean } }
-type Resetted = { timer: { elapsed: null, elapsedInMs: number, speakerIndex: number, startBlinkingTime: number, speakerName: string, countdownTime: number, message: string, messageIsVisible: boolean } }
-
-type State = {
-  timer: {
-    elapsed: number | null,
-    elapsedInMs: number | null,
-    speakerIndex: number,
-    speakerName: string
-    countdownTime: number
-    startBlinkingTime: number
-    message: string,
-    messageIsVisible: boolean
-  } | null,
+type RunningTimer = {
+  elapsed: number,
+  elapsedInMs: number,
+  eventId: string,
+  countdownTime: number
+  blinkingStartTime: number
+  blinkLength: number
+  message: string,
+  messageIsVisible: boolean
 }
 
-type SetupEvent = {
+type NonRunningTimer = Omit<RunningTimer, 'elapsed' | 'elapsedInMs'> & {
+  elapsed: null,
+  elapsedInMs: null,
+}
+
+type Timer = RunningTimer | NonRunningTimer
+
+type Idle = { timer: null }
+type Running = { timer: RunningTimer }
+type Resetted = { timer: NonRunningTimer }
+
+type State = { timer: Timer | null }
+
+export type SetupEvent = {
   type: "setup",
   data: {
-    speakerName: string
     countdownTime: number
-    startBlinkingTime: number
-    speakerIndex: number
+    blinkingStartTime: number
+    blinkLength: number
+    eventId: string
   }
 }
 
@@ -94,7 +101,9 @@ export const timerStore = setup({
     })
   },
   guards: {
-    isConnected: () => connectionActor.getSnapshot().matches("CONNECTED"),
+    isConnected: () => {
+      return connectionActor.getSnapshot().matches("CONNECTED")
+    },
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QBcCWBbMAnAxFuYyA2gAwC6ioADgPaypo0B2lIAHogLQBM3AdAE4SAVgEB2YQEYBAFgAcEgQGYAbABoQATy4k+KyTO4CVKkmJkC5A4WKUBfOxrSYsfAJIARADIBRHLEIAVypSCiQQWnpGFnCOBCUBPklk624VGWFuYRIVYQ1tBAs5PmEVZVtbEm45OSyHJwxsPgBBAGEAFTcANT8A5ABZOFgAQxhQ1kiGVGZWOIlhPhkSGQsSY2EZSRIlfMQrXTWlI+4ZJUklMUkVepBnJrbOnv9kGhDyCbopmdjEAW4lEqifRbGzcEhySS7BCSIx8cFrf6bJQyFSqGQ3O6uB7dHx8WAvKhUSDPYZYYjvcKTaKzRBiFRiPhGI7naoGORlKFKOS6ORKKobARXORSDGNLEdHF8LCBJhMVBMKA4TqtADS40pn2pPwQKm4DOESjBJnBwM2UOq-FkR2FVXk3GSopcLQlPSlMrlCpwVGGgQC6uomumMVAcX+KkEUnESmyCl5ck53L4vP5FiFIsctzFzseuOlsvlitgAAsaAB3QawEZjCkBqJBmk6qpJ4xLQ3VMSXdRaRBlYomKPmFTc5ECR33F2590FnBF1AQMAVqtgf0RQPfEOIC4A3kCawiZQXEiQ7sIMRpPQiZNczJZMRj8U5vje33E-CwQKYFdU+vawzh4ViMK1i8nyYgCOaiZGLqEhbLu1gog4GZMDQ87wOEmIfHW67sFwYi6EIogwbICiiDIUKcDUSQGGcJD8icCTcPe7jeD4mFfMGOEICQnKqEx2I9GxWobtC5iLPBIhrBIvDGFCmwlNyyhSNksgwtcGaYtmkr4q8RIQIJP7CWexR0meaR8pIoiqFCFn8CI5g2keBqyMIfETm6+YKvp2FxKscL0raIGgseBQXJISaAScKI2HSkjmK5j7PgEekalhHGhrwYkbBJ4g3jJJ7VLoUF6lIay7hsakOEAA */
@@ -113,15 +122,15 @@ export const timerStore = setup({
           target: 'ACTIVE.running',
           actions: assign({
             timer: ({ event }) => {
-              const newTimer: Running['timer'] = {
-                speakerIndex: -0,
+              const newTimer: Timer = {
                 elapsed: Math.floor(event.data.elapsed),
                 elapsedInMs: Math.floor(event.data.elapsed * 1000),
-                speakerName: "",
-                countdownTime: 0,
+                eventId: "EMPTY",
+                countdownTime: Math.floor(event.data.elapsed),
+                blinkingStartTime: 0,
+                blinkLength: 0,
                 message: "",
                 messageIsVisible: false,
-                startBlinkingTime: event.data.startBlinkingTime,
               }
               return newTimer
             }
@@ -265,7 +274,8 @@ export const timerStore = setup({
               return {
                 ...runningContext.timer,
                 messageIsVisible: false,
-                elapsed: null
+                elapsed: null,
+                elapsedInMs: null,
               }
             }
           })
@@ -277,7 +287,7 @@ export const timerStore = setup({
   on: {
     setup: {
       guard: and(['isConnected', ({ event }) => {
-        return event.data.speakerName.length > 0 && event.data.countdownTime > 0 && event.data.startBlinkingTime > 0
+        return !!event.data.eventId && event.data.countdownTime > 0 && event.data.blinkingStartTime > 0
       }]),
       actions: assign({
         timer: ({ event }) => {
@@ -287,10 +297,10 @@ export const timerStore = setup({
               { type: "stop" },
               {
                 type: "blink",
-                data: event.data.startBlinkingTime
+                data: event.data.blinkingStartTime
               }, {
                 type: "blink_length",
-                data: blinkLength ?? event.data.startBlinkingTime
+                data: blinkLength ?? event.data.blinkingStartTime
               }, {
                 type: "reset",
                 data: event.data.countdownTime,

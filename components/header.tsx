@@ -7,6 +7,8 @@ import { Wifi } from "~/lib/icons/Wifi";
 import { Switch } from "./ui/theme-switch";
 import { useState } from "react";
 import { Wired } from "~/lib/icons/Wired";
+import { useSelector as useMachineSelector } from "@xstate/react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +36,7 @@ import { Logs } from "~/lib/icons/Logs";
 import { GreenDot, RedDot } from "~/lib/icons/LogDots";
 import { getLocale } from "~/lib/locale";
 import { TimeInput } from "./ui/time-input";
+import { connectionActor } from "~/lib/store/connectionStore";
 
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
@@ -366,6 +369,15 @@ export const Header = () => {
   const [isDarkColorScheme, setIsDarkColorScheme] = useState(true);
   const [modal, setModal] = useState<Modal | null>(null);
 
+  const isConnected = useMachineSelector(connectionActor, (state) =>
+    state.matches("CONNECTED")
+  );
+
+  const connectionType = useMachineSelector(connectionActor, (state) => {
+    if (isConnected) return state.context.type;
+    return null;
+  });
+
   return (
     <View className="h-[60] px-[32] pt-[20]">
       <HeaderModals modal={modal} setModal={setModal} />
@@ -378,10 +390,18 @@ export const Header = () => {
         />
         <View className="flex-row gap-[24] items-center">
           <View className="flex-row gap-[8]">
-            <Button border="none" variant="secondary" icon={Wired}>
+            <Button
+              border="none"
+              variant={connectionType === "LAN" ? "primary" : "secondary"}
+              icon={Wired}
+            >
               <Text>Wired</Text>
             </Button>
-            <Button border="none" variant="secondary" icon={Wifi}>
+            <Button
+              border="none"
+              variant={connectionType === "WIFI" ? "primary" : "secondary"}
+              icon={Wifi}
+            >
               <Text>WiFi</Text>
             </Button>
           </View>

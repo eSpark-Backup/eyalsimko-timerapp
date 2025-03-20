@@ -10,6 +10,7 @@ import { Pause } from "~/lib/icons/Pause";
 import { Play } from "~/lib/icons/Play";
 import { Restart } from "~/lib/icons/Restart";
 import { More } from "~/lib/icons/More";
+import { useSelector as useMachineSelector } from "@xstate/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +35,8 @@ import { getLocale } from "~/lib/locale";
 import { eventConfigStore, Event } from "~/lib/store/eventConfig";
 import { useSelector } from "@xstate/store/react";
 import { TimeInput } from "../ui/time-input";
+import { SetupEvent, TimerContext } from "~/lib/store/timer";
+import { connectionActor } from "~/lib/store/connectionStore";
 
 export const TimersListHeader = () => {
   const [modal, setModal] = React.useState<ModalState | null>(null);
@@ -118,7 +121,7 @@ function TimerForm({
             <Input
               background="modal"
               label="Event Name"
-              // onBlur={onBlur}
+              onBlur={onBlur}
               onSubmitEditing={(e) => onChange(e.nativeEvent.text)}
               defaultValue={value}
             />
@@ -218,11 +221,6 @@ function TimerForm({
           border="none"
           variant="primary"
           onPress={(e) => {
-            console.log(
-              "onSubmit",
-              JSON.stringify(errors, null, 2),
-              JSON.stringify(getValues(), null, 2)
-            );
             submit(e);
           }}
         >
@@ -386,9 +384,15 @@ type ModalState =
       event: Event;
     };
 
-export default function TimersList() {
-  const events = useSelector(eventConfigStore, (state) => state.context.events);
-  const runningTimerId = events[0]?.id;
+function EventItem({
+  event,
+  index,
+  setModal,
+}: {
+  event: Event;
+  index: number;
+  setModal: (modal: ModalState | null) => void;
+}) {
   const insets = useSafeAreaInsets();
 
   const contentInsets = {
@@ -398,6 +402,177 @@ export default function TimersList() {
     right: 12,
   };
 
+  const actorRef = TimerContext.useActorRef();
+  const runningTimerId = useMachineSelector(actorRef, (state) => {
+    return state.context.timer?.eventId;
+  });
+
+  const isActive = useMachineSelector(actorRef, (state) =>
+    state.matches("ACTIVE")
+  );
+  const isRunning = useMachineSelector(actorRef, (state) =>
+    state.matches({ ACTIVE: "running" })
+  );
+  const isPaused = useMachineSelector(actorRef, (state) =>
+    state.matches({
+      ACTIVE: "paused",
+    })
+  );
+  const isStopped = useMachineSelector(actorRef, (state) =>
+    state.matches({
+      ACTIVE: "stopped",
+    })
+  );
+  const canStop = useMachineSelector(actorRef, (state) =>
+    state.can({ type: "stop" })
+  );
+  const canPause = useMachineSelector(actorRef, (state) =>
+    state.can({ type: "pause" })
+  );
+  const canResume = useMachineSelector(actorRef, (state) =>
+    state.can({ type: "resume" })
+  );
+
+  const setupEvent: SetupEvent = {
+    type: "setup",
+    data: {
+      countdownTime: event.countdownTime,
+      blinkingStartTime: event.blinkingStartTime,
+      blinkLength: event.blinkLength,
+      eventId: event.id,
+    },
+  } as const;
+  const canSetup = useMachineSelector(actorRef, (state) =>
+    state.can(setupEvent)
+  );
+  const isConnected = useMachineSelector(connectionActor, (state) =>
+    state.matches("CONNECTED")
+  );
+
+  return (
+    <View
+      key={event.id}
+      className={cn(
+        "flex-row items-center rounded-[8] py-[12] px-[20] gap-[16]",
+        event.id === runningTimerId && "bg-item-highlight",
+        event.id !== runningTimerId && "bg-item"
+      )}
+    >
+      <Move color="hsla(213, 5%, 57%, 1)" size={16} />
+      <View className="flex-1 flex-row items-center justify-between">
+        <View className="flex-row items-center gap-[16]">
+          <Text
+            style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
+            className="text-md w-[20]"
+          >
+            {index + 1}
+          </Text>
+          <Text className="color-primary text-md w-[100]">
+            {event.startedAt ? dateFormatter.format(event.startedAt) : ""}
+          </Text>
+          <View className="w-[60]">
+            <Text className="color-primary">
+              {formatCountdown({
+                countdownTime: event.countdownTime,
+                elapsedTime: event.countdownTime,
+              })}
+            </Text>
+          </View>
+          <View className="gap-[4]">
+            <View className="flex-row gap-[12]">
+              <Text>{event.name}</Text>
+              <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>
+                {event.speakerName}
+              </Text>
+            </View>
+            {event.description && (
+              <Text
+                style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
+                className="text-sm"
+              >
+                {event.description}
+              </Text>
+            )}
+          </View>
+        </View>
+        <View className="flex-row gap-[16] self-end">
+          {event.id === runningTimerId && isRunning ? (
+            <IconButton
+              disabled={!isConnected}
+              size="sm"
+              variant="success"
+              icon={Pause}
+              onPress={() => {
+                actorRef.send({ type: "pause" });
+              }}
+            />
+          ) : (
+            <IconButton
+              disabled={!isConnected}
+              size="sm"
+              variant="primary"
+              icon={Play}
+              onPress={() => {
+                if (event.id !== runningTimerId) {
+                  actorRef.send(setupEvent);
+                  actorRef.send({ type: "start" });
+                } else if (isPaused && event.id === runningTimerId) {
+                  actorRef.send({ type: "resume" });
+                } else if (isStopped && event.id === runningTimerId) {
+                  actorRef.send({ type: "start" });
+                }
+              }}
+            />
+          )}
+          <IconButton
+            disabled={!isConnected}
+            size="sm"
+            icon={Restart}
+            onPress={() => {
+              actorRef.send(setupEvent);
+            }}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <IconButton size="sm" icon={More} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              avoidCollisions={true}
+              align="end"
+              alignOffset={-32 - 6}
+              sideOffset={-32 - 12}
+              insets={contentInsets}
+              className="w-[148]"
+            >
+              <DropdownMenuGroup className="gap-[8]">
+                <DropdownMenuItem
+                  onPress={() => setModal({ type: "edit", event })}
+                >
+                  <View className="flex-1 flex-row justify-between items-center">
+                    <Text className="text-sm font-normal">Edit</Text>
+                    <Edit size={16} />
+                  </View>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onPress={() => setModal({ type: "delete", event })}
+                >
+                  <View className="flex-1 flex-row justify-between items-center">
+                    <Text className="text-sm font-normal">Delete</Text>
+                    <Trash size={16} />
+                  </View>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+export default function TimersList() {
+  const events = useSelector(eventConfigStore, (state) => state.context.events);
+
   const [modal, setModal] = React.useState<ModalState | null>(null);
 
   return (
@@ -405,93 +580,12 @@ export default function TimersList() {
       <TimerModals modal={modal} setModal={setModal} />
       <View className="gap-[12]">
         {events.map((event, index) => (
-          <View
+          <EventItem
             key={event.id}
-            className={cn(
-              "flex-row items-center rounded-[8] py-[12] px-[20] gap-[16]",
-              event.id === runningTimerId && "bg-item-highlight",
-              event.id !== runningTimerId && "bg-item"
-            )}
-          >
-            <Move color="hsla(213, 5%, 57%, 1)" size={16} />
-            <View className="flex-1 flex-row items-center justify-between">
-              <View className="flex-row items-center gap-[16]">
-                <Text
-                  style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
-                  className="text-md w-[20]"
-                >
-                  {index + 1}
-                </Text>
-                <Text className="color-primary text-md w-[100]">
-                  {event.startedAt ? dateFormatter.format(event.startedAt) : ""}
-                </Text>
-                <View className="w-[60]">
-                  <Text className="color-primary">
-                    {formatCountdown({
-                      countdownTime: event.countdownTime,
-                      elapsedTime: event.countdownTime,
-                    })}
-                  </Text>
-                </View>
-                <View className="gap-[4]">
-                  <View className="flex-row gap-[12]">
-                    <Text>{event.name}</Text>
-                    <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>
-                      {event.speakerName}
-                    </Text>
-                  </View>
-                  {event.description && (
-                    <Text
-                      style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
-                      className="text-sm"
-                    >
-                      {event.description}
-                    </Text>
-                  )}
-                </View>
-              </View>
-              <View className="flex-row gap-[16] self-end">
-                {event.id === runningTimerId ? (
-                  <IconButton size="sm" variant="success" icon={Pause} />
-                ) : (
-                  <IconButton size="sm" variant="primary" icon={Play} />
-                )}
-                <IconButton size="sm" icon={Restart} />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <IconButton size="sm" icon={More} />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    avoidCollisions={true}
-                    align="end"
-                    alignOffset={-32 - 6}
-                    sideOffset={-32 - 12}
-                    insets={contentInsets}
-                    className="w-[148]"
-                  >
-                    <DropdownMenuGroup className="gap-[8]">
-                      <DropdownMenuItem
-                        onPress={() => setModal({ type: "edit", event })}
-                      >
-                        <View className="flex-1 flex-row justify-between items-center">
-                          <Text className="text-sm font-normal">Edit</Text>
-                          <Edit size={16} />
-                        </View>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onPress={() => setModal({ type: "delete", event })}
-                      >
-                        <View className="flex-1 flex-row justify-between items-center">
-                          <Text className="text-sm font-normal">Delete</Text>
-                          <Trash size={16} />
-                        </View>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </View>
-            </View>
-          </View>
+            event={event}
+            index={index}
+            setModal={setModal}
+          />
         ))}
       </View>
     </>

@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "@xstate/react";
-import { TimerContext } from "~/lib/store/timer";
+import { SetupEvent, TimerContext } from "~/lib/store/timer";
 import { cn, formatDuration } from "~/lib/utils";
 import { Play } from "~/lib/icons/Play";
 import { Pause } from "~/lib/icons/Pause";
@@ -83,8 +83,8 @@ function Countdown() {
     : "text-primary";
 
   const blinkTimePeriod = {
-    start: timer.startBlinkingTime,
-    end: blinkLength === null ? 0 : timer.startBlinkingTime - blinkLength,
+    start: timer.blinkingStartTime,
+    end: blinkLength === null ? 0 : timer.blinkingStartTime - blinkLength,
   };
 
   const inBlinkTimePeriod = timer.elapsed
@@ -108,7 +108,7 @@ function Countdown() {
     <View className="flex flex-col md:flex-row md:landscape:flex-col gap-2 md:gap-4 items-baseline">
       <View className="flex flex-row gap-1 items-baseline">
         <Text className="text-2xl">
-          Timer {timer.speakerIndex + 1}: {timer.speakerName}:
+          Timer {timer.eventId + 1}: {timer.eventId}:
         </Text>
         <View className="flex flex-row gap-0.5"></View>
         <BlinkingLine isBlinking={isBlinking} />
@@ -241,13 +241,13 @@ export const TimerCard = ({
     }
   };
 
-  const setupEvent = {
+  const setupEvent: SetupEvent = {
     type: "setup",
     data: {
-      speakerName,
       countdownTime: countdownTime ?? 0,
-      startBlinkingTime: startBlinkingTime ?? 0,
-      speakerIndex,
+      blinkingStartTime: startBlinkingTime ?? 0,
+      blinkLength: 0,
+      eventId: "123",
     },
   } as const;
   const canSetup = useSelector(actorRef, (state) => state.can(setupEvent));
