@@ -1,5 +1,6 @@
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
+import { useSelector as useMachineSelector } from "@xstate/react";
 import { CompanyLogo } from "~/lib/icons/CompanyLogo";
 import {
   Canvas,
@@ -8,8 +9,11 @@ import {
   LinearGradient as SkiaLinearGradient,
   vec,
 } from "@shopify/react-native-skia";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { cn, formatCountdown } from "~/lib/utils";
+import { TimerContext } from "~/lib/store/timer";
+import { useSelector } from "@xstate/store/react";
+import { eventConfigStore } from "~/lib/store/eventConfig";
 
 /*
 position: absolute;
@@ -124,14 +128,15 @@ function ProgressBar({
 }
 
 export const ActiveTimerWidget = () => {
-  const timer = {
-    speakerName: "David",
-    countdownTime: 1000,
-    elapsedTime: 1000,
-    timerName: "Goals of the evening",
-  };
+  const actorRef = TimerContext.useActorRef();
+  const timer = useMachineSelector(actorRef, (state) => state.context.timer);
+  const event = useSelector(
+    eventConfigStore,
+    (state) =>
+      state.context.events.find((event) => event.id === timer?.eventId)!
+  );
 
-  if (!timer) return null;
+  if (!timer || !timer.elapsed) return null;
 
   return (
     <View className="flex-col flex-1 justify-between">
@@ -143,32 +148,33 @@ export const ActiveTimerWidget = () => {
           strokeWidth={0}
         />
         <Text className="text-lg font-semibold text-main-light">
-          {timer.speakerName}
+          {event.speakerName}
         </Text>
       </View>
       <View className="flex-1 items-center justify-center">
-        <Text
-          // style={{ fontFamily: "Poppins" }}
-          className={cn(
-            "text-8xl font-poppins font-medium",
-            timer.elapsedTime < 0 && "text-countdown-out-of-time",
-            timer.elapsedTime >= 0 && "text-primary"
-          )}
-        >
-          {formatCountdown({
-            elapsedTime: timer.elapsedTime,
-            countdownTime: timer.countdownTime,
-          })}
-        </Text>
+        {timer.elapsed !== null && (
+          <Text
+            className={cn(
+              "text-8xl font-poppins font-medium",
+              timer.elapsed < 0 && "text-countdown-out-of-time",
+              timer.elapsed >= 0 && "text-primary"
+            )}
+          >
+            {formatCountdown({
+              elapsedTime: timer.elapsed,
+              countdownTime: timer.countdownTime,
+            })}
+          </Text>
+        )}
         <View className="absolute bottom-[40]">
           <Text className="text-lg font-semibold text-main-light">
-            {timer.timerName}
+            {event.description}
           </Text>
         </View>
       </View>
       <ProgressBar
-        countdownTime={timer.countdownTime}
-        elapsedTime={timer.elapsedTime}
+        countdownTime={timer.countdownTime * 1000}
+        elapsedTime={timer.elapsedInMs ?? timer.countdownTime * 1000}
       />
     </View>
   );

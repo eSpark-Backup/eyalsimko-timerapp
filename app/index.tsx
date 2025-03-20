@@ -1,7 +1,7 @@
 import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "~/components/Card";
-import { Text } from "~/components/ui/text";
+import { useSelector as useMachineSelector } from "@xstate/react";
+
 import { ActiveTimerWidget } from "~/components/widgets/ActiveTimer";
 import {
   MessageWidget,
@@ -9,9 +9,14 @@ import {
 } from "~/components/widgets/Messages";
 import TimerControls from "~/components/widgets/TimerControls";
 import TimersList, { TimersListHeader } from "~/components/widgets/TimersList";
+import { TimerContext } from "~/lib/store/timer";
 
 export default function TimerScreen() {
-  const timer = {};
+  const actorRef = TimerContext.useActorRef();
+  const timerIsRunning = useMachineSelector(
+    actorRef,
+    (state) => state.context.timer?.elapsed !== null
+  );
 
   return (
     <View className="flex-1 gap-[24] pt-[20] px-[32] pb-[34]">
@@ -20,7 +25,10 @@ export default function TimerScreen() {
           <TimersList />
         </Card>
         <View style={{ width: 360 }}>
-          <Card spacing="small" borderColor={timer ? "active" : "default"}>
+          <Card
+            spacing="small"
+            borderColor={timerIsRunning ? "active" : "default"}
+          >
             <ActiveTimerWidget />
           </Card>
         </View>
