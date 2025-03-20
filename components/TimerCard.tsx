@@ -234,9 +234,6 @@ export const TimerCard = ({
   const setupEvent: SetupEvent = {
     type: "setup",
     data: {
-      countdownTime: countdownTime ?? 0,
-      blinkingStartTime: startBlinkingTime ?? 0,
-      blinkLength: 0,
       eventId: "123",
     },
   } as const;

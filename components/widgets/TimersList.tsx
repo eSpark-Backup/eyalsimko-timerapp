@@ -104,7 +104,6 @@ function TimerForm({
     },
   });
   const submit = handleSubmit((data) => {
-    console.log(data);
     onSubmit(data);
     closeModal();
   });
@@ -436,9 +435,6 @@ function EventItem({
   const setupEvent: SetupEvent = {
     type: "setup",
     data: {
-      countdownTime: event.countdownTime,
-      blinkingStartTime: event.blinkingStartTime,
-      blinkLength: event.blinkLength,
       eventId: event.id,
     },
   } as const;

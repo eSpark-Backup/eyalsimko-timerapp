@@ -14,6 +14,7 @@ import { cn, formatCountdown } from "~/lib/utils";
 import { TimerContext } from "~/lib/store/timer";
 import { useSelector } from "@xstate/store/react";
 import { eventConfigStore } from "~/lib/store/eventConfig";
+import { connectionActor } from "~/lib/store/connectionStore";
 
 /*
 position: absolute;
@@ -130,13 +131,11 @@ function ProgressBar({
 export const ActiveTimerWidget = () => {
   const actorRef = TimerContext.useActorRef();
   const timer = useMachineSelector(actorRef, (state) => state.context.timer);
-  const event = useSelector(
-    eventConfigStore,
-    (state) =>
-      state.context.events.find((event) => event.id === timer?.eventId)!
+  const event = useSelector(eventConfigStore, (state) =>
+    state.context.events.find((event) => event.id === timer?.eventId)
   );
 
-  if (!timer || !timer.elapsed) return null;
+  if (!timer || !timer.elapsed || !event) return null;
 
   return (
     <View className="flex-col flex-1 justify-between">
@@ -174,7 +173,7 @@ export const ActiveTimerWidget = () => {
       </View>
       <ProgressBar
         countdownTime={timer.countdownTime * 1000}
-        elapsedTime={timer.elapsedInMs ?? timer.countdownTime * 1000}
+        elapsedTime={timer.elapsedInMs}
       />
     </View>
   );

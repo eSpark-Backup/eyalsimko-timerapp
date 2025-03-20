@@ -64,11 +64,7 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
     const isFilled = isControlled
       ? value.length > 0
       : valueRef.current.length > 0;
-    const [isFocused, _setIsFocused] = React.useState(false);
-    const setIsFocused = (isFocused: boolean) => {
-      console.log("setIsFocused", isFocused);
-      _setIsFocused(isFocused);
-    };
+    const [isFocused, setIsFocused] = React.useState(false);
     const isFilledOrFocused = isFocused || isFilled;
     const labelFloating = useAnimatedValue(isFilledOrFocused ? 1 : 0);
 
@@ -104,7 +100,6 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
     const handleSubmitEditing = (
       e: NativeSyntheticEvent<TextInputSubmitEditingEventData>
     ) => {
-      console.log("onSubmitEditing");
       if (onSubmitEditing) onSubmitEditing(e);
       valueRef.current = e.nativeEvent.text;
     };

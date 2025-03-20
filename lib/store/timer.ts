@@ -30,9 +30,6 @@ type State = { timer: Timer | null }
 export type SetupEvent = {
   type: "setup",
   data: {
-    countdownTime: number
-    blinkingStartTime: number
-    blinkLength: number
     eventId: string
   }
 }
@@ -272,28 +269,34 @@ export const timerStore = setup({
   },
   on: {
     setup: {
-      guard: and(['isConnected', ({ event }) => {
-        return !!event.data.eventId && event.data.countdownTime > 0 && event.data.blinkingStartTime > 0
+      guard: and(['isConnected', ({ event: { data: { eventId } } }) => {
+        const event = eventConfigStore.getSnapshot().context.events.find(event => event.id === eventId)!
+
+        return !!eventId && event.countdownTime > 0 && event.blinkingStartTime > 0
       }]),
       actions: assign({
-        timer: ({ event }) => {
-          const blinkLength = eventConfigStore.getSnapshot().context.blinkLength
+        timer: ({ event: { data } }) => {
+          const event = eventConfigStore.getSnapshot().context.events.find(event => event.id === data.eventId)!
+          const defaultBlinkLength = eventConfigStore.getSnapshot().context.blinkLength
           connectionActor.send({
             type: "sendMessage", message: [
               { type: "stop" },
               {
                 type: "blink",
-                data: event.data.blinkingStartTime
+                data: event.blinkingStartTime
               }, {
                 type: "blink_length",
-                data: blinkLength ?? event.data.blinkingStartTime
+                data: event.blinkingStartTime ?? defaultBlinkLength
               }, {
                 type: "reset",
-                data: event.data.countdownTime,
+                data: event.countdownTime,
               }]
           })
           return {
-            ...event.data,
+            countdownTime: event.countdownTime,
+            blinkingStartTime: event.blinkingStartTime,
+            blinkLength: event.blinkingStartTime ?? defaultBlinkLength,
+            eventId: event.id,
             elapsed: null,
             elapsedInMs: null,
             messageId: null

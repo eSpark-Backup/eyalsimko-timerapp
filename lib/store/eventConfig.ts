@@ -1,3 +1,8 @@
+import { nanoid } from 'nanoid/non-secure'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { createStore } from '@xstate/store';
+import { connectionActor } from './connectionStore'
+
 export type Message = {
   id: string,
   content: string,
@@ -27,10 +32,6 @@ type State = {
   messages: Message[]
 }
 
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { createStore } from '@xstate/store';
-import { connectionActor } from './connectionStore'
-
 const initialState: State = {
   blinkingStartTime: null,
   blinkLength: null,
@@ -38,8 +39,6 @@ const initialState: State = {
   screenWifiConfig: [],
   messages: [],
 }
-
-const generateId = () => Math.random().toString(36)
 
 export const eventConfigStore = createStore({
   context: initialState,
@@ -73,7 +72,7 @@ export const eventConfigStore = createStore({
     addMessage: (context) => {
       return {
         messages: [...context.messages, {
-          id: generateId(),
+          id: nanoid(),
           content: '',
         }]
       }
@@ -95,9 +94,11 @@ export const eventConfigStore = createStore({
       }
     },
     addEvent: (context, { event }: { event: Omit<Event, 'id' | 'startedAt'> }) => {
+      const id = nanoid(10)
+      console.log("add event after id", id)
       return {
         events: [...context.events, {
-          id: generateId(),
+          id: id,
           startedAt: null,
           ...event
         }]
