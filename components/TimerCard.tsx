@@ -212,32 +212,22 @@ export const TimerCard = ({
 }) => {
   const actorRef = TimerContext.useActorRef();
 
-  const canSetMessage = useSelector(actorRef, (state) =>
-    state.can({ type: "setMessage", data: { message: "" } })
-  );
-  const canShowMessage = useSelector(actorRef, (state) =>
-    state.can({ type: "showMessage" })
-  );
+  const canSetMessage = false;
+  const canShowMessage = false;
   const canHideMessage = useSelector(actorRef, (state) =>
     state.can({ type: "hideMessage" })
   );
-  const messageIsVisible = useSelector(
-    actorRef,
-    (state) => state.context.timer?.messageIsVisible ?? false
-  );
+  const messageIsVisible = false;
 
   const canToggleMessage = canShowMessage || canHideMessage;
 
-  const message = useSelector(
-    actorRef,
-    (state) => state.context.timer?.message ?? ""
-  );
+  const message = "kek";
 
   const toggleMessage = () => {
     if (messageIsVisible) {
       actorRef.send({ type: "hideMessage" });
     } else {
-      actorRef.send({ type: "showMessage" });
+      actorRef.send({ type: "showMessage", data: { messageId: "kek" } });
     }
   };
 
@@ -299,12 +289,7 @@ export const TimerCard = ({
                   numberOfLines={1}
                   value={message}
                   style={{ fontSize: 21, lineHeight: 28 }}
-                  onChangeText={(text) => {
-                    actorRef.send({
-                      type: "setMessage",
-                      data: { message: text },
-                    });
-                  }}
+                  onChangeText={(text) => {}}
                   maxLength={40}
                 />
               )}
@@ -316,12 +301,7 @@ export const TimerCard = ({
                   numberOfLines={1}
                   value={message}
                   style={{ fontSize: 21, lineHeight: 28 }}
-                  onChangeText={(text) => {
-                    actorRef.send({
-                      type: "setMessage",
-                      data: { message: text },
-                    });
-                  }}
+                  onChangeText={(text) => {}}
                   maxLength={40}
                 />
               )}

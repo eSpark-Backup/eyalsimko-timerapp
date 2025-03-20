@@ -1,7 +1,6 @@
-import z from 'zod'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createActorContext } from '@xstate/react';
-import { and, assign, fromCallback, fromEventObservable, setup } from 'xstate';
+import { and, assign, fromCallback, setup } from 'xstate';
 import { ConnectedState, connectionActor, RecoverMessage } from './connectionStore';
 import { eventConfigStore } from './eventConfig';
 
@@ -12,8 +11,7 @@ type RunningTimer = {
   countdownTime: number
   blinkingStartTime: number
   blinkLength: number
-  message: string,
-  messageIsVisible: boolean
+  messageId: string | null,
 }
 
 type NonRunningTimer = Omit<RunningTimer, 'elapsed' | 'elapsedInMs'> & {
@@ -53,12 +51,10 @@ type Events = SetupEvent | {
 } | {
   type: "resume"
 } | {
-  type: "setMessage",
+  type: "showMessage",
   data: {
-    message: string
-  }
-} | {
-  type: "showMessage"
+    messageId: string
+  },
 } | {
   type: "hideMessage"
 } | {
@@ -129,8 +125,7 @@ export const timerStore = setup({
                 countdownTime: Math.floor(event.data.elapsed),
                 blinkingStartTime: 0,
                 blinkLength: 0,
-                message: "",
-                messageIsVisible: false,
+                messageId: null,
               }
               return newTimer
             }
@@ -193,20 +188,23 @@ export const timerStore = setup({
                   connectionActor.send({ type: "sendMessage", message: { type: "pause" } })
                   return {
                     ...runningContext.timer,
-                    messageIsVisible: false
+                    messageId: null
                   }
                 }
               })
             },
             showMessage: {
-              guard: 'isConnected',
+              guard: and(['isConnected', ({ event }) => {
+                return !!eventConfigStore.getSnapshot().context.messages.find(message => message.id === event.data.messageId)
+              }]),
               actions: assign({
-                timer: ({ context }) => {
+                timer: ({ event, context }) => {
                   const runningContext = context as Running
-                  connectionActor.send({ type: "sendMessage", message: { type: "msg", data: runningContext.timer.message } })
+                  const message = eventConfigStore.getSnapshot().context.messages.find(message => message.id === event.data.messageId)!
+                  connectionActor.send({ type: "sendMessage", message: { type: "msg", data: message.content } })
                   return {
                     ...runningContext.timer,
-                    messageIsVisible: true
+                    messageId: event.data.messageId
                   }
                 }
               })
@@ -219,7 +217,7 @@ export const timerStore = setup({
                   connectionActor.send({ type: "sendMessage", message: { type: "hide" } })
                   return {
                     ...runningContext.timer,
-                    messageIsVisible: false
+                    messageId: null
                   }
                 }
               })
@@ -239,17 +237,6 @@ export const timerStore = setup({
         },
       },
       on: {
-        setMessage: {
-          actions: assign({
-            timer: ({ context, event }) => {
-              const runningContext = context as Running
-              return {
-                ...runningContext.timer,
-                message: event.data.message
-              }
-            }
-          }),
-        },
         stop: {
           target: '.stopped',
           guard: 'isConnected',
@@ -273,7 +260,6 @@ export const timerStore = setup({
               })
               return {
                 ...runningContext.timer,
-                messageIsVisible: false,
                 elapsed: null,
                 elapsedInMs: null,
               }
@@ -308,10 +294,9 @@ export const timerStore = setup({
           })
           return {
             ...event.data,
-            message: 'Time is up!',
             elapsed: null,
             elapsedInMs: null,
-            messageIsVisible: false
+            messageId: null
           }
         }
       }),
