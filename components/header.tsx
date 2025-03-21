@@ -37,6 +37,8 @@ import { GreenDot, RedDot } from "~/lib/icons/LogDots";
 import { getLocale } from "~/lib/locale";
 import { TimeInput } from "./ui/time-input";
 import { connectionActor } from "~/lib/store/connectionStore";
+import { eventConfigStore } from "~/lib/store/eventConfig";
+import { useSelector } from "@xstate/store/react";
 
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
@@ -136,7 +138,12 @@ function HeaderModals({
       ],
     },
   ];
-  const [length, setLength] = React.useState(60);
+  const blinkLength =
+    useSelector(eventConfigStore, (state) => state.context.blinkLength) ??
+    undefined;
+  const blinkingStartTime =
+    useSelector(eventConfigStore, (state) => state.context.blinkingStartTime) ??
+    undefined;
   return (
     <>
       <Dialog
@@ -156,8 +163,13 @@ function HeaderModals({
                 <View className="flex-row gap-[20]">
                   <View className="flex-1">
                     <TimeInput
-                      value={0}
-                      onChange={() => {}}
+                      value={blinkingStartTime}
+                      onChange={(blinkingStartTime) =>
+                        eventConfigStore.send({
+                          type: "setBlinkingStartTime",
+                          blinkingStartTime,
+                        })
+                      }
                       size="default"
                       label="Start Time"
                       background="modal"
@@ -167,8 +179,13 @@ function HeaderModals({
                     <TimeInput
                       size="default"
                       background="modal"
-                      value={length}
-                      onChange={setLength}
+                      value={blinkLength}
+                      onChange={(blinkLength) => {
+                        eventConfigStore.send({
+                          type: "setBlinkLength",
+                          blinkLength,
+                        });
+                      }}
                       label="Length"
                     />
                   </View>

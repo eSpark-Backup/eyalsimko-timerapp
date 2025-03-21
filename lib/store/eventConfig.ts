@@ -143,6 +143,8 @@ AsyncStorage.getItem(snapshotKey)
 
       return {
         ...parsed,
+        blinkingStartTime: null,
+        blinkLength: null,
         events: parsed.events.map((event: any) => {
           return {
             ...event,

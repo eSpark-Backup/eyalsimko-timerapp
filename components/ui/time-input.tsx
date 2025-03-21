@@ -12,11 +12,14 @@ interface TimeInputProps
   onChange: (newValue: number) => void;
 }
 
+const emptyStringToNull = (value: string) => (value === "" ? null : value);
+
 const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
   const ref = React.useRef<TextInputRef>(null);
   const [localValue, setLocalValue] = React.useState(() =>
     value !== undefined ? formatTime(value) : ""
   );
+  const localValueRef = React.useRef(localValue);
 
   // Format seconds into HH:mm:ss
   function formatTime(totalSeconds: number): string {
@@ -31,60 +34,58 @@ const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
   }
 
   // Convert HH:mm:ss string to seconds
-  function timeToSeconds(timeStr: string): number {
-    const [hours = "0", minutes = "0", seconds = "0"] = timeStr
-      .replace(/[^\d:]/g, "")
-      .split(":");
+  function timeToSeconds(timeStr: string): number | null {
+    const cleaned = timeStr.replace(/[^\d]/g, "");
+    const hours = emptyStringToNull(cleaned.slice(0, 2));
+    const minutes = emptyStringToNull(cleaned.slice(2, 4));
+    const seconds = emptyStringToNull(cleaned.slice(4, 6));
+    if (!hours || !minutes || !seconds) return null;
+
     return parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds);
   }
 
   // Format input as user types
   function handleChangeText(text: string) {
-    const cleaned = text.replace(/[^\d:]/g, "");
-    let formatted = cleaned;
-
-    // Handle backspacing
-    if (cleaned.length < localValue.replace(/[^\d:]/g, "").length) {
-      setLocalValue(cleaned);
-      return;
-    }
+    const cleaned = text.replace(/[^\d]/g, "");
+    const hours = emptyStringToNull(cleaned.slice(0, 2));
+    const minutes = emptyStringToNull(cleaned.slice(2, 4));
+    const seconds = emptyStringToNull(cleaned.slice(4, 6));
 
     // Validate and format each section as user types
     if (cleaned.length >= 2) {
       // Minutes validation
-      if (cleaned.length >= 3) {
-        const minutes = cleaned.slice(3, 5);
+      if (minutes) {
         if (parseInt(minutes[0], 10) > 5) {
-          formatted = localValue;
+          return;
         }
       }
 
       // Seconds validation
-      if (cleaned.length >= 6) {
-        const seconds = cleaned.slice(6, 9);
+      if (seconds) {
         if (parseInt(seconds[0], 10) > 5) {
-          formatted = localValue;
+          return;
         }
       }
-
-      // Add colons
-      if (cleaned.length < 5 && !cleaned.includes(":")) {
-        formatted = `${formatted.slice(0, 2)}:${formatted.slice(2)}`;
-      } else if (cleaned.length >= 5 && !formatted.slice(5).includes(":")) {
-        formatted = `${formatted.slice(0, 5)}:${formatted.slice(5)}`;
-      }
     }
+    // Add colons
+    const formatted = [hours, minutes, seconds].filter(Boolean).join(":");
 
-    if (formatted.length === 8) ref.current?.blurAndRemoveFocus();
     setLocalValue(formatted);
+    localValueRef.current = formatted;
+    if (formatted.length === 8) ref.current?.blurAndRemoveFocus();
   }
 
   // Update parent when input is complete
   function handleBlur(e: NativeSyntheticEvent<TextInputFocusEventData>) {
     if (onBlur) onBlur(e);
-    const seconds = timeToSeconds(localValue);
-    onChange(seconds);
-    setLocalValue(formatTime(seconds));
+    const seconds = timeToSeconds(localValueRef.current);
+    if (seconds !== null) {
+      onChange(seconds);
+      setLocalValue(formatTime(seconds));
+    } else {
+      setLocalValue("");
+      localValueRef.current = "";
+    }
   }
 
   // Update local value when parent value changes
