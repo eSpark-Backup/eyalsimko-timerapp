@@ -588,7 +588,7 @@ export default function TimersList() {
                 elementY >= scrollY &&
                 elementY + elementHeight <= scrollY + scrollViewHeight;
 
-                if (!isVisible) {
+              if (!isVisible) {
                 const y = elementY - elementHeight;
                 currentScrollViewRef.scrollTo({
                   y: y < elementHeight ? 0 : y,
@@ -607,7 +607,6 @@ export default function TimersList() {
   }, [runningTimerId]);
 
   const [modal, setModal] = React.useState<ModalState | null>(null);
-
   return (
     <>
       <TimerModals modal={modal} setModal={setModal} />

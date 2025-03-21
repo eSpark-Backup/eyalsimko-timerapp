@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { useSelector as useMachineSelector } from "@xstate/react";
 import { Pause } from "~/lib/icons/Pause";
 import { formatCountdown, formatDuration } from "~/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IconButton } from "../iconButton";
 import { SkipBack } from "~/lib/icons/SkipBack";
 import { SkipForward } from "~/lib/icons/SkipForward";
@@ -13,6 +13,39 @@ import { TimerContext } from "~/lib/store/timer";
 import { useSelector } from "@xstate/store/react";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { Play } from "~/lib/icons/Play";
+
+function ElapsedTime() {
+  const firstEventStartedAt = useSelector(eventConfigStore, (state) => {
+    return [
+      ...state.context.events
+        .map((event) => event.startedAt)
+        .filter((a) => !!a),
+    ].sort((a, b) => {
+      return a.getTime() - b.getTime();
+    })[0];
+  });
+
+  const [secondsPassed, setSecondsPassed] = useState(() =>
+    firstEventStartedAt
+      ? Math.round((Date.now() - firstEventStartedAt.getTime()) / 1000)
+      : 0
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newSecondsPassed = firstEventStartedAt
+        ? Math.round((Date.now() - firstEventStartedAt.getTime()) / 1000)
+        : 0;
+
+      setSecondsPassed(newSecondsPassed);
+    }, 33);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [firstEventStartedAt]);
+
+  return formatDuration(secondsPassed);
+}
 
 export default function TimerControls() {
   const actorRef = TimerContext.useActorRef();
@@ -143,16 +176,11 @@ export default function TimerControls() {
       </View>
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Elapsed Time</Text>
-        {timer.elapsed !== null && (
-          <View className="border-highlight border py-[8] px-[12] rounded-[8]">
-            <Text className="font-normal ">
-              {formatCountdown({
-                countdownTime: timer.countdownTime,
-                elapsedTime: timer.elapsed,
-              })}
-            </Text>
-          </View>
-        )}
+        <View className="border-highlight border py-[8] px-[12] rounded-[8]">
+          <Text className="font-normal ">
+            <ElapsedTime />
+          </Text>
+        </View>
       </View>
       <View
         style={{ backgroundColor: "hsla(210, 32%, 13%, 1)" }}

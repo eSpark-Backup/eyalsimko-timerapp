@@ -138,7 +138,20 @@ const snapshotKey = 'configSnapshot-v1'
 
 AsyncStorage.getItem(snapshotKey)
   .then(snapshot => {
-    const parsedSnapshot = JSON.parse(snapshot ?? 'null') as State | null
+    const parsedSnapshot = (() => {
+      const parsed = JSON.parse(snapshot ?? 'null')
+
+      return {
+        ...parsed,
+        events: parsed.events.map((event: any) => {
+          return {
+            ...event,
+            // startedAt: event.startedAt ? new Date(event.startedAt) : null 
+            startedAt: null
+          }
+        })
+      }
+    })() as State | null
     if (parsedSnapshot) {
       eventConfigStore.send({
         type: 'initialize',
