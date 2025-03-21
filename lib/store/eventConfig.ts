@@ -103,15 +103,15 @@ export const eventConfigStore = createStore({
         }]
       }
     },
-    updateEvent: (context, { event }: { event: Omit<Event, 'startedAt'> }) => {
-      const index = context.events.findIndex(event => event.id === event.id)
+    setEventStartedAt: (context, { eventId }: { eventId: string }) => {
+      const index = context.events.findIndex(event => event.id === eventId)
       if (index === -1) return context
       return {
         events: [
           ...context.events.slice(0, index),
           {
-            startedAt: context.events[index].startedAt,
-            ...event
+            ...context.events[index],
+            startedAt: new Date(),
           },
           ...context.events.slice(index + 1)
         ]

@@ -143,6 +143,7 @@ export const timerStore = setup({
               actions: assign({
                 timer: ({ context }) => {
                   const stoppedContext = context as Resetted
+                  eventConfigStore.send({ type: "setEventStartedAt", eventId: stoppedContext.timer.eventId })
                   connectionActor.send({
                     type: "sendMessage", message: {
                       type: "start"
