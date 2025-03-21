@@ -55,6 +55,10 @@ const spacingSizeMap = {
   small: 16,
 } as const;
 
+export const CardScrollRefContext = React.createContext<
+  React.RefObject<ScrollView>
+>({ current: null });
+
 export default function Card({
   children,
   scrollable = false,
@@ -68,6 +72,7 @@ export default function Card({
   spacing?: "default" | "small";
   borderColor?: "default" | "active";
 }) {
+  const scrollRef = React.useRef<ScrollView>(null);
   if (scrollable) {
     return (
       <View
@@ -77,8 +82,13 @@ export default function Card({
         <View className={scrollableCardHeaderVariants({ spacing })}>
           {header}
         </View>
-        <ScrollView className={scrollableCardContentVariants({ spacing })}>
-          {children}
+        <ScrollView
+          ref={scrollRef}
+          className={scrollableCardContentVariants({ spacing })}
+        >
+          <CardScrollRefContext.Provider value={scrollRef}>
+            {children}
+          </CardScrollRefContext.Provider>
         </ScrollView>
       </View>
     );

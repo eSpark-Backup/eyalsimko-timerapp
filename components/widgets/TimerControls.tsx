@@ -26,7 +26,7 @@ export default function TimerControls() {
     state.context.events.findIndex((event) => event.id === timer?.eventId)
   );
   const previousEvent = useSelector(eventConfigStore, (state) =>
-    state.context.events.at(eventIndex - 1)
+    eventIndex > 0 ? state.context.events.at(eventIndex - 1) : null
   );
   const nextEvent = useSelector(eventConfigStore, (state) =>
     state.context.events.at(eventIndex + 1)

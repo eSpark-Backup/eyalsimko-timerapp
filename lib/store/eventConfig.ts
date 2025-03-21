@@ -95,7 +95,6 @@ export const eventConfigStore = createStore({
     },
     addEvent: (context, { event }: { event: Omit<Event, 'id' | 'startedAt'> }) => {
       const id = nanoid(10)
-      console.log("add event after id", id)
       return {
         events: [...context.events, {
           id: id,

@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { findNodeHandle, UIManager, View } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { Text } from "~/components/ui/text";
 import { Button } from "../ui/button";
@@ -28,7 +28,7 @@ import {
   DialogFooter,
   DialogHeader,
 } from "../ui/dialog";
-import React from "react";
+import React, { useEffect } from "react";
 import { TrashDanger } from "~/lib/icons/TrashDanger";
 import { Input } from "../ui/input";
 import { getLocale } from "~/lib/locale";
@@ -37,6 +37,7 @@ import { useSelector } from "@xstate/store/react";
 import { TimeInput } from "../ui/time-input";
 import { SetupEvent, TimerContext } from "~/lib/store/timer";
 import { connectionActor } from "~/lib/store/connectionStore";
+import { CardScrollRefContext } from "../Card";
 
 export const TimersListHeader = () => {
   const [modal, setModal] = React.useState<ModalState | null>(null);
@@ -567,7 +568,43 @@ function EventItem({
 }
 
 export default function TimersList() {
+  const runningTimerRef = React.useRef<View>(null);
+  const scrollViewRef = React.useContext(CardScrollRefContext);
+  const actorRef = TimerContext.useActorRef();
   const events = useSelector(eventConfigStore, (state) => state.context.events);
+  const runningTimerId = useMachineSelector(actorRef, (state) => {
+    return state.context.timer?.eventId;
+  });
+
+  const checkVisibility = () => {
+    const currentRunningTimerRef = runningTimerRef.current;
+    const currentScrollViewRef = scrollViewRef.current;
+    if (currentRunningTimerRef && currentScrollViewRef) {
+      (scrollViewRef.current as unknown as View).measureInWindow(
+        (_sx, scrollY, _sw, scrollViewHeight) => {
+          currentRunningTimerRef?.measureInWindow(
+            (_ex, elementY, _ew, elementHeight) => {
+              const isVisible =
+                elementY >= scrollY &&
+                elementY + elementHeight <= scrollY + scrollViewHeight;
+
+                if (!isVisible) {
+                const y = elementY - elementHeight;
+                currentScrollViewRef.scrollTo({
+                  y: y < elementHeight ? 0 : y,
+                  animated: true,
+                });
+              }
+            }
+          );
+        }
+      );
+    }
+  };
+
+  useEffect(() => {
+    checkVisibility();
+  }, [runningTimerId]);
 
   const [modal, setModal] = React.useState<ModalState | null>(null);
 
@@ -576,12 +613,12 @@ export default function TimersList() {
       <TimerModals modal={modal} setModal={setModal} />
       <View className="gap-[12]">
         {events.map((event, index) => (
-          <EventItem
+          <View
             key={event.id}
-            event={event}
-            index={index}
-            setModal={setModal}
-          />
+            ref={runningTimerId === event.id ? runningTimerRef : null}
+          >
+            <EventItem event={event} index={index} setModal={setModal} />
+          </View>
         ))}
       </View>
     </>
