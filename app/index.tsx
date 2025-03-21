@@ -15,7 +15,7 @@ export default function TimerScreen() {
   const actorRef = TimerContext.useActorRef();
   const timerIsRunning = useMachineSelector(
     actorRef,
-    (state) => state.context.timer?.elapsed !== null
+    (state) => !!state.context.timer?.elapsed
   );
 
   return (

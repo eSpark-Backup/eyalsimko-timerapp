@@ -39,6 +39,7 @@ import { TimeInput } from "./ui/time-input";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { useSelector } from "@xstate/store/react";
+import { TimerContext } from "~/lib/store/timer";
 
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
@@ -144,6 +145,8 @@ function HeaderModals({
   const blinkingStartTime =
     useSelector(eventConfigStore, (state) => state.context.blinkingStartTime) ??
     undefined;
+
+  const actorRef = TimerContext.useActorRef();
   return (
     <>
       <Dialog
@@ -303,7 +306,11 @@ function HeaderModals({
                   </Button>
                 </DialogClose>
                 <Button
-                  onPress={() => setModal(null)}
+                  onPress={() => {
+                    eventConfigStore.send({ type: "reset" });
+                    actorRef.send({ type: "reset" });
+                    setModal(null);
+                  }}
                   size="lg"
                   variant="destructive"
                 >
