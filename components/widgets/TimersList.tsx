@@ -73,12 +73,14 @@ function TimerForm({
   closeModal,
   onSubmit,
   submitLabel,
+  isTimerRunning,
 }: {
   initialValues?: FormData;
   renderFooter: (submitButton: React.ReactNode) => React.ReactNode;
   onSubmit: (data: FormData) => void;
   closeModal: () => void;
   submitLabel: string;
+  isTimerRunning?: boolean;
 }) {
   const defaultBlinkingStartTime = useSelector(
     eventConfigStore,
@@ -190,6 +192,7 @@ function TimerForm({
             fieldState: { error },
           }) => (
             <TimeInput
+              editable={!isTimerRunning}
               hasError={!!error}
               background="modal"
               label="Duration"
@@ -212,6 +215,7 @@ function TimerForm({
                 fieldState: { error },
               }) => (
                 <TimeInput
+                  editable={!isTimerRunning}
                   hasError={!!error}
                   background="modal"
                   label="Flash Time"
@@ -234,6 +238,7 @@ function TimerForm({
                 fieldState: { error },
               }) => (
                 <TimeInput
+                  editable={!isTimerRunning}
                   hasError={!!error}
                   background="modal"
                   label="Flash Length"
@@ -271,6 +276,12 @@ function TimerModals({
   modal: ModalState | null;
   setModal: React.Dispatch<React.SetStateAction<ModalState | null>>;
 }) {
+  const actorRef = TimerContext.useActorRef();
+  const runningTimerId = useMachineSelector(actorRef, (state) => {
+    if (!state.matches({ ACTIVE: "running" })) return null;
+    return state.context.timer?.eventId;
+  });
+  console.log({ runningTimerId });
   return (
     <>
       <Dialog
@@ -328,6 +339,7 @@ function TimerModals({
             </DialogHeader>
             {modal?.type === "edit" && (
               <TimerForm
+                isTimerRunning={modal.event.id === runningTimerId}
                 initialValues={getFormData(modal.event)}
                 closeModal={() => setModal(null)}
                 onSubmit={(data) => {
@@ -592,6 +604,7 @@ function EventItem({
                   </View>
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  disabled={event.id === runningTimerId}
                   onPress={() => setModal({ type: "delete", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
