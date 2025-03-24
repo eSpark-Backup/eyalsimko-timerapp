@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { cn } from "~/lib/utils";
 
-const variants = cva("border-2", {
+const variants = cva("", {
   variants: {
     size: {
       small: "native:h-[36] p-[8] rounded-[8] text-md",
@@ -36,6 +36,7 @@ interface FloatingLabelInputProps
   extends TextInputProps,
     VariantProps<typeof variants> {
   label?: string;
+  hasError?: boolean;
 }
 
 export type TextInputRef = TextInput & { blurAndRemoveFocus: () => void };
@@ -50,6 +51,7 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
       label,
       value,
       placeholder,
+      hasError,
       onBlur,
       onFocus,
       onSubmitEditing,
@@ -157,6 +159,8 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
           className={cn(
             "web:flex web:w-full border-transparent native:leading-[1.25] text-foreground placeholder:text-muted-foreground web:ring-offset-background file:border-0 file:bg-transparent file:font-medium web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2",
             isFocused && "border-highlight",
+            !hasError && "border-2",
+            !isFocused && hasError && "border border-red-500",
             props.editable === false && "opacity-50 web:cursor-not-allowed",
             variants({ size, className, background })
           )}

@@ -135,7 +135,7 @@ export const ActiveTimerWidget = () => {
     state.context.events.find((event) => event.id === timer?.eventId)
   );
 
-  if (!timer || !timer.elapsed || !event) return null;
+  if (!timer || timer.elapsed === null || !event) return null;
 
   return (
     <View className="flex-col flex-1 justify-between">

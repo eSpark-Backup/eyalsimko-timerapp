@@ -109,10 +109,14 @@ function TimerForm({
   });
   const submit = handleSubmit((data) => {
     console.log("ON SUBMIT HANDLER", data);
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      blinkingStartTime: data.blinkingStartTime ?? 0,
+      blinkLength: data.blinkLength ?? 0,
+    });
     closeModal();
   });
-
+  console.log(errors);
   return (
     <>
       <View className="gap-[20]">
@@ -121,8 +125,12 @@ function TimerForm({
           rules={{
             required: true,
           }}
-          render={({ field: { onChange, onBlur, value } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <Input
+              hasError={!!error}
               background="modal"
               label="Event Name"
               onBlur={onBlur}
@@ -135,10 +143,14 @@ function TimerForm({
         <Controller
           control={control}
           rules={{
-            required: true,
+            required: false,
           }}
-          render={({ field: { onChange, onBlur, value } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <Input
+              hasError={!!error}
               background="modal"
               label="Event Description"
               onBlur={onBlur}
@@ -153,8 +165,12 @@ function TimerForm({
           rules={{
             required: true,
           }}
-          render={({ field: { onChange, onBlur, value } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <Input
+              hasError={!!error}
               background="modal"
               label="Speaker Name"
               onBlur={onBlur}
@@ -169,8 +185,12 @@ function TimerForm({
           rules={{
             required: true,
           }}
-          render={({ field: { onChange, onBlur, value } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <TimeInput
+              hasError={!!error}
               background="modal"
               label="Duration"
               onBlur={onBlur}
@@ -185,10 +205,14 @@ function TimerForm({
             <Controller
               control={control}
               rules={{
-                required: true,
+                required: false,
               }}
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({
+                field: { onChange, onBlur, value },
+                fieldState: { error },
+              }) => (
                 <TimeInput
+                  hasError={!!error}
                   background="modal"
                   label="Flash Time"
                   onBlur={onBlur}
@@ -203,10 +227,14 @@ function TimerForm({
             <Controller
               control={control}
               rules={{
-                required: true,
+                required: false,
               }}
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({
+                field: { onChange, onBlur, value },
+                fieldState: { error },
+              }) => (
                 <TimeInput
+                  hasError={!!error}
                   background="modal"
                   label="Flash Length"
                   onBlur={onBlur}
@@ -225,6 +253,7 @@ function TimerForm({
           border="none"
           variant="primary"
           onPress={(e) => {
+            console.log(errors);
             submit(e);
           }}
         >

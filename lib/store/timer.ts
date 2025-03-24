@@ -273,7 +273,7 @@ export const timerStore = setup({
       guard: and(['isConnected', ({ event: { data: { eventId } } }) => {
         const event = eventConfigStore.getSnapshot().context.events.find(event => event.id === eventId)!
 
-        return !!eventId && event.countdownTime > 0 && event.blinkingStartTime > 0
+        return !!eventId && event.countdownTime > 0
       }]),
       actions: assign({
         timer: ({ event: { data } }) => {
@@ -287,7 +287,7 @@ export const timerStore = setup({
                 data: event.blinkingStartTime
               }, {
                 type: "blink_length",
-                data: event.blinkingStartTime ?? defaultBlinkLength
+                data: event.blinkLength
               }, {
                 type: "reset",
                 data: event.countdownTime,
