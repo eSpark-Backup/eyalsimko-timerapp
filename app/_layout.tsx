@@ -36,6 +36,7 @@ import { ToastProvider } from "~/components/ui/toast";
 import { LinearGradient } from "expo-linear-gradient";
 import Background from "~/components/Background";
 import { Header } from "~/components/header";
+import { ConnectionLostModalProvider } from "~/components/ConnectionLostModal";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -291,35 +292,37 @@ export default function RootLayout() {
 
   return (
     <TimerContext.Provider>
-      <GestureHandlerRootView>
-        <TimerSync />
-        <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-          <StatusBar
-            hidden={true}
-            style={isDarkColorScheme ? "light" : "dark"}
-            networkActivityIndicatorVisible
-          />
-          <View className="flex-1 bg-screenBackground">
-            <Background />
-            <View className="flex-1">
-              <Stack
-                screenOptions={{
-                  contentStyle: { backgroundColor: "transparent" },
-                }}
-              >
-                <Stack.Screen
-                  options={{
-                    header: () => <Header />,
+      <ConnectionLostModalProvider>
+        <GestureHandlerRootView>
+          <TimerSync />
+          <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+            <StatusBar
+              hidden={true}
+              style={isDarkColorScheme ? "light" : "dark"}
+              networkActivityIndicatorVisible
+            />
+            <View className="flex-1 bg-screenBackground">
+              <Background />
+              <View className="flex-1">
+                <Stack
+                  screenOptions={{
+                    contentStyle: { backgroundColor: "transparent" },
                   }}
-                  name="index"
-                />
-              </Stack>
+                >
+                  <Stack.Screen
+                    options={{
+                      header: () => <Header />,
+                    }}
+                    name="index"
+                  />
+                </Stack>
+              </View>
             </View>
-          </View>
-          <PortalHost />
-          <ToastProvider />
-        </ThemeProvider>
-      </GestureHandlerRootView>
+            <PortalHost />
+            <ToastProvider />
+          </ThemeProvider>
+        </GestureHandlerRootView>
+      </ConnectionLostModalProvider>
     </TimerContext.Provider>
   );
 }

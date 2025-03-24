@@ -4,6 +4,7 @@ import NetInfo from '@react-native-community/netinfo';
 import Toast from 'react-native-toast-message';
 import { Alert, AppState } from "react-native";
 import { sendUpdate } from "../timerModuleFirmware";
+import { hide as hideConnectionLostModal, show as showConnectionLostModal } from '~/components/ConnectionLostModal';
 
 const recoverMessageSchema = z.object({
   time_left: z.number(),
@@ -158,6 +159,7 @@ const connectionStore = setup({
   },
   actors: {
     subscribeConnection: fromCallback(({ input, sendBack }: { input: WebSocket, sendBack: (event: Events) => void }) => {
+      hideConnectionLostModal()
       return input.addEventListener('close', (e) => {
         if (e.code !== 1000)
           sendBack({ type: 'connectionLost' })
@@ -300,11 +302,7 @@ const connectionStore = setup({
         connectionLost: {
           target: 'ERROR',
           actions: () => {
-            Toast.show({
-              type: "error",
-              text1: 'Connection lost',
-              text2: 'Connection with the module has been lost.\nCheck your lan/WiFi connection or does the module is running.',
-            })
+            showConnectionLostModal()
           }
         }
       },
