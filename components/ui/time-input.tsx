@@ -8,7 +8,7 @@ import { Input, TextInputRef } from "~/components/ui/input";
 
 interface TimeInputProps
   extends Omit<React.ComponentProps<typeof Input>, "value" | "onChange"> {
-  value: number | undefined; // value in seconds
+  value?: number | null; // value in seconds
   onChange: (newValue: number) => void;
 }
 
@@ -17,12 +17,13 @@ const emptyStringToNull = (value: string) => (value === "" ? null : value);
 const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
   const ref = React.useRef<TextInputRef>(null);
   const [localValue, setLocalValue] = React.useState(() =>
-    value !== undefined ? formatTime(value) : ""
+    value !== null && value !== undefined ? formatTime(value) : ""
   );
   const localValueRef = React.useRef(localValue);
 
   // Format seconds into HH:mm:ss
   function formatTime(totalSeconds: number): string {
+    console.log("FORMAT TIME", totalSeconds);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
@@ -90,7 +91,9 @@ const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
 
   // Update local value when parent value changes
   React.useEffect(() => {
-    setLocalValue(value !== undefined ? formatTime(value) : "");
+    setLocalValue(
+      value !== null && value !== undefined ? formatTime(value) : ""
+    );
   }, [value]);
 
   return (

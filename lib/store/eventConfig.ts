@@ -118,6 +118,21 @@ export const eventConfigStore = createStore({
         }]
       }
     },
+    updateEvent: (context, { eventId, event }: { eventId: string, event: Omit<Event, 'startedAt' | 'id'> }) => {
+      const index = context.events.findIndex(event => event.id === eventId)
+      if (index === -1) return context
+      console.log(index)
+      return {
+        events: [
+          ...context.events.slice(0, index),
+          {
+            ...context.events[index],
+            ...event,
+          },
+          ...context.events.slice(index + 1)
+        ]
+      }
+    },
     changeEventOrder: (context, { fromIndex, toIndex }: { fromIndex: number, toIndex: number }) => {
       const events = context.events
       if (fromIndex < 0 || fromIndex >= events.length || toIndex < 0 || toIndex >= events.length) {

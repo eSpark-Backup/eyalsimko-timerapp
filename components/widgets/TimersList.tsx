@@ -72,11 +72,13 @@ function TimerForm({
   renderFooter,
   closeModal,
   onSubmit,
+  submitLabel,
 }: {
   initialValues?: FormData;
   renderFooter: (submitButton: React.ReactNode) => React.ReactNode;
   onSubmit: (data: FormData) => void;
   closeModal: () => void;
+  submitLabel: string;
 }) {
   const defaultBlinkingStartTime = useSelector(
     eventConfigStore,
@@ -106,6 +108,7 @@ function TimerForm({
     },
   });
   const submit = handleSubmit((data) => {
+    console.log("ON SUBMIT HANDLER", data);
     onSubmit(data);
     closeModal();
   });
@@ -225,7 +228,7 @@ function TimerForm({
             submit(e);
           }}
         >
-          <Text>Add Timer</Text>
+          <Text>{submitLabel}</Text>
         </Button>
       )}
     </>
@@ -299,14 +302,14 @@ function TimerModals({
                 initialValues={getFormData(modal.event)}
                 closeModal={() => setModal(null)}
                 onSubmit={(data) => {
+                  console.log("on submit!", data);
                   eventConfigStore.send({
                     type: "updateEvent",
-                    event: {
-                      id: modal.event.id,
-                      ...data,
-                    },
+                    eventId: modal.event.id,
+                    event: data,
                   });
                 }}
+                submitLabel="Save Changes"
                 renderFooter={(submitButton) => {
                   return (
                     <DialogFooter>
@@ -343,6 +346,7 @@ function TimerModals({
                   event: data,
                 });
               }}
+              submitLabel="Add Timer"
               closeModal={() => setModal(null)}
               renderFooter={(submitButton) => {
                 return (
@@ -588,7 +592,7 @@ export default function TimersList() {
     const currentRunningTimerRef = runningTimerRef.current;
     const currentScrollViewRef = scrollViewRef.current;
     if (currentRunningTimerRef && currentScrollViewRef) {
-      currentScrollViewRef.measureInWindow(
+      (currentScrollViewRef as unknown as View).measureInWindow(
         (_sx, scrollY, _sw, scrollViewHeight) => {
           if (scrollViewHeight === 0) return;
           console.log(_sx, scrollY, _sw, scrollViewHeight);

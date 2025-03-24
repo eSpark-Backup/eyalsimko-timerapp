@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Text } from "./ui/text";
 import { CompanyLogo } from "~/lib/icons/CompanyLogo";
@@ -139,14 +139,24 @@ function HeaderModals({
       ],
     },
   ];
-  const blinkLength =
-    useSelector(eventConfigStore, (state) => state.context.blinkLength) ??
-    undefined;
-  const blinkingStartTime =
-    useSelector(eventConfigStore, (state) => state.context.blinkingStartTime) ??
-    undefined;
+  const initialBlinkLength = useSelector(
+    eventConfigStore,
+    (state) => state.context.blinkLength
+  );
+  const initialBlinkingStartTime = useSelector(
+    eventConfigStore,
+    (state) => state.context.blinkingStartTime
+  );
 
   const actorRef = TimerContext.useActorRef();
+  const [blinkLength, setBlinkLength] = useState(initialBlinkLength);
+  const [blinkingStartTime, setBlinkingStartTime] = useState(
+    initialBlinkingStartTime
+  );
+  useEffect(() => {
+    setBlinkLength(initialBlinkLength);
+    setBlinkingStartTime(initialBlinkingStartTime);
+  }, [modal?.type, initialBlinkLength, initialBlinkingStartTime]);
   return (
     <>
       <Dialog
@@ -167,12 +177,7 @@ function HeaderModals({
                   <View className="flex-1">
                     <TimeInput
                       value={blinkingStartTime}
-                      onChange={(blinkingStartTime) =>
-                        eventConfigStore.send({
-                          type: "setBlinkingStartTime",
-                          blinkingStartTime,
-                        })
-                      }
+                      onChange={setBlinkingStartTime}
                       size="default"
                       label="Start Time"
                       background="modal"
@@ -183,12 +188,7 @@ function HeaderModals({
                       size="default"
                       background="modal"
                       value={blinkLength}
-                      onChange={(blinkLength) => {
-                        eventConfigStore.send({
-                          type: "setBlinkLength",
-                          blinkLength,
-                        });
-                      }}
+                      onChange={setBlinkLength}
                       label="Length"
                     />
                   </View>
@@ -236,7 +236,18 @@ function HeaderModals({
                   size="lg"
                   border="none"
                   variant="primary"
-                  onPress={() => setModal(null)}
+                  onPress={() => {
+                    eventConfigStore.send({
+                      type: "setBlinkingStartTime",
+                      blinkingStartTime,
+                    });
+                    eventConfigStore.send({
+                      type: "setBlinkLength",
+                      blinkLength,
+                    });
+
+                    setModal(null);
+                  }}
                 >
                   <Text>Save Changes</Text>
                 </Button>

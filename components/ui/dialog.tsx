@@ -99,7 +99,7 @@ const DialogContent = React.forwardRef<
           <DialogPrimitive.Content
             ref={ref}
             className={cn(
-              "web:cursor-default bg-modal-background px-[24] pt-[24] pb-[40] web:duration-200 rounded-[20]",
+              "web:cursor-default bg-modal-background px-[24] py-[24] web:duration-200 rounded-[20]",
               open
                 ? "web:animate-in web:fade-in-0 web:zoom-in-95"
                 : "web:animate-out web:fade-out-0 web:zoom-out-95",
@@ -150,7 +150,7 @@ const DialogContent = React.forwardRef<
               {props.header}
             </View>
             <ScrollView
-              className="pb-[40] px-[12] mx-[12]"
+              className="pb-[24] px-[12] mx-[12]"
               style={{
                 maxHeight: maxContentHeight,
               }}
