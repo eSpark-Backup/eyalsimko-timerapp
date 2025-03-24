@@ -138,158 +138,6 @@ export default function RootLayout() {
     return null;
   }
 
-  const oldLayout = (
-    <Stack>
-      <Stack.Screen
-        name="index"
-        options={{
-          title: "",
-          header: () => (
-            <View className="pt-safe w-full">
-              <View className="p-4 flex-row gap-2 md:gap-12">
-                <View className="flex-1 flex-row gap-2 md:gap-12 items-center">
-                  <CompanyLogo
-                    className="text-primary"
-                    width={117}
-                    height={36.4}
-                    strokeWidth={1}
-                    viewBox="0 0 180 56"
-                  />
-                  <View className="flex-1">
-                    <Link
-                      href={{
-                        pathname: "/settings",
-                        params: {
-                          tab: "eventNameAndDescription",
-                        },
-                      }}
-                    >
-                      <View>
-                        <Text
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
-                          className="text-lg md:text-2xl font-semibold"
-                        >
-                          {eventName}
-                          {eventDescription ? `: ${eventDescription}` : ""}
-                        </Text>
-                      </View>
-                    </Link>
-                  </View>
-                </View>
-                <View className="flex flex-row items-center sm:gap-4 md:gap-6">
-                  <View
-                    className={cn(
-                      "h-2 w-2 rounded-full",
-                      isDisconnectedOrIDLE && "bg-gray-300",
-                      isConnected && "bg-green-500",
-                      // isConnecting && "bg-gray-500",
-                      isConnectionErrorOrConnecting && "bg-red-500"
-                    )}
-                  />
-                  <Link
-                    href={{
-                      pathname: "/settings",
-                      params: {
-                        tab: "connection",
-                      },
-                    }}
-                    asChild
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hidden md:flex flex-row gap-2"
-                    >
-                      <Wifi
-                        className={cn(
-                          "h-4 w-4 text-primary",
-                          connectionType === "WIFI" && "text-green-500"
-                        )}
-                      />
-                      <Text
-                        className={cn(
-                          connectionType === "WIFI" && "text-green-500"
-                        )}
-                      >
-                        WIRELESS
-                      </Text>
-                    </Button>
-                  </Link>
-                  <Link
-                    href={{
-                      pathname: "/settings",
-                      params: {
-                        tab: "connection",
-                      },
-                    }}
-                    asChild
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hidden md:flex flex-row gap-2"
-                    >
-                      <WifiOff
-                        className={cn(
-                          "h-4 w-4 text-primary",
-                          connectionType === "LAN" && "text-green-500"
-                        )}
-                      />
-                      <Text
-                        className={cn(
-                          connectionType === "LAN" && "text-green-500"
-                        )}
-                      >
-                        WIRED
-                      </Text>
-                    </Button>
-                  </Link>
-                  <View className="hidden md:flex">
-                    <ThemeToggle />
-                  </View>
-                  <Link href="/help">
-                    <Text>Help</Text>
-                  </Link>
-                  <Link href="/settings">
-                    <Text>Settings</Text>
-                  </Link>
-                </View>
-              </View>
-            </View>
-          ),
-        }}
-      />
-      <Stack.Screen
-        name="settings"
-        options={{
-          title: "Event settings",
-          headerRight: () => (
-            <Link href="/help" asChild>
-              <Button variant="ghost" className="flex flex-row gap-2">
-                <CircleHelp className="h-4 w-4 text-foreground" />
-                <Text>Help</Text>
-              </Button>
-            </Link>
-          ),
-        }}
-      />
-      <Stack.Screen
-        name="scanCode"
-        options={{
-          header: () => null,
-        }}
-      />
-      <Stack.Screen
-        name="help"
-        options={{
-          title: "Help",
-          presentation: "modal",
-        }}
-      />
-    </Stack>
-  );
-
   return (
     <TimerContext.Provider>
       <ConnectionLostModalProvider>
@@ -314,6 +162,12 @@ export default function RootLayout() {
                       header: () => <Header />,
                     }}
                     name="index"
+                  />
+                  <Stack.Screen
+                    name="scanCode"
+                    options={{
+                      header: () => null,
+                    }}
                   />
                 </Stack>
               </View>

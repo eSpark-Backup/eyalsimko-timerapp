@@ -55,7 +55,7 @@ const iconVariants = cva("items-center justify-center", {
       default: "color-primary",
       primary: "color-primary",
       "primary-muted": "color-primary",
-      destructive: "",
+      destructive: "text-destructive-foreground",
       "destructive-muted": "",
       outline: "",
       secondary: "text-primary/60",

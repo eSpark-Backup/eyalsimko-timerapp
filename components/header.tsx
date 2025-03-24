@@ -40,6 +40,7 @@ import { connectionActor } from "~/lib/store/connectionStore";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { useSelector } from "@xstate/store/react";
 import { TimerContext } from "~/lib/store/timer";
+import { SettingsModal } from "./SettingsModal";
 
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
@@ -149,112 +150,13 @@ function HeaderModals({
   );
 
   const actorRef = TimerContext.useActorRef();
-  const [blinkLength, setBlinkLength] = useState(initialBlinkLength);
-  const [blinkingStartTime, setBlinkingStartTime] = useState(
-    initialBlinkingStartTime
-  );
-  useEffect(() => {
-    setBlinkLength(initialBlinkLength);
-    setBlinkingStartTime(initialBlinkingStartTime);
-  }, [modal?.type, initialBlinkLength, initialBlinkingStartTime]);
   return (
     <>
       <Dialog
         open={modal?.type === "settings"}
         onOpenChange={() => setModal(null)}
       >
-        <DialogContent className="w-[464]">
-          <View className="gap-[40]">
-            <DialogHeader>
-              <Text className="text-xl text-center font-semibold">
-                General Settings
-              </Text>
-            </DialogHeader>
-            <View className="gap-[40]">
-              <View className="gap-[12]">
-                <Text className="text-lg font-semibold">Flash Settings</Text>
-                <View className="flex-row gap-[20]">
-                  <View className="flex-1">
-                    <TimeInput
-                      value={blinkingStartTime}
-                      onChange={setBlinkingStartTime}
-                      size="default"
-                      label="Start Time"
-                      background="modal"
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <TimeInput
-                      size="default"
-                      background="modal"
-                      value={blinkLength}
-                      onChange={setBlinkLength}
-                      label="Length"
-                    />
-                  </View>
-                </View>
-              </View>
-              <View className="gap-[20]">
-                <View className="gap-[4]">
-                  <Text className="text-lg font-semibold">
-                    Connection Settings
-                  </Text>
-                  <Text className="text-md">
-                    No wired of WiFi connection detected.
-                  </Text>
-                  <Text>
-                    Please connect to the WiFi network using SSID and password
-                    from the screen.
-                  </Text>
-                </View>
-                <View className="gap-[12]">
-                  <Button size="lg" border="none">
-                    <Text>Open WiFi settings to change the network</Text>
-                  </Button>
-                  <Button size="lg" border="none">
-                    <Text>Scan the QR code from the screen</Text>
-                  </Button>
-                </View>
-              </View>
-              <View className="gap-[20]">
-                <Button
-                  variant="destructive-muted"
-                  size="lg"
-                  border="none"
-                  onPress={() => setModal({ type: "deleteData" })}
-                >
-                  <Text>Delete all timers</Text>
-                </Button>
-              </View>
-            </View>
-            <DialogFooter>
-              <View className="flex-row justify-between">
-                <Button size="lg" border="none" onPress={() => setModal(null)}>
-                  <Text>Cancel</Text>
-                </Button>
-                <Button
-                  size="lg"
-                  border="none"
-                  variant="primary"
-                  onPress={() => {
-                    eventConfigStore.send({
-                      type: "setBlinkingStartTime",
-                      blinkingStartTime,
-                    });
-                    eventConfigStore.send({
-                      type: "setBlinkLength",
-                      blinkLength,
-                    });
-
-                    setModal(null);
-                  }}
-                >
-                  <Text>Save Changes</Text>
-                </Button>
-              </View>
-            </DialogFooter>
-          </View>
-        </DialogContent>
+        <SettingsModal setModal={setModal} />
       </Dialog>
       <Dialog open={modal?.type === "help"} onOpenChange={() => setModal(null)}>
         <DialogContent
