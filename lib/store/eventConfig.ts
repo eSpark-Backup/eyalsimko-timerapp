@@ -192,8 +192,8 @@ AsyncStorage.getItem(snapshotKey)
         events: parsed.events.map((event: any) => {
           return {
             ...event,
-            // startedAt: event.startedAt ? new Date(event.startedAt) : null 
-            startedAt: null
+            startedAt: event.startedAt ? new Date(event.startedAt) : null
+            // startedAt: null
           }
         })
       }
