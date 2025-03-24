@@ -1,5 +1,6 @@
-import type React from "react";
+import React from "react";
 import { View } from "react-native";
+import Sortable from "react-native-sortables";
 import { useSelector as useMachineSelector } from "@xstate/react";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -12,10 +13,11 @@ import { Trash } from "~/lib/icons/Trash";
 import { Move } from "~/lib/icons/Move";
 import { useSelector } from "@xstate/store/react";
 import { eventConfigStore, Message } from "~/lib/store/eventConfig";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useMachine } from "@xstate/react";
 import { TimerContext } from "~/lib/store/timer";
 import { connectionActor } from "~/lib/store/connectionStore";
+import { CardScrollRefContext } from "../Card";
 
 export const MessageWidgetHeader = () => {
   const [isFlashing, setIsFlashing] = useState(false);
@@ -82,7 +84,11 @@ function MessageRow({ message }: { message: Message }) {
         }}
       />
       <View className="justify-between items-center flex-row gap-[12]">
-        <Move color="hsla(213, 5%, 57%, 1)" size={16} />
+        <Sortable.Handle>
+          <View className="w-[50] items-start justify-center">
+            <Move color="hsla(213, 5%, 57%, 1)" size={16} />
+          </View>
+        </Sortable.Handle>
         <View className="flex-row gap-[12]">
           <IconButton
             border
@@ -129,15 +135,31 @@ function MessageRow({ message }: { message: Message }) {
 }
 
 export const MessageWidget = () => {
+  const scrollViewRef = React.useContext(CardScrollRefContext);
   const messages = useSelector(
     eventConfigStore,
     (state) => state.context.messages
   );
   return (
-    <View className="gap-[20]">
-      {messages.map((message) => (
+    <Sortable.Grid
+      onDragEnd={({ fromIndex, toIndex }) => {
+        eventConfigStore.send({
+          type: "changeMessageOrder",
+          fromIndex,
+          toIndex,
+        });
+      }}
+      scrollableRef={scrollViewRef}
+      rowGap={20}
+      columns={1}
+      dragActivationDelay={0}
+      data={messages}
+      activeItemScale={1.05}
+      overDrag="vertical"
+      customHandle
+      renderItem={({ item: message }) => (
         <MessageRow key={message.id} message={message} />
-      ))}
-    </View>
+      )}
+    />
   );
 };

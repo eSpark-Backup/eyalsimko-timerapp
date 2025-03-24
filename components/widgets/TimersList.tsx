@@ -38,6 +38,7 @@ import { TimeInput } from "../ui/time-input";
 import { SetupEvent, TimerContext } from "~/lib/store/timer";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { CardScrollRefContext } from "../Card";
+import Sortable from "react-native-sortables";
 
 export const TimersListHeader = () => {
   const [modal, setModal] = React.useState<ModalState | null>(null);
@@ -455,7 +456,14 @@ function EventItem({
         event.id !== runningTimerId && "bg-item"
       )}
     >
-      <Move color="hsla(213, 5%, 57%, 1)" size={16} />
+      <Sortable.Handle>
+        <View
+          className="h-full justify-center"
+          style={{ margin: -20, padding: 20 }}
+        >
+          <Move color="hsla(213, 5%, 57%, 1)" size={16} />
+        </View>
+      </Sortable.Handle>
       <View className="flex-1 flex-row items-center justify-between">
         <View className="flex-row items-center gap-[16]">
           <Text
@@ -580,14 +588,17 @@ export default function TimersList() {
     const currentRunningTimerRef = runningTimerRef.current;
     const currentScrollViewRef = scrollViewRef.current;
     if (currentRunningTimerRef && currentScrollViewRef) {
-      (scrollViewRef.current as unknown as View).measureInWindow(
+      currentScrollViewRef.measureInWindow(
         (_sx, scrollY, _sw, scrollViewHeight) => {
-          currentRunningTimerRef?.measureInWindow(
+          if (scrollViewHeight === 0) return;
+          console.log(_sx, scrollY, _sw, scrollViewHeight);
+          currentRunningTimerRef.measureInWindow(
             (_ex, elementY, _ew, elementHeight) => {
+              console.log(_ex, elementY, _ew, elementHeight);
               const isVisible =
                 elementY >= scrollY &&
                 elementY + elementHeight <= scrollY + scrollViewHeight;
-
+              console.log(isVisible);
               if (!isVisible) {
                 const y = elementY - elementHeight;
                 currentScrollViewRef.scrollTo({
@@ -607,19 +618,35 @@ export default function TimersList() {
   }, [runningTimerId]);
 
   const [modal, setModal] = React.useState<ModalState | null>(null);
+
   return (
     <>
       <TimerModals modal={modal} setModal={setModal} />
-      <View className="gap-[12]">
-        {events.map((event, index) => (
+      <Sortable.Grid
+        onDragEnd={({ fromIndex, toIndex }) => {
+          eventConfigStore.send({
+            type: "changeEventOrder",
+            fromIndex,
+            toIndex,
+          });
+        }}
+        scrollableRef={scrollViewRef}
+        rowGap={12}
+        columns={1}
+        dragActivationDelay={0}
+        data={events}
+        activeItemScale={1.05}
+        overDrag="vertical"
+        customHandle
+        renderItem={({ item: event, index }) => (
           <View
             key={event.id}
             ref={runningTimerId === event.id ? runningTimerRef : null}
           >
             <EventItem event={event} index={index} setModal={setModal} />
           </View>
-        ))}
-      </View>
+        )}
+      />
     </>
   );
 }

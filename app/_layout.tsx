@@ -8,6 +8,8 @@ import {
   Theme,
   ThemeProvider,
 } from "@react-navigation/native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import { Link, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
@@ -289,33 +291,35 @@ export default function RootLayout() {
 
   return (
     <TimerContext.Provider>
-      <TimerSync />
-      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-        <StatusBar
-          hidden={true}
-          style={isDarkColorScheme ? "light" : "dark"}
-          networkActivityIndicatorVisible
-        />
-        <View className="flex-1 bg-screenBackground">
-          <Background />
-          <View className="flex-1">
-            <Stack
-              screenOptions={{
-                contentStyle: { backgroundColor: "transparent" },
-              }}
-            >
-              <Stack.Screen
-                options={{
-                  header: () => <Header />,
+      <GestureHandlerRootView>
+        <TimerSync />
+        <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+          <StatusBar
+            hidden={true}
+            style={isDarkColorScheme ? "light" : "dark"}
+            networkActivityIndicatorVisible
+          />
+          <View className="flex-1 bg-screenBackground">
+            <Background />
+            <View className="flex-1">
+              <Stack
+                screenOptions={{
+                  contentStyle: { backgroundColor: "transparent" },
                 }}
-                name="index"
-              />
-            </Stack>
+              >
+                <Stack.Screen
+                  options={{
+                    header: () => <Header />,
+                  }}
+                  name="index"
+                />
+              </Stack>
+            </View>
           </View>
-        </View>
-        <PortalHost />
-        <ToastProvider />
-      </ThemeProvider>
+          <PortalHost />
+          <ToastProvider />
+        </ThemeProvider>
+      </GestureHandlerRootView>
     </TimerContext.Provider>
   );
 }

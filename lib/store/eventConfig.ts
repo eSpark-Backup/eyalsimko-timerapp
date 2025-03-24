@@ -77,6 +77,21 @@ export const eventConfigStore = createStore({
         }]
       }
     },
+    changeMessageOrder: (context, { fromIndex, toIndex }: { fromIndex: number, toIndex: number }) => {
+      const messages = context.messages
+      if (fromIndex < 0 || fromIndex >= messages.length || toIndex < 0 || toIndex >= messages.length) {
+        return { messages }
+      }
+
+      const message = messages[fromIndex];
+      const newMessages = messages.slice();
+      newMessages.splice(fromIndex, 1);
+      newMessages.splice(toIndex, 0, message);
+
+      return {
+        messages: newMessages
+      }
+    },
     removeMessage: (context, { message }: { message: Message }) => {
       return {
         messages: context.messages.filter(msg => msg.id !== message.id)
@@ -101,6 +116,21 @@ export const eventConfigStore = createStore({
           startedAt: null,
           ...event
         }]
+      }
+    },
+    changeEventOrder: (context, { fromIndex, toIndex }: { fromIndex: number, toIndex: number }) => {
+      const events = context.events
+      if (fromIndex < 0 || fromIndex >= events.length || toIndex < 0 || toIndex >= events.length) {
+        return { events }
+      }
+
+      const event = events[fromIndex];
+      const newEvents = events.slice();
+      newEvents.splice(fromIndex, 1);
+      newEvents.splice(toIndex, 0, event);
+
+      return {
+        events: newEvents
       }
     },
     setEventStartedAt: (context, { eventId }: { eventId: string }) => {

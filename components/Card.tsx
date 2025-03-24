@@ -1,7 +1,9 @@
 import { cva } from "class-variance-authority";
 import React from "react";
 import { ScrollView, View } from "react-native";
+import Animated, { AnimatedRef } from "react-native-reanimated";
 import { cn } from "~/lib/utils";
+import { useAnimatedRef } from "react-native-reanimated";
 
 const cardVariants = cva("border flex-1 rounded-[10]", {
   variants: {
@@ -56,8 +58,8 @@ const spacingSizeMap = {
 } as const;
 
 export const CardScrollRefContext = React.createContext<
-  React.RefObject<ScrollView>
->({ current: null });
+  AnimatedRef<Animated.ScrollView>
+>(null as unknown as AnimatedRef<Animated.ScrollView>);
 
 export default function Card({
   children,
@@ -72,7 +74,8 @@ export default function Card({
   spacing?: "default" | "small";
   borderColor?: "default" | "active";
 }) {
-  const scrollRef = React.useRef<ScrollView>(null);
+  const animatedRef = useAnimatedRef<Animated.ScrollView>();
+
   if (scrollable) {
     return (
       <View
@@ -82,14 +85,14 @@ export default function Card({
         <View className={scrollableCardHeaderVariants({ spacing })}>
           {header}
         </View>
-        <ScrollView
-          ref={scrollRef}
+        <Animated.ScrollView
+          ref={animatedRef}
           className={scrollableCardContentVariants({ spacing })}
         >
-          <CardScrollRefContext.Provider value={scrollRef}>
+          <CardScrollRefContext.Provider value={animatedRef}>
             {children}
           </CardScrollRefContext.Provider>
-        </ScrollView>
+        </Animated.ScrollView>
       </View>
     );
   }
