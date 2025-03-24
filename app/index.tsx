@@ -33,7 +33,7 @@ export default function TimerScreen() {
           </Card>
         </View>
       </View>
-      <View className="h-[425] flex-row gap-[24]">
+      <View className="h-[400] flex-row gap-[24]">
         <View className="flex-1">
           <Card header={<MessageWidgetHeader />} scrollable={true}>
             <MessageWidget />
