@@ -278,7 +278,6 @@ function ConnectionSettings<ModalState extends { type: "deleteData" }>({
               border="none"
               onPress={() => {
                 setModal(null);
-                console.log("AJSDKJASDJK");
               }}
             >
               <Text>Scan the QR code from the screen</Text>

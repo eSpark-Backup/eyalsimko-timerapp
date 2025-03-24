@@ -23,7 +23,6 @@ const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
 
   // Format seconds into HH:mm:ss
   function formatTime(totalSeconds: number): string {
-    console.log("FORMAT TIME", totalSeconds);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;

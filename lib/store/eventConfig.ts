@@ -121,7 +121,6 @@ export const eventConfigStore = createStore({
     updateEvent: (context, { eventId, event }: { eventId: string, event: Omit<Event, 'startedAt' | 'id'> }) => {
       const index = context.events.findIndex(event => event.id === eventId)
       if (index === -1) return context
-      console.log(index)
       return {
         events: [
           ...context.events.slice(0, index),

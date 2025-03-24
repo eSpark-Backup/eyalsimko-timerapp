@@ -110,7 +110,6 @@ function TimerForm({
     },
   });
   const submit = handleSubmit((data) => {
-    console.log("ON SUBMIT HANDLER", data);
     onSubmit({
       ...data,
       blinkingStartTime: data.blinkingStartTime ?? 0,
@@ -118,7 +117,6 @@ function TimerForm({
     });
     closeModal();
   });
-  console.log(errors);
   return (
     <>
       <View className="gap-[20]">
@@ -258,7 +256,6 @@ function TimerForm({
           border="none"
           variant="primary"
           onPress={(e) => {
-            console.log(errors);
             submit(e);
           }}
         >
@@ -281,7 +278,6 @@ function TimerModals({
     if (!state.matches({ ACTIVE: "running" })) return null;
     return state.context.timer?.eventId;
   });
-  console.log({ runningTimerId });
   return (
     <>
       <Dialog
@@ -343,7 +339,6 @@ function TimerModals({
                 initialValues={getFormData(modal.event)}
                 closeModal={() => setModal(null)}
                 onSubmit={(data) => {
-                  console.log("on submit!", data);
                   eventConfigStore.send({
                     type: "updateEvent",
                     eventId: modal.event.id,
@@ -637,14 +632,11 @@ export default function TimersList() {
       (currentScrollViewRef as unknown as View).measureInWindow(
         (_sx, scrollY, _sw, scrollViewHeight) => {
           if (scrollViewHeight === 0) return;
-          console.log(_sx, scrollY, _sw, scrollViewHeight);
           currentRunningTimerRef.measureInWindow(
             (_ex, elementY, _ew, elementHeight) => {
-              console.log(_ex, elementY, _ew, elementHeight);
               const isVisible =
                 elementY >= scrollY &&
                 elementY + elementHeight <= scrollY + scrollViewHeight;
-              console.log(isVisible);
               if (!isVisible) {
                 const y = elementY - elementHeight;
                 currentScrollViewRef.scrollTo({
