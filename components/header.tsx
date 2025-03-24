@@ -427,14 +427,16 @@ export const Header = () => {
           <View className="flex-row gap-[8]">
             <Button
               border="none"
-              variant={connectionType === "LAN" ? "primary" : "secondary"}
+              variant={connectionType === "LAN" ? "primary-muted" : "secondary"}
               icon={Wired}
             >
               <Text>Wired</Text>
             </Button>
             <Button
               border="none"
-              variant={connectionType === "WIFI" ? "primary" : "secondary"}
+              variant={
+                connectionType === "WIFI" ? "primary-muted" : "secondary"
+              }
               icon={Wifi}
             >
               <Text>WiFi</Text>

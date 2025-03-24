@@ -40,6 +40,7 @@
     --timer-out-of-time: 349, 86%, 61%, 0.2;
     --countdown-out-of-time: 349, 100%, 71%, 1;
     --highlight: 213, 98%, 45%, 1;
+    --highlight-muted: 213, 98%, 45%, 0.31;
     --green-highlight: 147, 46%, 37%, 1;
     --modal-background: 210, 100%, 5%, 1;
     --toggle-disabled: 0, 0%, 100%, 0.3;

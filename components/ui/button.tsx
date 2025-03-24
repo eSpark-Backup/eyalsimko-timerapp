@@ -13,6 +13,7 @@ const buttonVariants = cva(
         default:
           "bg-buttonDefaultBackground border-buttonDefaultBorderColor web:hover:opacity-90 active:opacity-90",
         primary: "bg-highlight border-cardBorder",
+        "primary-muted": "bg-highlight-muted border-cardBorder",
         destructive: "bg-destructive web:hover:opacity-90 active:opacity-90",
         "destructive-muted": "web:hover:opacity-90 active:opacity-90",
         outline:
@@ -28,7 +29,7 @@ const buttonVariants = cva(
       size: {
         xs: "h-[24] gap-[8] rounded-[4] px-[12]",
         sm: "h-[32] gap-[8] rounded-[8] px-[12]",
-        default: "h-[36] gap-[8] px-[12]",
+        default: "h-[36] gap-[8] rounded-[8] px-[12]",
         lg: "h-[44] rounded-[8] px-8 native:h-14",
       },
     },
@@ -53,6 +54,7 @@ const iconVariants = cva("items-center justify-center", {
     variant: {
       default: "color-primary",
       primary: "color-primary",
+      "primary-muted": "color-primary",
       destructive: "",
       "destructive-muted": "",
       outline: "",
@@ -80,6 +82,7 @@ const buttonTextVariants = cva(
       variant: {
         default: "text-primary",
         primary: "text-primary",
+        "primary-muted": "text-primary",
         destructive: "text-destructive-foreground",
         "destructive-muted": "text-destructive-foreground",
         outline: "group-active:text-accent-foreground",
