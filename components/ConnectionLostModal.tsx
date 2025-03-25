@@ -48,8 +48,20 @@ export const hide = () => ref.current?.hide();
 
 export function ConnectionLostModal() {
   const { isOpen, setIsOpen } = React.useContext(ConnectionLostModalContext);
+  const [isLocalOpen, setIsLocalOpen] = React.useState(isOpen);
+
+  React.useEffect(() => {
+    console.log({ isOpen, isLocalOpen });
+    if (isLocalOpen === false && isOpen === true) {
+      const timeoutId = setTimeout(() => setIsLocalOpen(isOpen), 300);
+      return () => clearTimeout(timeoutId);
+    } else {
+      setIsLocalOpen(isOpen);
+    }
+  }, [isOpen, isLocalOpen]);
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isLocalOpen} onOpenChange={setIsOpen}>
       <DialogContent className="w-[442]">
         <View className="gap-[40]">
           <DialogHeader className="items-center gap-[20]">

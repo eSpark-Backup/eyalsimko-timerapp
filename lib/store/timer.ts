@@ -3,6 +3,8 @@ import { createActorContext } from '@xstate/react';
 import { and, assign, fromCallback, setup } from 'xstate';
 import { ConnectedState, connectionActor, RecoverMessage } from './connectionStore';
 import { eventConfigStore } from './eventConfig';
+import Toast from 'react-native-toast-message';
+import { AppState } from 'react-native';
 
 type RunningTimer = {
   elapsed: number,
@@ -23,10 +25,11 @@ type Timer = RunningTimer | NonRunningTimer
 type MessageState = { messageId: string | null }
 
 type Idle = { timer: null }
+type Disconnected = { timer: null }
 type Running = { timer: RunningTimer, }
-type Resetted = { timer: NonRunningTimer, }
+type Resetted = { timer: NonRunningTimer }
 
-type State = { timer: Timer | null } & MessageState
+type State = { timer: Timer | null, disconnectedWhileRunningEventId: null | string } & MessageState
 
 export type SetupEvent = {
   type: "setup",
@@ -58,6 +61,8 @@ type Events = SetupEvent | {
 } | {
   type: "recover",
   data: RecoverMessage
+} | {
+  type: "disconnect"
 }
 
 export const timerStore = setup({
@@ -79,14 +84,18 @@ export const timerStore = setup({
     waitForDisconnect: fromCallback(({ sendBack }) => {
       connectionActor.subscribe(snapshot => {
         if (!snapshot.matches("CONNECTED")) {
-          sendBack({ type: "reset" })
+          sendBack({ type: "disconnect" })
         }
       })
     }),
     waitForRecovery: fromCallback(({ sendBack }) => {
+      console.log("RUN waitForRecovery")
       connectionActor.subscribe(snapshot => {
         if (snapshot.matches("CONNECTED")) {
           const context = connectionActor.getSnapshot().context as ConnectedState
+          const disconnectedWihleRunningEventId = context.disconnectedWhileRunningEventId
+          const event = eventConfigStore.getSnapshot().context.events.find(event => event.id === disconnectedWihleRunningEventId)!
+
           if (context.timerInit) {
             sendBack({ type: "recover", data: context.timerInit })
           }
@@ -106,6 +115,7 @@ export const timerStore = setup({
   context: {
     timer: null,
     messageId: null,
+    disconnectedWhileRunningEventId: null,
   },
   states: {
     IDLE: {
@@ -116,17 +126,35 @@ export const timerStore = setup({
         recover: {
           target: 'ACTIVE.running',
           actions: assign({
-            timer: ({ event }) => {
-              const newTimer: Timer = {
-                elapsed: Math.floor(event.data.elapsed),
-                elapsedInMs: Math.floor(event.data.elapsed * 1000),
-                eventId: "EMPTY",
-                countdownTime: Math.floor(event.data.elapsed),
-                blinkingStartTime: 0,
-                blinkLength: 0,
+            timer: ({ event: { data }, context }) => {
+              const disconnectedWhileRunningEventId = context.disconnectedWhileRunningEventId
+              const event = eventConfigStore.getSnapshot().context.events.find(event => event.id === disconnectedWhileRunningEventId)!
+              if (!event) {
+                Toast.show({
+                  type: "error",
+                  text1: "Timer recovery failed",
+                  text2: "There was a timer running on the Timer module, but timer recovery failed.",
+                })
+                return {
+                  elapsed: Math.floor(data.elapsed),
+                  elapsedInMs: Math.floor(data.elapsed * 1000),
+                  eventId: "EMPTY",
+                  countdownTime: Math.floor(data.elapsed),
+                  blinkingStartTime: data.startBlinkingTime,
+                  blinkLength: data.startBlinkingTime,
+                }
+              }
+              const newTimer: RunningTimer = {
+                elapsed: Math.floor(data.elapsed),
+                elapsedInMs: Math.floor(data.elapsed * 1000),
+                eventId: event.id,
+                countdownTime: event.countdownTime,
+                blinkingStartTime: event.blinkingStartTime,
+                blinkLength: event.blinkLength,
               }
               return newTimer
-            }
+            },
+            disconnectedWhileRunningEventId: null
           })
         }
       }
@@ -274,7 +302,8 @@ export const timerStore = setup({
             elapsedInMs: null,
             messageId: null
           }
-        }
+        },
+        disconnectedWhileRunningEventId: () => null,
       }),
       target: '.ACTIVE'
     },
@@ -282,9 +311,17 @@ export const timerStore = setup({
       actions: assign({
         timer: () => {
           return null
-        }
+        },
+        disconnectedWhileRunningEventId: () => null
       }),
       target: '.IDLE'
+    },
+    disconnect: {
+      target: '.IDLE',
+      actions: assign({
+        timer: () => null,
+        disconnectedWhileRunningEventId: ({ context }) => context.timer?.eventId ?? null
+      })
     },
     showMessage: {
       guard: and(['isConnected', ({ event }) => {
@@ -317,14 +354,11 @@ let TimerContext = {
   isResolved: false,
 }
 
-const snapshotKey = 'timerSnapshot-v0'
+const snapshotKey = 'timerSnapshot-v1'
 
 const getContext = async () => {
   const snapshot = JSON.parse(await AsyncStorage.getItem(snapshotKey) ?? 'null')
-  const context = createActorContext(timerStore, {
-    snapshot,
-  });
-
+  const context = createActorContext(timerStore, snapshot ? { snapshot } : undefined);
   TimerContext = {
     ...context,
     isResolved: true,
