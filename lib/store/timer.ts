@@ -11,7 +11,6 @@ type RunningTimer = {
   countdownTime: number
   blinkingStartTime: number
   blinkLength: number
-  messageId: string | null,
 }
 
 type NonRunningTimer = Omit<RunningTimer, 'elapsed' | 'elapsedInMs'> & {
@@ -21,11 +20,13 @@ type NonRunningTimer = Omit<RunningTimer, 'elapsed' | 'elapsedInMs'> & {
 
 type Timer = RunningTimer | NonRunningTimer
 
-type Idle = { timer: null }
-type Running = { timer: RunningTimer }
-type Resetted = { timer: NonRunningTimer }
+type MessageState = { messageId: string | null }
 
-type State = { timer: Timer | null }
+type Idle = { timer: null }
+type Running = { timer: RunningTimer, }
+type Resetted = { timer: NonRunningTimer, }
+
+type State = { timer: Timer | null } & MessageState
 
 export type SetupEvent = {
   type: "setup",
@@ -104,6 +105,7 @@ export const timerStore = setup({
   initial: 'IDLE',
   context: {
     timer: null,
+    messageId: null,
   },
   states: {
     IDLE: {
@@ -122,7 +124,6 @@ export const timerStore = setup({
                 countdownTime: Math.floor(event.data.elapsed),
                 blinkingStartTime: 0,
                 blinkLength: 0,
-                messageId: null,
               }
               return newTimer
             }
@@ -191,35 +192,6 @@ export const timerStore = setup({
                 }
               })
             },
-            showMessage: {
-              guard: and(['isConnected', ({ event }) => {
-                return !!eventConfigStore.getSnapshot().context.messages.find(message => message.id === event.data.messageId)
-              }]),
-              actions: assign({
-                timer: ({ event, context }) => {
-                  const runningContext = context as Running
-                  const message = eventConfigStore.getSnapshot().context.messages.find(message => message.id === event.data.messageId)!
-                  connectionActor.send({ type: "sendMessage", message: { type: "msg", data: message.content } })
-                  return {
-                    ...runningContext.timer,
-                    messageId: event.data.messageId
-                  }
-                }
-              })
-            },
-            hideMessage: {
-              guard: 'isConnected',
-              actions: assign({
-                timer: ({ context }) => {
-                  const runningContext = context as Running
-                  connectionActor.send({ type: "sendMessage", message: { type: "hide" } })
-                  return {
-                    ...runningContext.timer,
-                    messageId: null
-                  }
-                }
-              })
-            }
           }
         },
         paused: {
@@ -313,6 +285,29 @@ export const timerStore = setup({
         }
       }),
       target: '.IDLE'
+    },
+    showMessage: {
+      guard: and(['isConnected', ({ event }) => {
+        return !!eventConfigStore.getSnapshot().context.messages.find(message => message.id === event.data.messageId)
+      }]),
+      actions: assign({
+        messageId: ({ event, context }) => {
+          const runningContext = context as Running
+          const message = eventConfigStore.getSnapshot().context.messages.find(message => message.id === event.data.messageId)!
+          connectionActor.send({ type: "sendMessage", message: { type: "msg", data: message.content } })
+          return event.data.messageId
+        }
+      })
+    },
+    hideMessage: {
+      guard: 'isConnected',
+      actions: assign({
+        messageId: ({ context }) => {
+          const runningContext = context as Running
+          connectionActor.send({ type: "sendMessage", message: { type: "hide" } })
+          return null
+        }
+      })
     }
   },
 });

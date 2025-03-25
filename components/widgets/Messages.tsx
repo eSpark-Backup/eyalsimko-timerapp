@@ -51,7 +51,7 @@ function MessageRow({ message }: { message: Message }) {
   const actorRef = TimerContext.useActorRef();
   const activeMessageId = useMachineSelector(
     actorRef,
-    (state) => state.context.timer?.messageId
+    (state) => state.context.messageId
   );
   const canShowMessage = useMachineSelector(actorRef, (state) =>
     state.can({ type: "showMessage", data: { messageId: message.id } })
@@ -104,7 +104,7 @@ function MessageRow({ message }: { message: Message }) {
           />
           {message.id === activeMessageId ? (
             <Button
-              disabled={!canHideMessage}
+              disabled={!canHideMessage || !isConnected}
               size="xs"
               onPress={() => {
                 actorRef.send({ type: "hideMessage" });
@@ -115,7 +115,7 @@ function MessageRow({ message }: { message: Message }) {
             </Button>
           ) : (
             <Button
-              disabled={!canShowMessage}
+              disabled={!canShowMessage || !isConnected}
               size="xs"
               onPress={() => {
                 actorRef.send({
