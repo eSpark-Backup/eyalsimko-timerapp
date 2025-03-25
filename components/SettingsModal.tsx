@@ -183,6 +183,11 @@ function ConnectionSettings<ModalState extends { type: "deleteData" }>({
     }
   };
   const isConnectionErrorOrConnecting = isConnectionError || isConnecting;
+
+  const canUpdateFirmware = useMachineSelector(connectionActor, (state) =>
+    state.can({ type: "updateFirmware" })
+  );
+
   return (
     <View className="flex gap-4">
       <Text className="text-lg font-semibold">Connection Settings</Text>
@@ -347,6 +352,36 @@ function ConnectionSettings<ModalState extends { type: "deleteData" }>({
               <Text>Shutdown</Text>
             </Button>
           </View>
+          <Button
+            disabled={!canUpdateFirmware}
+            variant="primary"
+            size="lg"
+            border="none"
+            className="flex-row gap-2"
+            onPress={() => {
+              Alert.alert(
+                "Update Timer module firmware",
+                "Updating the timer module will reboot the device. Do you want to update?",
+                [
+                  {
+                    text: "Cancel",
+                    style: "cancel",
+                    onPress: () => {},
+                  },
+                  {
+                    text: "Update",
+                    style: "destructive",
+                    onPress: () => {
+                      connectionActor.send({ type: "updateFirmware" });
+                      setModal(null);
+                    },
+                  },
+                ]
+              );
+            }}
+          >
+            <Text>Update Timer module firmware</Text>
+          </Button>
         </View>
       )}
       {isDisconnected && (
