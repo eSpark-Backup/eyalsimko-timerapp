@@ -134,8 +134,8 @@ function TimerForm({
               background="modal"
               label="Event Name"
               onBlur={onBlur}
-              onSubmitEditing={(e) => onChange(e.nativeEvent.text)}
-              defaultValue={value}
+              onChangeText={onChange}
+              value={value}
             />
           )}
           name="name"
@@ -154,8 +154,8 @@ function TimerForm({
               background="modal"
               label="Event Description"
               onBlur={onBlur}
-              onSubmitEditing={(e) => onChange(e.nativeEvent.text)}
-              defaultValue={value}
+              onChangeText={onChange}
+              value={value}
             />
           )}
           name="description"
@@ -174,8 +174,8 @@ function TimerForm({
               background="modal"
               label="Speaker Name"
               onBlur={onBlur}
-              onSubmitEditing={(e) => onChange(e.nativeEvent.text)}
-              defaultValue={value}
+              onChangeText={onChange}
+              value={value}
             />
           )}
           name="speakerName"

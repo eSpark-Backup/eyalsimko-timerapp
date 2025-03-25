@@ -13,15 +13,15 @@ const recoverMessageSchema = z.object({
 }).transform(({ time_left, blink_start_time, blink_length }) => ({ elapsed: time_left, startBlinkingTime: blink_start_time }))
 export type RecoverMessage = z.infer<typeof recoverMessageSchema>
 
-const wsConfigs = [
-  { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
-  { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
-] as const
-
 // const wsConfigs = [
-//   { url: "ws://192.168.0.111232:8001", type: "LAN" },
-//   { url: "ws://192.168.0.112:8001", type: "WIFI" },
+//   { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
+//   { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
 // ] as const
+
+const wsConfigs = [
+  { url: "ws://192.168.0.111232:8001", type: "LAN" },
+  { url: "ws://192.168.0.112:8001", type: "WIFI" },
+] as const
 
 const connectToServer = async () => {
   return getConnection(wsConfigs[0]).catch(() => getConnection(wsConfigs[1]))
