@@ -115,7 +115,11 @@ function MessageRow({ message }: { message: Message }) {
             </Button>
           ) : (
             <Button
-              disabled={!canShowMessage || !isConnected}
+              disabled={
+                !canShowMessage ||
+                !isConnected ||
+                message.content.trim().length === 0
+              }
               size="xs"
               onPress={() => {
                 actorRef.send({
@@ -140,6 +144,15 @@ export const MessageWidget = () => {
     eventConfigStore,
     (state) => state.context.messages
   );
+  console.log(messages);
+  if (messages.length === 0) {
+    return (
+      <View className="flex-1 h-auto items-center justify-center">
+        <Text>kek</Text>
+      </View>
+    );
+  }
+
   return (
     <Sortable.Grid
       onDragEnd={({ fromIndex, toIndex }) => {

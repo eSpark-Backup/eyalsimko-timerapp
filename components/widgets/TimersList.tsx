@@ -28,7 +28,7 @@ import {
   DialogFooter,
   DialogHeader,
 } from "../ui/dialog";
-import React, { useEffect } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { TrashDanger } from "~/lib/icons/TrashDanger";
 import { Input } from "../ui/input";
 import { getLocale } from "~/lib/locale";
@@ -40,20 +40,33 @@ import { connectionActor } from "~/lib/store/connectionStore";
 import { CardScrollRefContext } from "../Card";
 import Sortable from "react-native-sortables";
 
-export const TimersListHeader = () => {
-  const [modal, setModal] = React.useState<ModalState | null>(null);
-  return (
-    <>
-      <TimerModals modal={modal} setModal={setModal} />
-      <View className="flex-row justify-between items-center">
-        <Text className="text-lg font-semibold">List of Events</Text>
-        <Button size="sm" icon={Plus} onPress={() => setModal({ type: "add" })}>
-          <Text>Add New Timer</Text>
-        </Button>
-      </View>
-    </>
-  );
+export type TimersListHeaderRef = {
+  addEvent: () => void;
 };
+
+export const TimersListHeader = forwardRef<TimersListHeaderRef, {}>(
+  (props, ref) => {
+    const [modal, setModal] = React.useState<ModalState | null>(null);
+    useImperativeHandle(ref, () => ({
+      addEvent: () => setModal({ type: "add" }),
+    }));
+    return (
+      <>
+        <TimerModals modal={modal} setModal={setModal} />
+        <View className="flex-row justify-between items-center">
+          <Text className="text-lg font-semibold">List of Events</Text>
+          <Button
+            size="sm"
+            icon={Plus}
+            onPress={() => setModal({ type: "add" })}
+          >
+            <Text>Add New Timer</Text>
+          </Button>
+        </View>
+      </>
+    );
+  }
+);
 
 const getFormData = (event: Event): FormData => {
   return {
@@ -444,6 +457,9 @@ function EventItem({
   };
 
   const actorRef = TimerContext.useActorRef();
+  const timerIsStarted = useMachineSelector(actorRef, (state) => {
+    return state.context.timer?.elapsed !== null;
+  });
   const runningTimerId = useMachineSelector(actorRef, (state) => {
     return state.context.timer?.eventId;
   });
@@ -599,7 +615,9 @@ function EventItem({
                   </View>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  disabled={event.id === runningTimerId}
+                  disabled={
+                    event.id === runningTimerId ? timerIsStarted : false
+                  }
                   onPress={() => setModal({ type: "delete", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">

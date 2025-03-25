@@ -12,6 +12,8 @@ import TimerControls from "~/components/widgets/TimerControls";
 import TimersList, { TimersListHeader } from "~/components/widgets/TimersList";
 import { TimerContext } from "~/lib/store/timer";
 import { ConnectionLostModal } from "~/components/ConnectionLostModal";
+import MessagesCard from "~/components/cards/MessagesCard";
+import TimersListCard from "~/components/cards/TimersListCard";
 
 export default function TimerScreen() {
   const actorRef = TimerContext.useActorRef();
@@ -25,9 +27,7 @@ export default function TimerScreen() {
       <ConnectionLostModal />
       <View className="flex-1 gap-[24] pt-[20] px-[32] pb-[34]">
         <View className="flex-1 flex-row gap-[24]">
-          <Card scrollable={true} header={<TimersListHeader />}>
-            <TimersList />
-          </Card>
+          <TimersListCard />
           <View style={{ width: 360 }}>
             <Card
               spacing="small"
@@ -39,9 +39,7 @@ export default function TimerScreen() {
         </View>
         <View className="h-[400] flex-row gap-[24]">
           <View className="flex-1">
-            <Card header={<MessageWidgetHeader />} scrollable={true}>
-              <MessageWidget />
-            </Card>
+            <MessagesCard />
           </View>
           <View className="flex-1">
             <Card>
