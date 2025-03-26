@@ -135,7 +135,7 @@ export const ActiveTimerWidget = () => {
     state.context.events.find((event) => event.id === timer?.eventId)
   );
 
-  if (!timer || timer.elapsed === null || !event) return null;
+  if (!timer || !event) return null;
 
   return (
     <View className="flex-col flex-1 justify-between">
@@ -151,20 +151,18 @@ export const ActiveTimerWidget = () => {
         </Text>
       </View>
       <View className="flex-1 items-center justify-center">
-        {timer.elapsed !== null && (
-          <Text
-            className={cn(
-              "text-8xl font-poppins font-medium",
-              timer.elapsed < 0 && "text-countdown-out-of-time",
-              timer.elapsed >= 0 && "text-primary"
-            )}
-          >
-            {formatCountdown({
-              elapsedTime: timer.elapsed,
-              countdownTime: timer.countdownTime,
-            })}
-          </Text>
-        )}
+        <Text
+          className={cn(
+            "text-8xl font-poppins font-medium",
+            timer.elapsed && timer.elapsed < 0 && "text-countdown-out-of-time",
+            !timer.elapsed || (timer.elapsed >= 0 && "text-primary")
+          )}
+        >
+          {formatCountdown({
+            elapsedTime: timer.elapsed ?? timer.countdownTime,
+            countdownTime: timer.countdownTime,
+          })}
+        </Text>
         <View className="absolute bottom-[40]">
           <Text className="text-lg font-semibold text-main-light">
             {event.description}
@@ -173,7 +171,7 @@ export const ActiveTimerWidget = () => {
       </View>
       <ProgressBar
         countdownTime={timer.countdownTime * 1000}
-        elapsedTime={timer.elapsedInMs}
+        elapsedTime={timer.elapsedInMs ?? timer.countdownTime * 1000}
       />
     </View>
   );

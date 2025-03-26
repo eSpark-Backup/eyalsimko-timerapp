@@ -17,9 +17,8 @@ import TimersListCard from "~/components/cards/TimersListCard";
 
 export default function TimerScreen() {
   const actorRef = TimerContext.useActorRef();
-  const timerIsRunning = useMachineSelector(
-    actorRef,
-    (state) => typeof state.context.timer?.elapsed === "number"
+  const timerIsActive = useMachineSelector(actorRef, (state) =>
+    state.matches("ACTIVE")
   );
 
   return (
@@ -31,7 +30,7 @@ export default function TimerScreen() {
           <View style={{ width: 360 }}>
             <Card
               spacing="small"
-              borderColor={timerIsRunning ? "active" : "default"}
+              borderColor={timerIsActive ? "active" : "default"}
             >
               <ActiveTimerWidget />
             </Card>
