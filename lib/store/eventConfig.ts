@@ -161,6 +161,14 @@ export const eventConfigStore = createStore({
         ]
       }
     },
+    resetStartedAt: (context) => ({
+      events: context.events.map(event => {
+        return {
+          ...event,
+          startedAt: null
+        }
+      })
+    }),
     deleteEvent: (context, { event: deletedEvent }: { event: Event }) => {
       return {
         events: context.events.filter(event => event.id !== deletedEvent.id)

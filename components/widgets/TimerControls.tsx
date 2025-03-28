@@ -13,6 +13,7 @@ import { TimerContext } from "~/lib/store/timer";
 import { useSelector } from "@xstate/store/react";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { Play } from "~/lib/icons/Play";
+import { Restart } from "~/lib/icons/Restart";
 
 function ElapsedTime() {
   const firstEventStartedAt = useSelector(eventConfigStore, (state) => {
@@ -176,10 +177,27 @@ export default function TimerControls() {
       </View>
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Elapsed Time</Text>
-        <View className="border-highlight border py-[8] px-[12] rounded-[8]">
-          <Text className="font-normal ">
-            <ElapsedTime />
-          </Text>
+        <View className="flex-row gap-[8] items-center">
+          {event.startedAt && (
+            <IconButton
+              size="sm"
+              icon={Restart}
+              onPress={() => {
+                eventConfigStore.send({ type: "resetStartedAt" });
+                if (isRunning) {
+                  eventConfigStore.send({
+                    type: "setEventStartedAt",
+                    eventId: event.id,
+                  });
+                }
+              }}
+            />
+          )}
+          <View className="border-highlight border py-[8] px-[12] rounded-[8]">
+            <Text className="font-normal ">
+              <ElapsedTime />
+            </Text>
+          </View>
         </View>
       </View>
       <View

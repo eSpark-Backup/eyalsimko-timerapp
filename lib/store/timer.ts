@@ -224,7 +224,15 @@ export const timerStore = setup({
             resume: {
               guard: 'isConnected',
               target: 'running',
-              actions: () => {
+              actions: ({ context }) => {
+                const runningContext = context as Running
+                const event = eventConfigStore.getSnapshot().context.events.find(event => event.id === runningContext.timer.eventId)!
+                if (!event.startedAt) {
+                  eventConfigStore.send({
+                    type: "setEventStartedAt",
+                    eventId: runningContext.timer.eventId,
+                  })
+                }
                 connectionActor.send({ type: "sendMessage", message: { type: "resume" } })
               }
             }
