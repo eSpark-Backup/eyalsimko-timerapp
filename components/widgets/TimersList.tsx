@@ -39,6 +39,7 @@ import { SetupEvent, TimerContext } from "~/lib/store/timer";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { CardScrollRefContext } from "../Card";
 import Sortable from "react-native-sortables";
+import { Modal, modalStore } from "~/lib/store/modalStore";
 
 export type TimersListHeaderRef = {
   addEvent: () => void;
@@ -46,19 +47,18 @@ export type TimersListHeaderRef = {
 
 export const TimersListHeader = forwardRef<TimersListHeaderRef, {}>(
   (props, ref) => {
-    const [modal, setModal] = React.useState<ModalState | null>(null);
-    useImperativeHandle(ref, () => ({
-      addEvent: () => setModal({ type: "add" }),
-    }));
+    const setModal = (modal: Modal) =>
+      modalStore.send({ type: "showModal", modal });
+
     return (
       <>
-        <TimerModals modal={modal} setModal={setModal} />
+        {/* <TimerModals modal={modal} setModal={setModal} /> */}
         <View className="flex-row justify-between items-center">
           <Text className="text-lg font-semibold">List of Events</Text>
           <Button
             size="sm"
             icon={Plus}
-            onPress={() => setModal({ type: "add" })}
+            onPress={() => setModal({ type: "addEvent" })}
           >
             <Text>Add New Timer</Text>
           </Button>
@@ -438,15 +438,10 @@ type ModalState =
       event: Event;
     };
 
-function EventItem({
-  event,
-  index,
-  setModal,
-}: {
-  event: Event;
-  index: number;
-  setModal: (modal: ModalState | null) => void;
-}) {
+function EventItem({ event, index }: { event: Event; index: number }) {
+  const setModal = (modal: Modal) =>
+    modalStore.send({ type: "showModal", modal });
+
   const insets = useSafeAreaInsets();
 
   const contentInsets = {
@@ -607,7 +602,7 @@ function EventItem({
             >
               <DropdownMenuGroup className="gap-[8]">
                 <DropdownMenuItem
-                  onPress={() => setModal({ type: "edit", event })}
+                  onPress={() => setModal({ type: "editEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
                     <Text className="text-sm font-normal">Edit</Text>
@@ -618,7 +613,7 @@ function EventItem({
                   disabled={
                     event.id === runningTimerId ? timerIsStarted : false
                   }
-                  onPress={() => setModal({ type: "delete", event })}
+                  onPress={() => setModal({ type: "deleteEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
                     <Text className="text-sm font-normal">Delete</Text>
@@ -673,11 +668,11 @@ export default function TimersList() {
     checkVisibility();
   }, [runningTimerId]);
 
-  const [modal, setModal] = React.useState<ModalState | null>(null);
+  // const [modal, setModal] = React.useState<ModalState | null>(null);
 
   return (
     <>
-      <TimerModals modal={modal} setModal={setModal} />
+      {/* <TimerModals modal={modal} setModal={setModal} /> */}
       <Sortable.Grid
         onDragEnd={({ fromIndex, toIndex }) => {
           eventConfigStore.send({
@@ -699,7 +694,7 @@ export default function TimersList() {
             key={event.id}
             ref={runningTimerId === event.id ? runningTimerRef : null}
           >
-            <EventItem event={event} index={index} setModal={setModal} />
+            <EventItem event={event} index={index} />
           </View>
         )}
       />

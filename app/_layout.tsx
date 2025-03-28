@@ -9,11 +9,18 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 
 import { Link, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
-import { Platform, View, StyleSheet, SafeAreaView } from "react-native";
+import {
+  Platform,
+  View,
+  StyleSheet,
+  SafeAreaView,
+  KeyboardAvoidingView,
+} from "react-native";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { PortalHost } from "@rn-primitives/portal";
@@ -139,45 +146,47 @@ export default function RootLayout() {
   }
 
   return (
-    <TimerContext.Provider>
+    <KeyboardProvider>
       <ConnectionLostModalProvider>
-        <GestureHandlerRootView>
-          <TimerSync />
-          <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-            <StatusBar
-              hidden={true}
-              style={isDarkColorScheme ? "light" : "dark"}
-              networkActivityIndicatorVisible
-            />
-            <View className="flex-1 bg-screenBackground">
-              <Background />
-              <View className="flex-1">
-                <Stack
-                  screenOptions={{
-                    contentStyle: { backgroundColor: "transparent" },
-                  }}
-                >
-                  <Stack.Screen
-                    options={{
-                      header: () => <Header />,
+        <TimerContext.Provider>
+          <GestureHandlerRootView>
+            <TimerSync />
+            <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+              <StatusBar
+                hidden={true}
+                style={isDarkColorScheme ? "light" : "dark"}
+                networkActivityIndicatorVisible
+              />
+              <View className="flex-1 bg-screenBackground">
+                <Background />
+                <View className="flex-1">
+                  <Stack
+                    screenOptions={{
+                      contentStyle: { backgroundColor: "transparent" },
                     }}
-                    name="index"
-                  />
-                  <Stack.Screen
-                    name="scanCode"
-                    options={{
-                      header: () => null,
-                    }}
-                  />
-                </Stack>
+                  >
+                    <Stack.Screen
+                      options={{
+                        header: () => null,
+                      }}
+                      name="index"
+                    />
+                    <Stack.Screen
+                      name="scanCode"
+                      options={{
+                        header: () => null,
+                      }}
+                    />
+                  </Stack>
+                </View>
               </View>
-            </View>
-            <PortalHost />
-            <ToastProvider />
-          </ThemeProvider>
-        </GestureHandlerRootView>
+              <PortalHost />
+              <ToastProvider />
+            </ThemeProvider>
+          </GestureHandlerRootView>
+        </TimerContext.Provider>
       </ConnectionLostModalProvider>
-    </TimerContext.Provider>
+    </KeyboardProvider>
   );
 }
 
