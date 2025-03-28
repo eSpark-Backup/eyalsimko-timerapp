@@ -4,6 +4,7 @@ import { ScrollView, View } from "react-native";
 import Animated, { AnimatedRef } from "react-native-reanimated";
 import { cn } from "~/lib/utils";
 import { useAnimatedRef } from "react-native-reanimated";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 const cardVariants = cva("border flex-1 rounded-[10]", {
   variants: {

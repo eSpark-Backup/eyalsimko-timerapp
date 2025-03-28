@@ -89,12 +89,9 @@ export const timerStore = setup({
       })
     }),
     waitForRecovery: fromCallback(({ sendBack }) => {
-      console.log("RUN waitForRecovery")
       connectionActor.subscribe(snapshot => {
         if (snapshot.matches("CONNECTED")) {
           const context = connectionActor.getSnapshot().context as ConnectedState
-          const disconnectedWihleRunningEventId = context.disconnectedWhileRunningEventId
-          const event = eventConfigStore.getSnapshot().context.events.find(event => event.id === disconnectedWihleRunningEventId)!
 
           if (context.timerInit) {
             sendBack({ type: "recover", data: context.timerInit })

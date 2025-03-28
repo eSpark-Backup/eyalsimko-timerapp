@@ -12,6 +12,7 @@ import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { Text } from "./text";
 import { X } from "~/lib/icons/X";
 import { cn } from "~/lib/utils";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -79,7 +80,14 @@ type ScrollableContentProps =
   | {
       scrollable: true;
       height: number;
+      header?: null;
+      headerHeight?: number;
+    }
+  | {
+      scrollable: true;
+      height: number;
       header: React.ReactNode;
+      headerHeight: number;
     };
 
 const DialogContent = React.forwardRef<
@@ -89,7 +97,6 @@ const DialogContent = React.forwardRef<
   } & ScrollableContentProps
 >(({ className, children, portalHost, style = {}, ...props }, ref) => {
   const { open } = DialogPrimitive.useRootContext();
-  const [maxContentHeight, setMaxContentHeight] = React.useState(0);
   const headerRef = React.useRef<View>(null);
 
   if (!props.scrollable) {
@@ -123,7 +130,6 @@ const DialogContent = React.forwardRef<
             ref={ref}
             className={cn(
               "web:cursor-default bg-modal-background web:duration-200 rounded-[20]",
-              maxContentHeight === 0 && "opacity-0",
               open
                 ? "web:animate-in web:fade-in-0 web:zoom-in-95"
                 : "web:animate-out web:fade-out-0 web:zoom-out-95",
@@ -137,26 +143,17 @@ const DialogContent = React.forwardRef<
             ]}
             {...restProps}
           >
-            <View
-              className="pt-[24] px-[24]"
-              onLayout={(e) => {
-                e.nativeEvent.layout.height &&
-                  setMaxContentHeight(
-                    props.height - e.nativeEvent.layout.height
-                  );
-              }}
-              ref={headerRef}
-            >
+            <View className="pt-[24] px-[24]" ref={headerRef}>
               {props.header}
             </View>
-            <ScrollView
+            <KeyboardAwareScrollView
               className="pb-[24] px-[12] mx-[12]"
               style={{
-                maxHeight: maxContentHeight,
+                maxHeight: props.height - (props.headerHeight ?? 0),
               }}
             >
               <Pressable>{children}</Pressable>
-            </ScrollView>
+            </KeyboardAwareScrollView>
           </DialogPrimitive.Content>
         </DialogOverlay>
       </DialogPortal>

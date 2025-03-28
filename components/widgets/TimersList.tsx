@@ -39,7 +39,7 @@ import { SetupEvent, TimerContext } from "~/lib/store/timer";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { CardScrollRefContext } from "../Card";
 import Sortable from "react-native-sortables";
-import { Modal, modalStore } from "~/lib/store/modalStore";
+import { useModal, useShowModal } from "~/lib/context/ModalContext";
 
 export type TimersListHeaderRef = {
   addEvent: () => void;
@@ -47,8 +47,7 @@ export type TimersListHeaderRef = {
 
 export const TimersListHeader = forwardRef<TimersListHeaderRef, {}>(
   (props, ref) => {
-    const setModal = (modal: Modal) =>
-      modalStore.send({ type: "showModal", modal });
+    const showModal = useShowModal();
 
     return (
       <>
@@ -58,7 +57,7 @@ export const TimersListHeader = forwardRef<TimersListHeaderRef, {}>(
           <Button
             size="sm"
             icon={Plus}
-            onPress={() => setModal({ type: "addEvent" })}
+            onPress={() => showModal({ type: "addEvent" })}
           >
             <Text>Add New Timer</Text>
           </Button>
@@ -439,8 +438,7 @@ type ModalState =
     };
 
 function EventItem({ event, index }: { event: Event; index: number }) {
-  const setModal = (modal: Modal) =>
-    modalStore.send({ type: "showModal", modal });
+  const showModal = useShowModal();
 
   const insets = useSafeAreaInsets();
 
@@ -602,7 +600,7 @@ function EventItem({ event, index }: { event: Event; index: number }) {
             >
               <DropdownMenuGroup className="gap-[8]">
                 <DropdownMenuItem
-                  onPress={() => setModal({ type: "editEvent", event })}
+                  onPress={() => showModal({ type: "editEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
                     <Text className="text-sm font-normal">Edit</Text>
@@ -613,7 +611,7 @@ function EventItem({ event, index }: { event: Event; index: number }) {
                   disabled={
                     event.id === runningTimerId ? timerIsStarted : false
                   }
-                  onPress={() => setModal({ type: "deleteEvent", event })}
+                  onPress={() => showModal({ type: "deleteEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
                     <Text className="text-sm font-normal">Delete</Text>
@@ -668,7 +666,27 @@ export default function TimersList() {
     checkVisibility();
   }, [runningTimerId]);
 
-  // const [modal, setModal] = React.useState<ModalState | null>(null);
+  const showModal = useShowModal();
+
+  const handleEdit = (event: Event) => {
+    showModal({
+      type: "editEvent",
+      event,
+    });
+  };
+
+  const handleDelete = (event: Event) => {
+    showModal({
+      type: "deleteEvent",
+      event,
+    });
+  };
+
+  const handleAdd = () => {
+    showModal({
+      type: "addEvent",
+    });
+  };
 
   return (
     <>

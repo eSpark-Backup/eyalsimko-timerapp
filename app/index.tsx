@@ -1,37 +1,31 @@
 import * as React from "react";
-import { KeyboardAvoidingView, View } from "react-native";
+import { View } from "react-native";
+
 import Card from "~/components/Card";
 import { useSelector as useMachineSelector } from "@xstate/react";
 
 import { ActiveTimerWidget } from "~/components/widgets/ActiveTimer";
-import {
-  MessageWidget,
-  MessageWidgetHeader,
-} from "~/components/widgets/Messages";
 import TimerControls from "~/components/widgets/TimerControls";
-import TimersList, { TimersListHeader } from "~/components/widgets/TimersList";
 import { TimerContext } from "~/lib/store/timer";
 import { ConnectionLostModal } from "~/components/ConnectionLostModal";
 import MessagesCard from "~/components/cards/MessagesCard";
 import TimersListCard from "~/components/cards/TimersListCard";
 import { Header } from "~/components/header";
 import { Modals } from "~/components/Modals";
-import { useSelector } from "@xstate/store/react";
-import { modalStore } from "~/lib/store/modalStore";
-import { useRouter } from "expo-router";
+import { useModal } from "~/lib/context/ModalContext";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
 export default function TimerScreen() {
   const actorRef = TimerContext.useActorRef();
   const timerIsActive = useMachineSelector(actorRef, (state) =>
     state.matches("ACTIVE")
   );
-  const modal = useSelector(modalStore, (state) => state.context.modal);
+  const modal = useModal();
   return (
     <>
-      <Modals />
       <KeyboardAvoidingView
-        behavior={modal ? undefined : "position"}
-        keyboardVerticalOffset={0}
+        enabled={modal.type === "none"}
+        behavior={"position"}
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1 }}
       >
@@ -61,6 +55,7 @@ export default function TimerScreen() {
         </View>
       </KeyboardAvoidingView>
       <ConnectionLostModal />
+      <Modals />
     </>
   );
 }

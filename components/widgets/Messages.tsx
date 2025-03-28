@@ -144,7 +144,6 @@ export const MessageWidget = () => {
     eventConfigStore,
     (state) => state.context.messages
   );
-  console.log(messages);
   if (messages.length === 0) {
     return (
       <View className="flex-1 h-auto items-center justify-center">

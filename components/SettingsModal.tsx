@@ -42,6 +42,7 @@ import {
 import { Unplug } from "~/lib/icons/Unplug";
 import { Power } from "~/lib/icons/Power";
 import { RotateCcw } from "~/lib/icons/RotateCcw";
+import { useCloseModal, useShowModal } from "~/lib/context/ModalContext";
 
 function VersionInfo() {
   const appVersion = Application.nativeApplicationVersion;
@@ -56,11 +57,8 @@ function VersionInfo() {
 
 type WifiNetwork = Awaited<ReturnType<typeof WifiManager.loadWifiList>>[number];
 
-function ConnectionSettings<ModalState extends { type: "deleteData" }>({
-  setModal,
-}: {
-  setModal: (val: ModalState | null) => void;
-}) {
+function ConnectionSettings() {
+  const closeModal = useCloseModal();
   const [availableNetworks, setAvailableNetworks] = useState<WifiNetwork[]>([]);
   const [isConnectingToWifi, setIsConnectingToWifi] = useState(false);
   const knownWifiNetworks = useSelector(
@@ -278,13 +276,7 @@ function ConnectionSettings<ModalState extends { type: "deleteData" }>({
             <Text>Open WiFi settings to change the network</Text>
           </Button>
           <Link href="/scanCode" asChild>
-            <Button
-              size="lg"
-              border="none"
-              onPress={() => {
-                setModal(null);
-              }}
-            >
+            <Button size="lg" border="none" onPress={closeModal}>
               <Text>Scan the QR code from the screen</Text>
             </Button>
           </Link>
@@ -373,7 +365,7 @@ function ConnectionSettings<ModalState extends { type: "deleteData" }>({
                     style: "destructive",
                     onPress: () => {
                       connectionActor.send({ type: "updateFirmware" });
-                      setModal(null);
+                      closeModal();
                     },
                   },
                 ]
@@ -408,11 +400,10 @@ function ConnectionSettings<ModalState extends { type: "deleteData" }>({
   );
 }
 
-export function SettingsModal<ModalState extends { type: "deleteData" }>({
-  setModal,
-}: {
-  setModal: (val: ModalState | null) => void;
-}) {
+export function SettingsModal() {
+  const showModal = useShowModal();
+  const closeModal = useCloseModal();
+
   const initialBlinkLength = useSelector(
     eventConfigStore,
     (state) => state.context.blinkLength
@@ -464,14 +455,14 @@ export function SettingsModal<ModalState extends { type: "deleteData" }>({
             </View>
           </View>
           <View className="gap-[20]">
-            <ConnectionSettings setModal={setModal} />
+            <ConnectionSettings />
           </View>
           <View className="gap-[20]">
             <Button
               variant="destructive"
               size="lg"
               border="none"
-              onPress={() => setModal({ type: "deleteData" } as ModalState)}
+              onPress={() => showModal({ type: "deleteData" })}
             >
               <Text>Delete all timers</Text>
             </Button>
@@ -497,8 +488,7 @@ export function SettingsModal<ModalState extends { type: "deleteData" }>({
                   type: "setBlinkLength",
                   blinkLength,
                 });
-
-                setModal(null);
+                closeModal();
               }}
             >
               <Text>Save Changes</Text>
