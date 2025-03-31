@@ -1,4 +1,5 @@
 import { cva, VariantProps } from "class-variance-authority";
+import { LucideIcon } from "lucide-react-native";
 import * as React from "react";
 import {
   TextInput,
@@ -31,12 +32,26 @@ const variants = cva("", {
     background: "default",
   },
 });
+const iconVariants = cva("absolute justify-center right-0 top-0", {
+  variants: {
+    size: {
+      small: "native:h-[36] pr-[8]",
+      default: "native:h-[60] pr-[15]",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+  },
+});
+
+type IconProps = React.ComponentProps<LucideIcon>;
 
 interface FloatingLabelInputProps
   extends TextInputProps,
     VariantProps<typeof variants> {
   label?: string;
   hasError?: boolean;
+  icon?: React.ComponentType<IconProps>;
 }
 
 export type TextInputRef = TextInput & { blurAndRemoveFocus: () => void };
@@ -56,6 +71,7 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
       onFocus,
       onSubmitEditing,
       onChangeText,
+      icon: Icon,
       ...props
     },
     ref
@@ -149,6 +165,11 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
         <Animated.Text style={[styles.label, labelStyle]}>
           {label}
         </Animated.Text>
+        {Icon && (
+          <View className={iconVariants({ size })}>
+            <Icon size={20} />
+          </View>
+        )}
         <TextInput
           value={value}
           ref={inputRef}

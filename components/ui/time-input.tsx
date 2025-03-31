@@ -5,6 +5,7 @@ import {
   TextInputFocusEventData,
 } from "react-native";
 import { Input, TextInputRef } from "~/components/ui/input";
+import { Clocks } from "~/lib/icons/Clocks";
 
 interface TimeInputProps
   extends Omit<React.ComponentProps<typeof Input>, "value" | "onChange"> {
@@ -104,6 +105,7 @@ const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
       maxLength={8}
       placeholder="00:00:00"
       keyboardType="number-pad"
+      icon={Clocks}
       {...props}
     />
   );
