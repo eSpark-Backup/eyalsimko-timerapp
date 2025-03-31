@@ -3,7 +3,7 @@ import { useSelector } from "@xstate/store/react";
 import { useSelector as useMachineSelector } from "@xstate/react";
 import { Text } from "~/components/ui/text";
 import { TimerContext } from "~/lib/store/timer";
-import { eventConfigStore } from "~/lib/store/eventConfig";
+import { eventConfigStore, Log } from "~/lib/store/eventConfig";
 import { useCloseModal, useModal } from "~/lib/context/ModalContext";
 import {
   Dialog,
@@ -26,30 +26,6 @@ import { IconButton } from "./iconButton";
 import { Close } from "~/lib/icons/Close";
 import { GreenDot, RedDot } from "~/lib/icons/LogDots";
 import { cn } from "~/lib/utils";
-
-type Log = {
-  type: "connectionLost" | "connectionRecovered";
-  connectionType: "LAN" | "WIFI";
-  date: Date;
-};
-
-const logs: Log[] = [
-  {
-    type: "connectionRecovered",
-    connectionType: "LAN",
-    date: new Date("2023-07-01T04:12:00.000Z"),
-  },
-  {
-    type: "connectionLost",
-    connectionType: "WIFI",
-    date: new Date("2023-07-02T03:42:00.000Z"),
-  },
-  {
-    type: "connectionRecovered",
-    connectionType: "WIFI",
-    date: new Date("2023-07-03T02:11:00.000Z"),
-  },
-];
 
 type LogType = Log["type"];
 
@@ -332,6 +308,8 @@ export function Modals() {
     return state.context.timer?.eventId;
   });
 
+  const logs = useSelector(eventConfigStore, (state) => state.context.logs);
+
   return (
     <>
       <Dialog open={modal?.type === "deleteEvent"} onOpenChange={closeModal}>
@@ -556,9 +534,16 @@ export function Modals() {
           }
         >
           <View className="pt-[40]">
+            {logs.length === 0 && (
+              <View className="h-[200] items-center justify-center">
+                <Text className="text-2xl text-muted-foreground">
+                  No logs yet
+                </Text>
+              </View>
+            )}
             {logs.map((log, index) => (
               <View key={index} className="flex-row">
-                <View className="w-[65] mr-[6] items-center">
+                <View className="w-[68] mr-[6] items-center">
                   <Text className="text-sm font-semibold leading-none">
                     {timerFormatter.format(log.date)}
                   </Text>

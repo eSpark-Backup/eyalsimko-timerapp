@@ -5,6 +5,7 @@ import Toast from 'react-native-toast-message';
 import { Alert, AppState } from "react-native";
 import { sendUpdate } from "../timerModuleFirmware";
 import { hide as hideConnectionLostModal, show as showConnectionLostModal } from '~/components/ConnectionLostModal';
+import { eventConfigStore } from './eventConfig';
 
 const recoverMessageSchema = z.object({
   time_left: z.number(),
@@ -114,13 +115,24 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
       const onMessage = ({ data }: { data: unknown }) => {
         if (typeof data === "string" && data.split(':')[0] === "recover") {
           const { data: timerInit } = recoverMessageSchema.safeParse(JSON.parse(data.substring(data.indexOf(':') + 1)))
-          if (timerInit)
+          eventConfigStore.send({
+            type: "addLog",
+            log: {
+              type: "connectionRecovered",
+              connectionType: config.type,
+              date: new Date(),
+            }
+          })
+
+          if (timerInit) {
+
             resolve({
               ws,
               type: config.type,
               messageQueue: [],
               timerInit,
             })
+          }
           else {
             Toast.show({
               type: "error",
@@ -136,6 +148,15 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
           }
         }
         if (data === "hello") {
+          eventConfigStore.send({
+            type: "addLog",
+            log: {
+              type: "connectionRecovered",
+              connectionType: config.type,
+              date: new Date(),
+            }
+          })
+
           clearTimeout(timeout)
           ws.removeEventListener('open', onOpen)
           ws.removeEventListener('message', onMessage)
@@ -164,11 +185,19 @@ const connectionStore = setup({
     events: {} as Events,
   },
   actors: {
-    subscribeConnection: fromCallback(({ input, sendBack }: { input: WebSocket, sendBack: (event: Events) => void }) => {
+    subscribeConnection: fromCallback(({ input, sendBack }: { input: { ws: WebSocket, type: Config["type"] }, sendBack: (event: Events) => void }) => {
       hideConnectionLostModal()
-      return input.addEventListener('close', (e) => {
+      return input.ws.addEventListener('close', (e) => {
         if (e.code !== 1000)
-          sendBack({ type: 'connectionLost' })
+          eventConfigStore.send({
+            type: "addLog",
+            log: {
+              type: "connectionLost",
+              connectionType: input.type ?? "WIFI",
+              date: new Date(),
+            }
+          })
+        sendBack({ type: 'connectionLost' })
       })
     }),
     initialize: fromCallback(({ sendBack }) => {
@@ -288,7 +317,7 @@ const connectionStore = setup({
       },
       invoke: {
         src: 'subscribeConnection',
-        input: ({ context }) => context.ws as WebSocket,
+        input: ({ context }) => ({ ws: context.ws as WebSocket, type: context.type as Config["type"] }),
       },
       on: {
         updateFirmware: {

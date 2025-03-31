@@ -1,7 +1,12 @@
 import { nanoid } from 'nanoid/non-secure'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createStore } from '@xstate/store';
-import { connectionActor } from './connectionStore'
+
+export type Log = {
+  type: "connectionLost" | "connectionRecovered";
+  connectionType: "LAN" | "WIFI";
+  date: Date;
+};
 
 export type Message = {
   id: string,
@@ -29,7 +34,8 @@ type State = {
   blinkLength: number | null
   events: Event[]
   screenWifiConfig: WiFiConfig[],
-  messages: Message[]
+  messages: Message[],
+  logs: Log[],
 }
 
 const initialState: State = {
@@ -38,23 +44,23 @@ const initialState: State = {
   events: [],
   screenWifiConfig: [],
   messages: [],
+  logs: [],
 }
 
 export const eventConfigStore = createStore({
   context: initialState,
   on: {
+    addLog: (context, { log }: { log: Log }) => {
+      return {
+        logs: [log, ...context.logs]
+      }
+    },
     setBlinkLength: (context, { blinkLength }: Pick<State, 'blinkLength'>) => {
-      if (blinkLength)
-        connectionActor.send({ type: "sendMessage", message: { type: "blink_length", data: blinkLength } })
-
       return {
         blinkLength
       }
     },
     setBlinkingStartTime: (context, { blinkingStartTime }: Pick<State, 'blinkingStartTime'>) => {
-      if (blinkingStartTime)
-        connectionActor.send({ type: "sendMessage", message: { type: "blink_length", data: blinkingStartTime } })
-
       return {
         blinkingStartTime
       }
@@ -195,15 +201,14 @@ AsyncStorage.getItem(snapshotKey)
 
       return {
         ...parsed,
-        blinkingStartTime: null,
-        blinkLength: null,
         events: parsed.events.map((event: any) => {
           return {
             ...event,
             startedAt: event.startedAt ? new Date(event.startedAt) : null
             // startedAt: null
           }
-        })
+        }),
+        logs: [],
       }
     })() as State | null
     if (parsedSnapshot) {
