@@ -360,10 +360,10 @@ export function Modals() {
                 <Button
                   onPress={() => {
                     if (modal?.type !== "deleteEvent") return;
-                    // eventConfigStore.send({
-                    //   type: "deleteEvent",
-                    //   event: modal.event,
-                    // });
+                    eventConfigStore.send({
+                      type: "deleteEvent",
+                      event: modal.event,
+                    });
                     closeModal();
                   }}
                   size="lg"
