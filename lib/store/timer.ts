@@ -13,6 +13,7 @@ type RunningTimer = {
   countdownTime: number
   blinkingStartTime: number
   blinkLength: number
+  blackout: boolean
 }
 
 type NonRunningTimer = Omit<RunningTimer, 'elapsed' | 'elapsedInMs'> & {
@@ -51,6 +52,8 @@ type Events = SetupEvent | {
   type: "pause"
 } | {
   type: "resume"
+} | {
+  type: "toggleBlackout"
 } | {
   type: "showMessage",
   data: {
@@ -139,6 +142,7 @@ export const timerStore = setup({
                   countdownTime: Math.floor(data.elapsed),
                   blinkingStartTime: data.startBlinkingTime,
                   blinkLength: data.startBlinkingTime,
+                  blackout: false,
                 }
               }
               const newTimer: RunningTimer = {
@@ -148,6 +152,7 @@ export const timerStore = setup({
                 countdownTime: event.countdownTime,
                 blinkingStartTime: event.blinkingStartTime,
                 blinkLength: event.blinkLength,
+                blackout: false,
               }
               return newTimer
             },
@@ -269,6 +274,22 @@ export const timerStore = setup({
             }
           })
         },
+        toggleBlackout: {
+          actions: assign({
+            timer: ({ context }) => {
+              const runningContext = context as Running
+              const isBlackoutMode = runningContext.timer.blackout
+              if (isBlackoutMode)
+                connectionActor.send({ type: "sendMessage", message: { type: "blackout:off" } })
+              else
+                connectionActor.send({ type: "sendMessage", message: { type: "blackout:on" } })
+              return {
+                ...runningContext.timer,
+                blackout: !isBlackoutMode,
+              }
+            }
+          })
+        }
       },
       initial: 'stopped',
     }
@@ -305,7 +326,8 @@ export const timerStore = setup({
             eventId: event.id,
             elapsed: null,
             elapsedInMs: null,
-            messageId: null
+            messageId: null,
+            blackout: false,
           }
         },
         disconnectedWhileRunningEventId: () => null,

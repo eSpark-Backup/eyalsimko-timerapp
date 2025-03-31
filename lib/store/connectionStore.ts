@@ -67,6 +67,10 @@ type WsMessage = {
   type: "disconnect",
 } | {
   type: "init"
+} | {
+  type: "blackout:on"
+} | {
+  type: "blackout:off"
 }
 
 const queueableMessageTypes = ["blink_length"]

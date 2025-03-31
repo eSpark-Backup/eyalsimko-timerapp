@@ -73,7 +73,10 @@ export default function TimerControls() {
     state.matches({ ACTIVE: "stopped" })
   );
 
-  const [blackoutActive, setBlackoutActive] = useState(false);
+  const blackoutActive = useMachineSelector(
+    actorRef,
+    (state) => state.context.timer?.blackout ?? false
+  );
   const [glowActive, setGlowActive] = useState(false);
 
   if (!timer || !event) return null;
@@ -172,7 +175,7 @@ export default function TimerControls() {
         <Text className="font-normal ">Blackout Screen</Text>
         <Switch
           checked={blackoutActive}
-          onCheckedChange={() => setBlackoutActive(!blackoutActive)}
+          onCheckedChange={() => actorRef.send({ type: "toggleBlackout" })}
         />
       </View>
       <View className="flex-row justify-between items-center">
