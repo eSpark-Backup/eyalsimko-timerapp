@@ -140,12 +140,7 @@ export const ActiveTimerWidget = () => {
   return (
     <View className="flex-col flex-1 justify-between">
       <View className="flex-row justify-between">
-        <CompanyLogo
-          viewBox="0 0 95 20"
-          height={20}
-          width={94.7}
-          strokeWidth={0}
-        />
+        <CompanyLogo height={20} width={89} strokeWidth={0} />
         <Text className="text-lg font-semibold text-main-light">
           {event.speakerName}
         </Text>

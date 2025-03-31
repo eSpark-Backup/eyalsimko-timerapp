@@ -54,12 +54,7 @@ export const Header = () => {
   return (
     <View className="h-[60] px-[32] pt-[20]">
       <View className="flex-1 flex-row justify-between items-center">
-        <CompanyLogo
-          viewBox="0 0 95 20"
-          height={28}
-          width={132.57}
-          strokeWidth={0}
-        />
+        <CompanyLogo size={124} strokeWidth={0} />
         <View className="flex-row gap-[24] items-center">
           <View className="flex-row gap-[8]">
             <Button
