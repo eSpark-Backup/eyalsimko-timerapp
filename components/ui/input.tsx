@@ -163,8 +163,6 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
         : (undefined as any)
     );
 
-    console.log(value);
-
     return (
       <View className="relative">
         <Animated.Text style={[styles.label, labelStyle]}>

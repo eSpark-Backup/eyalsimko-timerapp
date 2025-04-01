@@ -1,10 +1,9 @@
 import { cva } from "class-variance-authority";
 import React from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import Animated, { AnimatedRef } from "react-native-reanimated";
 import { cn } from "~/lib/utils";
 import { useAnimatedRef } from "react-native-reanimated";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 const cardVariants = cva("border flex-1 rounded-[10]", {
   variants: {
@@ -62,20 +61,26 @@ export const CardScrollRefContext = React.createContext<
   AnimatedRef<Animated.ScrollView>
 >(null as unknown as AnimatedRef<Animated.ScrollView>);
 
+export const CardScrollPositionContext = React.createContext<number>(0);
+
 export default function Card({
   children,
   scrollable = false,
   header = null,
   spacing = "default",
   borderColor = "default",
+  autoScrollToBottom = false,
 }: {
   children: React.ReactNode;
   scrollable?: boolean;
   header?: React.ReactNode;
   spacing?: "default" | "small";
   borderColor?: "default" | "active";
+  autoScrollToBottom?: boolean;
 }) {
   const animatedRef = useAnimatedRef<Animated.ScrollView>();
+  const lastScrollViewHeightRef = React.useRef<null | number>(null);
+  const [scrollPosition, setScrollPosition] = React.useState(0);
 
   if (scrollable) {
     return (
@@ -87,11 +92,28 @@ export default function Card({
           {header}
         </View>
         <Animated.ScrollView
+          onScroll={(e) => setScrollPosition(e.nativeEvent.contentOffset.y)}
           ref={animatedRef}
           className={scrollableCardContentVariants({ spacing })}
         >
           <CardScrollRefContext.Provider value={animatedRef}>
-            {children}
+            <CardScrollPositionContext.Provider value={scrollPosition}>
+              <View
+                onLayout={(e) => {
+                  const height = e.nativeEvent.layout.height;
+                  if (
+                    lastScrollViewHeightRef.current !== null &&
+                    lastScrollViewHeightRef.current < height &&
+                    autoScrollToBottom
+                  ) {
+                    animatedRef.current?.scrollToEnd();
+                  }
+                  lastScrollViewHeightRef.current = height;
+                }}
+              >
+                {children}
+              </View>
+            </CardScrollPositionContext.Provider>
           </CardScrollRefContext.Provider>
         </Animated.ScrollView>
       </View>

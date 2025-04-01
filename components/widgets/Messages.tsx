@@ -140,10 +140,12 @@ function MessageRow({ message }: { message: Message }) {
 
 export const MessageWidget = () => {
   const scrollViewRef = React.useContext(CardScrollRefContext);
+
   const messages = useSelector(
     eventConfigStore,
     (state) => state.context.messages
   );
+
   if (messages.length === 0) {
     return (
       <View className="flex-1 h-auto items-center justify-center">

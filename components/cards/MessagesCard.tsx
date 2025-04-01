@@ -43,7 +43,7 @@ export default function MessagesCard() {
   }
 
   return (
-    <Card header={<MessageWidgetHeader />} scrollable={true}>
+    <Card header={<MessageWidgetHeader />} autoScrollToBottom scrollable={true}>
       <MessageWidget />
     </Card>
   );

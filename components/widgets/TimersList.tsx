@@ -37,7 +37,7 @@ import { useSelector } from "@xstate/store/react";
 import { TimeInput } from "../ui/time-input";
 import { SetupEvent, TimerContext } from "~/lib/store/timer";
 import { connectionActor } from "~/lib/store/connectionStore";
-import { CardScrollRefContext } from "../Card";
+import { CardScrollPositionContext, CardScrollRefContext } from "../Card";
 import Sortable from "react-native-sortables";
 import { useModal, useShowModal } from "~/lib/context/ModalContext";
 
@@ -624,28 +624,32 @@ function EventItem({ event, index }: { event: Event; index: number }) {
 export default function TimersList() {
   const runningTimerRef = React.useRef<View>(null);
   const scrollViewRef = React.useContext(CardScrollRefContext);
-  const actorRef = TimerContext.useActorRef();
+  const scrollPosition = React.useContext(CardScrollPositionContext);
+
   const events = useSelector(eventConfigStore, (state) => state.context.events);
+
+  const actorRef = TimerContext.useActorRef();
   const runningTimerId = useMachineSelector(actorRef, (state) => {
     return state.context.timer?.eventId;
   });
 
-  const checkVisibility = () => {
-    const currentRunningTimerRef = runningTimerRef.current;
+  const checkVisibility = (timerRef: React.RefObject<View>) => {
+    const currentRunningTimerRef = timerRef.current;
     const currentScrollViewRef = scrollViewRef.current;
+
     if (currentRunningTimerRef && currentScrollViewRef) {
       (currentScrollViewRef as unknown as View).measureInWindow(
         (_sx, scrollY, _sw, scrollViewHeight) => {
           if (scrollViewHeight === 0) return;
-          currentRunningTimerRef.measureInWindow(
+          currentRunningTimerRef.measureLayout(
+            currentScrollViewRef as unknown as View,
             (_ex, elementY, _ew, elementHeight) => {
               const isVisible =
-                elementY >= scrollY &&
-                elementY + elementHeight <= scrollY + scrollViewHeight;
+                elementY < scrollViewHeight + scrollPosition - elementHeight &&
+                elementY > scrollPosition;
               if (!isVisible) {
-                const y = elementY - elementHeight;
                 currentScrollViewRef.scrollTo({
-                  y: y < elementHeight ? 0 : y,
+                  y: elementY,
                   animated: true,
                 });
               }
@@ -657,30 +661,8 @@ export default function TimersList() {
   };
 
   useEffect(() => {
-    checkVisibility();
+    checkVisibility(runningTimerRef);
   }, [runningTimerId]);
-
-  const showModal = useShowModal();
-
-  const handleEdit = (event: Event) => {
-    showModal({
-      type: "editEvent",
-      event,
-    });
-  };
-
-  const handleDelete = (event: Event) => {
-    showModal({
-      type: "deleteEvent",
-      event,
-    });
-  };
-
-  const handleAdd = () => {
-    showModal({
-      type: "addEvent",
-    });
-  };
 
   return (
     <>

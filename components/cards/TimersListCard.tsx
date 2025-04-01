@@ -43,7 +43,7 @@ export default function TimersListCard() {
   }
 
   return (
-    <Card scrollable={true} header={<TimersListHeader />}>
+    <Card scrollable={true} autoScrollToBottom header={<TimersListHeader />}>
       <TimersList />
     </Card>
   );
