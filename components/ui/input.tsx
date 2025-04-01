@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TextInputProps,
   Platform,
+  Text,
   Easing,
   useAnimatedValue,
   NativeSyntheticEvent,
@@ -51,6 +52,7 @@ interface FloatingLabelInputProps
     VariantProps<typeof variants> {
   label?: string;
   hasError?: boolean;
+  hint?: string;
   icon?: React.ComponentType<IconProps>;
 }
 
@@ -72,6 +74,7 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
       onSubmitEditing,
       onChangeText,
       icon: Icon,
+      hint,
       ...props
     },
     ref
@@ -160,6 +163,8 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
         : (undefined as any)
     );
 
+    console.log(value);
+
     return (
       <View className="relative">
         <Animated.Text style={[styles.label, labelStyle]}>
@@ -168,6 +173,26 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
         {Icon && (
           <View className={iconVariants({ size })}>
             <Icon size={20} />
+          </View>
+        )}
+        {hint && isFilledOrFocused && (
+          <View className="absolute flex-row bottom-[11.5] left-[16] text-md">
+            <Text>
+              {[...hint].map((hintLetter, index) => (
+                <Text
+                  key={index}
+                  className={
+                    value?.at(index)
+                      ? "text-transparent"
+                      : hintLetter === ":"
+                      ? "text-muted-foreground"
+                      : "text-transparent"
+                  }
+                >
+                  {hintLetter}
+                </Text>
+              ))}
+            </Text>
           </View>
         )}
         <TextInput

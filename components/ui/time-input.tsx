@@ -13,6 +13,14 @@ interface TimeInputProps
   onChange: (newValue: number) => void;
 }
 
+const formatPartialTime = (
+  hours: string | null,
+  minutes: string | null,
+  seconds: string | null
+) => {
+  return [hours, minutes, seconds].filter((item) => item !== null).join(":");
+};
+
 const emptyStringToNull = (value: string) => (value === "" ? null : value);
 
 const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
@@ -69,7 +77,7 @@ const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
       }
     }
     // Add colons
-    const formatted = [hours, minutes, seconds].filter(Boolean).join(":");
+    const formatted = formatPartialTime(hours, minutes, seconds);
 
     setLocalValue(formatted);
     localValueRef.current = formatted;
@@ -104,6 +112,7 @@ const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
       onBlur={handleBlur}
       maxLength={8}
       placeholder="00:00:00"
+      hint="00:00:00"
       keyboardType="number-pad"
       icon={Clocks}
       {...props}
