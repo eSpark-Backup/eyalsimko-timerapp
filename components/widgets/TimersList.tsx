@@ -41,31 +41,25 @@ import { CardScrollRefContext } from "../Card";
 import Sortable from "react-native-sortables";
 import { useModal, useShowModal } from "~/lib/context/ModalContext";
 
-export type TimersListHeaderRef = {
-  addEvent: () => void;
+export const TimersListHeader = () => {
+  const showModal = useShowModal();
+
+  return (
+    <>
+      {/* <TimerModals modal={modal} setModal={setModal} /> */}
+      <View className="flex-row justify-between items-center">
+        <Text className="text-lg font-semibold">List of Events</Text>
+        <Button
+          size="sm"
+          icon={Plus}
+          onPress={() => showModal({ type: "addEvent" })}
+        >
+          <Text>Add New Timer</Text>
+        </Button>
+      </View>
+    </>
+  );
 };
-
-export const TimersListHeader = forwardRef<TimersListHeaderRef, {}>(
-  (props, ref) => {
-    const showModal = useShowModal();
-
-    return (
-      <>
-        {/* <TimerModals modal={modal} setModal={setModal} /> */}
-        <View className="flex-row justify-between items-center">
-          <Text className="text-lg font-semibold">List of Events</Text>
-          <Button
-            size="sm"
-            icon={Plus}
-            onPress={() => showModal({ type: "addEvent" })}
-          >
-            <Text>Add New Timer</Text>
-          </Button>
-        </View>
-      </>
-    );
-  }
-);
 
 const getFormData = (event: Event): FormData => {
   return {

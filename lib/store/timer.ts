@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createActorContext } from '@xstate/react';
-import { and, assign, fromCallback, setup } from 'xstate';
+import { and, assign, fromCallback, fromPromise, setup } from 'xstate';
 import { ConnectedState, connectionActor, RecoverMessage } from './connectionStore';
 import { eventConfigStore } from './eventConfig';
 import Toast from 'react-native-toast-message';
@@ -101,6 +101,16 @@ export const timerStore = setup({
           }
         }
       })
+    }),
+    waitForEventDeletion: fromPromise(({ input }: { input: { eventId: string } }) => {
+      return new Promise((resolve) => {
+        const subscription = eventConfigStore.subscribe((state) => {
+          if (!state.context.events.find(event => event.id === input.eventId)) {
+            subscription.unsubscribe()
+            resolve(undefined)
+          }
+        })
+      })
     })
   },
   guards: {
@@ -109,7 +119,7 @@ export const timerStore = setup({
     },
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QBcCWBbMAnAxFuYyA2gAwC6ioADgPaypo0B2lIAHogLQBM3AdAE4SAVgEB2YQEYBAFgAcEgQGYAbABoQATy4k+KyTO4CVKkmJkC5A4WKUBfOxrSYsfAJIARADIBRHLEIAVypSCiQQWnpGFnCOBCUBPklk624VGWFuYRIVYQ1tBAs5PmEVZVtbEm45OSyHJwxsPgBBAGEAFTcANT8A5ABZOFgAQxhQ1kiGVGZWOIlhPhkSGQsSY2EZSRIlfMQrXTWlI+4ZJUklMUkVepBnJrbOnv9kGhDyCbopmdjEAW4lEqifRbGzcEhySS7BCSIx8cFrf6bJQyFSqGQ3O6uB7dHx8WAvKhUSDPYZYYjvcKTaKzRBiFRiPhGI7naoGORlKFKOS6ORKKobARXORSDGNLEdHF8LCBJhMVBMKA4TqtADS40pn2pPwQKm4DOESjBJnBwM2UOq-FkR2FVXk3GSopcLQlPSlMrlCpwVGGgQC6uomumMVAcX+KkEUnESmyCl5ck53L4vP5FiFIsctzFzseuOlsvlitgAAsaAB3QawEZjCkBqJBmk6qpJ4xLQ3VMSXdRaRBlYomKPmFTc5ECR33F2590FnBF1AQMAVqtgf0RQPfEOIC4A3kCawiZQXEiQ7sIMRpPQiZNczJZMRj8U5vje33E-CwQKYFdU+vawzh4ViMK1i8nyYgCOaiZGLqEhbLu1gog4GZMDQ87wOEmIfHW67sFwYi6EIogwbICiiDIUKcDUSQGGcJD8icCTcPe7jeD4mFfMGOEICQnKqEx2I9GxWobtC5iLPBIhrBIvDGFCmwlNyyhSNksgwtcGaYtmkr4q8RIQIJP7CWexR0meaR8pIoiqFCFn8CI5g2keBqyMIfETm6+YKvp2FxKscL0raIGgseBQXJISaAScKI2HSkjmK5j7PgEekalhHGhrwYkbBJ4g3jJJ7VLoUF6lIay7hsakOEAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBcCWBbMAnAxLMyArgA4DaADALqKjED2sqadAdjSAJ6IC0ATPwBoQAD0QBGAMxiAHADoAbPLFiA7BICs6lb3LSJAX31C0mXFjgEK1JCHqNmbG6IR9esgJzl17lerHuAFmlfdwl5IS4XcgUxAN53RXIVAPdpdy0DIxATbBwIVFgAY1YWMELkK3Y7JlRWdkjuCXJ3WXUhZzF5CTcNeSD5L21dTOMMXNgACzoAdwBZOFgAQxhKm2qHep4JH3bxd1VZFRUvIM0hvUNR0xwJ1Agwedgllaoqhhq6mwbtlV2EfwORxO0jOOguWRyWFkAEkACIAGQAojhzMUAG7YVa0d4bJyICTdWTSaS8aRiXhtTiITTqWQSFQkgIBeRaFRKaSXbJjKEAQQAwgAVaEANWRsGQdDIrzWONqjlAzncvAkrW8SjEgzBYgi4nisl0zWVAUkzLCAU5kNk-KFopwEqgUAANmAAEKOxaFADWdEIFWl2PscvYHV4xwU6rUoOGOpcofIFu5VsFIsRsnFkuIkDwyEWWD91gDH3lIkQbJUsniBMkpNi0nk7hjEmk0T05ApKU6ILECdMSZtqawhBYLFQLCgeVYYFko7RdE9U8t1pTskHw9HUAQM7ohUWDlIYkoWNsss+CsQIOinni8mVBK0vG1VIQQRaAWGKnc+3kXZ72D7y9XEcxxwIU+QAaSPdYgzxBAb3LdRunIRI62UY0Y1JNxAgJC9eCCB9uwhRMl1FFchyA8diEWQh8Egk9i2cZV5A8PwfA0XQGSbRtmyJJp2y-H9CN7YjU0o6is3MWBCEwWjA1PEtn14JiQQZbx1D0JoP3Q7jr1DPxmk-dRmV-XlkxIwD1wnUppxYWd51kRdTIHMj103Gzt13OV90PA83lk+jz3US82wSW8NG0R9Ii0AIPGGAJ7zirR5EMLIWDoe54BsSFfKLYMeDDTxvF8fwghCAIY0aBIPE-VJyBkOITWMmEEURbLcTPBByEbMJGuE1roPa1RopSQyvGaXx+AScraWNTxmQ1XxmUWnrHLTCViEzCA+rk5xtDkMt+C6WrvDCGMxHUNxBlOcgju2OLlv7Ui1zHLb-OfTx9XkY5cPU+8IvxFQxCJBlcOZVklGSe7l1E-BNplPzcoQfg3GGt9Ap8c7ry06IdKK-T0iM5KgA */
   id: 'timer',
   initial: 'IDLE',
   context: {
@@ -159,12 +169,19 @@ export const timerStore = setup({
             disconnectedWhileRunningEventId: null
           })
         }
-      }
+      },
+      entry: () => connectionActor.send({ type: "sendMessage", message: { type: "stop" } }),
     },
     ACTIVE: {
-      invoke: {
+      invoke: [{
         src: 'waitForDisconnect'
-      },
+      }, {
+        src: "waitForEventDeletion",
+        input: ({ context }) => ({ eventId: context.timer?.eventId as string }),
+        onDone: {
+          target: "#timer.IDLE",
+        }
+      }],
       states: {
         stopped: {
           on: {
@@ -191,9 +208,9 @@ export const timerStore = setup({
           }
         },
         running: {
-          invoke: {
-            src: 'ticks'
-          },
+          invoke: [{
+            src: 'ticks',
+          }],
           on: {
             TICK: {
               actions: assign({

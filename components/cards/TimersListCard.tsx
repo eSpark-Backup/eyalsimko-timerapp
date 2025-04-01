@@ -1,24 +1,22 @@
 import { useSelector } from "@xstate/store/react";
 import Card from "../Card";
 import { Text } from "~/components/ui/text";
-import TimersList, {
-  TimersListHeader,
-  TimersListHeaderRef,
-} from "../widgets/TimersList";
+import TimersList, { TimersListHeader } from "../widgets/TimersList";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { View } from "react-native";
 import { Button } from "../ui/button";
 import { Plus } from "~/lib/icons/Plus";
-import { useRef } from "react";
+import { useShowModal } from "~/lib/context/ModalContext";
 
 export default function TimersListCard() {
   const events = useSelector(eventConfigStore, (state) => state.context.events);
-  const ref = useRef<TimersListHeaderRef>(null);
+
+  const showModal = useShowModal();
 
   if (events.length === 0) {
     return (
       <Card>
-        <TimersListHeader ref={ref} />
+        <TimersListHeader />
         <View className="flex-1 items-center justify-center gap-[24]">
           <View className="gap-[12]">
             <Text className="text-xl font-semibold text-center">
@@ -34,7 +32,7 @@ export default function TimersListCard() {
             border="none"
             icon={Plus}
             onPress={() => {
-              ref.current?.addEvent();
+              showModal({ type: "addEvent" });
             }}
           >
             <Text>Add Event</Text>
