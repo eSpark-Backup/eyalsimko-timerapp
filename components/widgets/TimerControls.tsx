@@ -75,11 +75,9 @@ export default function TimerControls() {
 
   const blackoutActive = useMachineSelector(
     actorRef,
-    (state) => state.context.timer?.blackout ?? false
+    (state) => state.context.blackout
   );
   const [glowActive, setGlowActive] = useState(false);
-
-  if (!timer || !event) return null;
 
   return (
     <View className="flex-col gap-[16]">
@@ -90,7 +88,7 @@ export default function TimerControls() {
         <View className="flex-row gap-[24] items-center">
           <IconButton
             size="sm"
-            disabled={!previousEvent}
+            disabled={!previousEvent || !timer}
             icon={SkipBack}
             onPress={() => {
               if (!previousEvent) return;
@@ -105,6 +103,7 @@ export default function TimerControls() {
             <IconButton
               size="lg"
               icon={Pause}
+              disabled={!timer}
               onPress={() => {
                 actorRef.send({ type: "pause" });
               }}
@@ -113,6 +112,7 @@ export default function TimerControls() {
             <IconButton
               size="lg"
               icon={Play}
+              disabled={!timer}
               onPress={() => {
                 if (isStopped) {
                   actorRef.send({
@@ -126,7 +126,7 @@ export default function TimerControls() {
           )}
           <IconButton
             size="sm"
-            disabled={!nextEvent}
+            disabled={!nextEvent || !timer}
             icon={SkipForward}
             onPress={() => {
               if (!nextEvent) return;
@@ -145,24 +145,30 @@ export default function TimerControls() {
       <View className="flex-row justify-between">
         {/* TODO: revisit all text and set 20pt line height*/}
         <Text className="text-md font-normal">Countdown Timer</Text>
-        <Text className="text-md font-normal">
-          {formatCountdown({
-            countdownTime: timer.countdownTime,
-            elapsedTime: timer.countdownTime,
-          })}
-        </Text>
+        {timer && (
+          <Text className="text-md font-normal">
+            {formatCountdown({
+              countdownTime: timer.countdownTime,
+              elapsedTime: timer.countdownTime,
+            })}
+          </Text>
+        )}
       </View>
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Flash Timer</Text>
-        <Text className="font-normal ">
-          {formatDuration(event.blinkingStartTime, true)}
-        </Text>
+        {event && (
+          <Text className="font-normal ">
+            {formatDuration(event.blinkingStartTime, true)}
+          </Text>
+        )}
       </View>
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Flash Length</Text>
-        <Text className="font-normal ">
-          {formatDuration(event.blinkLength, true)}
-        </Text>
+        {event && (
+          <Text className="font-normal ">
+            {formatDuration(event.blinkLength, true)}
+          </Text>
+        )}
       </View>
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Glow Effect</Text>
@@ -181,7 +187,7 @@ export default function TimerControls() {
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Elapsed Time</Text>
         <View className="flex-row gap-[8] items-center">
-          {event.startedAt && (
+          {event?.startedAt && (
             <IconButton
               size="sm"
               icon={Restart}
@@ -203,16 +209,18 @@ export default function TimerControls() {
           </View>
         </View>
       </View>
-      <View
-        style={{ backgroundColor: "hsla(210, 32%, 13%, 1)" }}
-        className="flex-row gap-[16] rounded-[12] py-[12] px-[16]"
-      >
-        <Text>{eventIndex + 1}</Text>
-        <View>
-          <Text>{event.name}</Text>
-          <Text>{event.speakerName}</Text>
+      {event && (
+        <View
+          style={{ backgroundColor: "hsla(210, 32%, 13%, 1)" }}
+          className="flex-row gap-[16] rounded-[12] py-[12] px-[16]"
+        >
+          <Text>{eventIndex + 1}</Text>
+          <View>
+            <Text>{event.name}</Text>
+            <Text>{event.speakerName}</Text>
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }

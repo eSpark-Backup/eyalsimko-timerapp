@@ -15,16 +15,16 @@ const recoverMessageSchema = z.object({
 export type RecoverMessage = z.infer<typeof recoverMessageSchema>
 
 // PROD
-const wsConfigs = [
-  { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
-  { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
-] as const
+// const wsConfigs = [
+//   { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
+//   { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
+// ] as const
 
 // DEV
-// const wsConfigs = [
-//   { url: "ws://192.168.0.104:8001", type: "LAN" },
-//   { url: "ws://192.168.100.66:8001", type: "WIFI" },
-// ] as const
+const wsConfigs = [
+  { url: "ws://192.168.0.104:8001", type: "LAN" },
+  { url: "ws://192.168.100.66:8001", type: "WIFI" },
+] as const
 
 const connectToServer = async () => {
   return getConnection(wsConfigs[0]).catch(() => getConnection(wsConfigs[1]))
