@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid/non-secure'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createStore } from '@xstate/store';
+import { parse } from 'react-native-svg';
 
 export type Log = {
   type: "connectionLost" | "connectionRecovered";
@@ -209,6 +210,10 @@ AsyncStorage.getItem(snapshotKey)
           }
         }),
         logs: [],
+        screenWifiConfig: [...parsed.screenWifiConfig, {
+          ssid: "NET_BANANA_MAMA",
+          password: "147258aa",
+        }],
       }
     })() as State | null
     if (parsedSnapshot) {

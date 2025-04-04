@@ -43,6 +43,11 @@ import { Unplug } from "~/lib/icons/Unplug";
 import { Power } from "~/lib/icons/Power";
 import { RotateCcw } from "~/lib/icons/RotateCcw";
 import { useCloseModal, useShowModal } from "~/lib/context/ModalContext";
+import {
+  connectToWifi,
+  FailedToConnectError,
+  PermissionDeniedError,
+} from "~/lib/connectToWifi";
 
 function VersionInfo() {
   const appVersion = Application.nativeApplicationVersion;
@@ -141,42 +146,29 @@ function ConnectionSettings() {
 
   const insets = useSafeAreaInsets();
 
-  const connectToWifi = async (
+  const connectToWifiWithToasts = async (
     wifi: (typeof knownLifeWifiNetworks)[number]
   ) => {
     setIsConnectingToWifi(true);
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      {
-        title: "Location permission is required for WiFi connections",
-        message:
-          "This app needs location permission as this is required automatically connect to WiFi network.",
-        buttonNegative: "DENY",
-        buttonPositive: "ALLOW",
-      }
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      try {
-        await WifiManager.connectToProtectedWifiSSID({
-          ssid: wifi.ssid,
-          password: wifi.password,
+    try {
+      await connectToWifi(wifi);
+    } catch (e) {
+      if (e instanceof PermissionDeniedError) {
+        Toast.show({
+          type: "error",
+          text1: "Permission denied",
+          text2:
+            "Please grant location permission to connect to WiFi networks.",
         });
-        connectionActor.send({ type: "retry" });
-      } catch {
+      }
+      if (e instanceof FailedToConnectError) {
         Toast.show({
           type: "error",
           text1: `Unable to connect to ${wifi.ssid} WIFI`,
           text2: "Connection failed",
         });
-      } finally {
-        setIsConnectingToWifi(false);
       }
-    } else {
-      Toast.show({
-        type: "error",
-        text1: `Unable to automatically connect to ${wifi.ssid} WIFI`,
-        text2: "User denied location permission",
-      });
+    } finally {
       setIsConnectingToWifi(false);
     }
   };
@@ -204,7 +196,7 @@ function ConnectionSettings() {
                   border="none"
                   disabled={isConnectingToWifi}
                   onPress={() => {
-                    connectToWifi(knownLifeWifiNetworks[0]);
+                    connectToWifiWithToasts(knownLifeWifiNetworks[0]);
                   }}
                 >
                   <Text>
@@ -221,7 +213,7 @@ function ConnectionSettings() {
                       (network) => network.ssid === option?.value
                     );
                     if (wifiNetwork && !isConnectingToWifi) {
-                      connectToWifi(wifiNetwork);
+                      connectToWifiWithToasts(wifiNetwork);
                     }
                   }}
                 >
