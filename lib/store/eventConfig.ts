@@ -210,10 +210,6 @@ AsyncStorage.getItem(snapshotKey)
           }
         }),
         logs: [],
-        screenWifiConfig: [...parsed.screenWifiConfig, {
-          ssid: "NET_BANANA_MAMA",
-          password: "147258aa",
-        }],
       }
     })() as State | null
     if (parsedSnapshot) {
