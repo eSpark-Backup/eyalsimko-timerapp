@@ -1,6 +1,12 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useNavigation } from "expo-router";
-import { View, StyleSheet, PermissionsAndroid, Platform } from "react-native";
+import {
+  View,
+  StyleSheet,
+  PermissionsAndroid,
+  Platform,
+  SafeAreaView,
+} from "react-native";
 import Toast from "react-native-toast-message";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -103,7 +109,7 @@ export default function ScanCodeScreen() {
                 text1: "Trying to connect to the network",
                 text2: `${ssid}; ${password}`,
               });
-              navigation.goBack()
+              navigation.goBack();
               if (Platform.OS === "android") {
                 const granted = await PermissionsAndroid.request(
                   PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -159,12 +165,17 @@ export default function ScanCodeScreen() {
           }
         }}
       >
-        <Button
-          className="absolute bottom-2 right-2"
-          onPress={() => navigation.goBack()}
-        >
-          <Text>Cancel</Text>
-        </Button>
+        <SafeAreaView>
+          <View className="absolute top-[12] right-[12]">
+            <Button
+              variant="primary"
+              size="lg"
+              onPress={() => navigation.goBack()}
+            >
+              <Text>Cancel</Text>
+            </Button>
+          </View>
+        </SafeAreaView>
       </CameraView>
     </View>
   );
