@@ -51,9 +51,14 @@ const initialState: State = {
 export const eventConfigStore = createStore({
   context: initialState,
   on: {
-    addLog: (context, { log }: { log: Log }) => {
+    addLog: (context, { log }: { log: Omit<Log, 'date'> }) => {
+      const lastEvent = context.logs[context.logs.length - 1]
+      if (log.type === "connectionRecovered" && lastEvent?.type === "connectionRecovered") return context
       return {
-        logs: [log, ...context.logs]
+        logs: [{
+          ...log,
+          date: new Date()
+        }, ...context.logs]
       }
     },
     setBlinkLength: (context, { blinkLength }: Pick<State, 'blinkLength'>) => {
