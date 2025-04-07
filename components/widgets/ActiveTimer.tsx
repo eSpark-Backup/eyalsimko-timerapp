@@ -148,7 +148,7 @@ export const ActiveTimerWidget = () => {
       <View className="flex-1 items-center justify-center">
         <Text
           className={cn(
-            "text-8xl font-poppins font-medium",
+            "text-8xl font-cousine font-medium",
             timer.elapsed && timer.elapsed < 0 && "text-countdown-out-of-time",
             !timer.elapsed || (timer.elapsed >= 0 && "text-primary")
           )}

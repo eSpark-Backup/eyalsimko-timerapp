@@ -33,7 +33,7 @@ export default function TimerScreen() {
         <View className="flex-1 gap-[24] pt-[20] px-[32] pb-[34]">
           <View className="flex-1 flex-row gap-[24]">
             <TimersListCard />
-            <View style={{ width: 380 }}>
+            <View style={{ width: 395 }}>
               <Card
                 spacing="small"
                 borderColor={timerIsActive ? "active" : "default"}

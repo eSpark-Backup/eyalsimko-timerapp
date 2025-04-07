@@ -108,11 +108,13 @@ const TimeInput = ({ value, onChange, onBlur, ...props }: TimeInputProps) => {
     <Input
       ref={ref}
       value={localValue}
+      className="font-cousine"
       onChangeText={handleChangeText}
       onBlur={handleBlur}
       maxLength={8}
       placeholder="00:00:00"
-      hint="00:00:00"
+      hint="  :  :  "
+      hitClassName="font-cousine"
       keyboardType="number-pad"
       icon={Clocks}
       {...props}

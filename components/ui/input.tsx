@@ -53,6 +53,7 @@ interface FloatingLabelInputProps
   label?: string;
   hasError?: boolean;
   hint?: string;
+  hitClassName?: string;
   icon?: React.ComponentType<IconProps>;
 }
 
@@ -75,6 +76,7 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
       onChangeText,
       icon: Icon,
       hint,
+      hitClassName,
       ...props
     },
     ref
@@ -174,22 +176,9 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
           </View>
         )}
         {hint && isFilledOrFocused && (
-          <View className="absolute flex-row bottom-[11.5] left-[16] text-md">
-            <Text>
-              {[...hint].map((hintLetter, index) => (
-                <Text
-                  key={index}
-                  className={
-                    value?.at(index)
-                      ? "text-transparent"
-                      : hintLetter === ":"
-                      ? "text-muted-foreground"
-                      : "text-transparent"
-                  }
-                >
-                  {hintLetter}
-                </Text>
-              ))}
+          <View className="absolute flex-row bottom-[12] left-[17]">
+            <Text className={cn("text-md text-muted-foreground", hitClassName)}>
+              {hint}
             </Text>
           </View>
         )}

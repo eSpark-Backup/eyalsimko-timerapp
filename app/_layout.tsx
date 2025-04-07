@@ -78,6 +78,10 @@ export default function RootLayout() {
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
     "Poppins-ThinItalic": require("../assets/fonts/Poppins-ThinItalic.ttf"),
+    "Cousine-Bold": require("../assets/fonts/Cousine-Bold.ttf"),
+    "Cousine-BoldItalic": require("../assets/fonts/Cousine-BoldItalic.ttf"),
+    "Cousine-Italic": require("../assets/fonts/Cousine-Italic.ttf"),
+    "Cousine-Regular": require("../assets/fonts/Cousine-Regular.ttf"),
   });
 
   React.useEffect(() => {

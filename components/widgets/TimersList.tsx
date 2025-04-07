@@ -515,11 +515,11 @@ function EventItem({ event, index }: { event: Event; index: number }) {
           >
             {index + 1}
           </Text>
-          <Text className="color-primary text-md w-[100]">
+          <Text className="color-primary text-md w-[100] font-cousine">
             {event.startedAt ? dateFormatter.format(event.startedAt) : ""}
           </Text>
-          <View className="w-[60]">
-            <Text className="color-primary">
+          <View className="w-[64]">
+            <Text className="color-primary font-cousine">
               {formatCountdown({
                 countdownTime: event.countdownTime,
                 elapsedTime: event.countdownTime,

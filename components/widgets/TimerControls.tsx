@@ -146,7 +146,7 @@ export default function TimerControls() {
         {/* TODO: revisit all text and set 20pt line height*/}
         <Text className="text-md font-normal">Countdown Timer</Text>
         {timer && (
-          <Text className="text-md font-normal">
+          <Text className="text-md font-normal font-cousine">
             {formatCountdown({
               countdownTime: timer.countdownTime,
               elapsedTime: timer.countdownTime,
@@ -157,7 +157,7 @@ export default function TimerControls() {
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Flash Timer</Text>
         {event && (
-          <Text className="font-normal ">
+          <Text className="font-normal font-cousine">
             {formatDuration(event.blinkingStartTime, true)}
           </Text>
         )}
@@ -165,7 +165,7 @@ export default function TimerControls() {
       <View className="flex-row justify-between items-center">
         <Text className="font-normal ">Flash Length</Text>
         {event && (
-          <Text className="font-normal ">
+          <Text className="font-normal font-cousine">
             {formatDuration(event.blinkLength, true)}
           </Text>
         )}
@@ -203,7 +203,7 @@ export default function TimerControls() {
             />
           )}
           <View className="border-highlight border py-[8] px-[12] rounded-[8]">
-            <Text className="font-normal ">
+            <Text className="font-normal font-cousine">
               <ElapsedTime />
             </Text>
           </View>

@@ -211,10 +211,14 @@ AsyncStorage.getItem(snapshotKey)
           return {
             ...event,
             startedAt: event.startedAt ? new Date(event.startedAt) : null
-            // startedAt: null
+            // startedAt: new Date("2023-03-01T18:00:00.000Z")
           }
         }),
-        logs: [],
+        logs: [{
+          type: "connectionLost",
+          connectionType: "LAN",
+          date: new Date("2023-03-01T18:00:00.000Z"),
+        }],
       }
     })() as State | null
     if (parsedSnapshot) {

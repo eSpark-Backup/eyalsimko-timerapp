@@ -9,6 +9,7 @@ module.exports = {
     extend: {
       fontFamily: {
         poppins: ["Poppins"],
+        cousine: ["Cousine"],
       },
       colors: {
         border: 'hsl(var(--border))',

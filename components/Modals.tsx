@@ -543,8 +543,8 @@ export function Modals() {
             )}
             {logs.map((log, index) => (
               <View key={index} className="flex-row">
-                <View className="w-[68] mr-[6] items-center">
-                  <Text className="text-sm font-semibold leading-none">
+                <View className="w-[80] mr-[6] items-center">
+                  <Text className="text-sm font-semibold leading-none font-cousine">
                     {timerFormatter.format(log.date)}
                   </Text>
                 </View>
