@@ -58,6 +58,7 @@
     "nanoid": "^5.1.5",
     "nativewind": "^4.1.23",
     "react": "18.3.1",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "18.3.1",
     "react-hook-form": "^7.54.2",
     "react-native": "0.76.7",
@@ -78,6 +79,7 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "3.3.5",
     "tailwindcss-animate": "^1.0.7",
+    "timer": "file:",
     "ws": "^8.18.0",
     "xstate": "^5.19.0",
     "zod": "^3.24.2"
@@ -85,6 +87,7 @@
   "devDependencies": {
     "@babel/core": "^7.26.0",
     "@types/react": "~18.3.12",
+    "@types/react-beautiful-dnd": "^13.1.8",
     "typescript": "^5.3.3"
   },
   "private": true

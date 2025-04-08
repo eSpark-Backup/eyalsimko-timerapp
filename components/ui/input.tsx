@@ -4,18 +4,19 @@ import * as React from "react";
 import {
   TextInput,
   View,
-  Animated,
   StyleSheet,
   TextInputProps,
-  Platform,
   Text,
-  Easing,
-  useAnimatedValue,
   NativeSyntheticEvent,
-  TextInputSubmitEditingEventData,
   TextInputFocusEventData,
+  TextInputSubmitEditingEventData,
 } from "react-native";
 import { cn } from "~/lib/utils";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated"; // Reanimated for both web and mobile
 
 const variants = cva("", {
   variants: {
@@ -89,36 +90,31 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
       : valueRef.current.length > 0;
     const [isFocused, setIsFocused] = React.useState(false);
     const isFilledOrFocused = isFocused || isFilled;
-    const labelFloating = useAnimatedValue(isFilledOrFocused ? 1 : 0);
+
+    const labelFloating = useSharedValue(isFilledOrFocused ? 1 : 0);
 
     React.useEffect(() => {
-      Animated.timing(labelFloating, {
-        toValue: isFilledOrFocused ? 1 : 0,
-        duration: 200,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: true, // Ernable native driver for better performance
-      }).start();
+      labelFloating.value = withSpring(isFilledOrFocused ? 1 : 0, {
+        damping: 20,
+        stiffness: 100,
+      });
     }, [isFilledOrFocused, labelFloating]);
 
-    const labelStyle = {
-      transform: [
-        {
-          translateY: labelFloating.interpolate({
-            inputRange: [0, 1],
-            outputRange: [20, 10],
-          }),
-        },
-        {
-          scale: labelFloating.interpolate({
-            inputRange: [0, 1],
-            outputRange: [1, 0.85],
-          }),
-        },
-      ],
-      color: isFilledOrFocused
-        ? "hsla(213, 5%, 57%, 1)"
-        : "hsla(213, 5%, 57%, 0.5)",
-    };
+    const labelStyle = useAnimatedStyle(() => {
+      return {
+        transform: [
+          {
+            translateY: withSpring(labelFloating.value === 1 ? 10 : 20),
+          },
+          {
+            scale: withSpring(labelFloating.value === 1 ? 0.85 : 1),
+          },
+        ],
+        color: labelFloating.value === 1
+          ? "hsla(213, 5%, 57%, 1)"
+          : "hsla(213, 5%, 57%, 0.5)",
+      };
+    });
 
     const handleSubmitEditing = (
       e: NativeSyntheticEvent<TextInputSubmitEditingEventData>
@@ -136,6 +132,7 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
       if (onFocus) onFocus(e);
       setIsFocused(true);
     };
+
     const handleBlur = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
       if (onBlur) {
         onBlur(e);

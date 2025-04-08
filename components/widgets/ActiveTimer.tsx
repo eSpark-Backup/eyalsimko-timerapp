@@ -1,7 +1,13 @@
-import { View } from "react-native";
+import React, { useRef, useState } from "react";
+import { View, Platform, StyleSheet, Text as RNText } from "react-native";
 import { Text } from "~/components/ui/text";
 import { useSelector as useMachineSelector } from "@xstate/react";
 import { CompanyLogo } from "~/lib/icons/CompanyLogo";
+import { TimerContext } from "~/lib/store/timer";
+import { useSelector } from "@xstate/store/react";
+import { eventConfigStore } from "~/lib/store/eventConfig";
+import { connectionActor } from "~/lib/store/connectionStore";
+import { cn, formatCountdown } from "~/lib/utils";
 import {
   Canvas,
   Mask,
@@ -9,32 +15,8 @@ import {
   LinearGradient as SkiaLinearGradient,
   vec,
 } from "@shopify/react-native-skia";
-import { useRef, useState } from "react";
-import { cn, formatCountdown } from "~/lib/utils";
-import { TimerContext } from "~/lib/store/timer";
-import { useSelector } from "@xstate/store/react";
-import { eventConfigStore } from "~/lib/store/eventConfig";
-import { connectionActor } from "~/lib/store/connectionStore";
 
-/*
-position: absolute;
-width: 197px;
-height: 80px;
-left: calc(50% - 197px/2);
-top: calc(50% - 80px/2 - 9.66px);
-
-font-family: 'Poppins';
-font-style: normal;
-font-weight: 500;
-font-size: 80px;
-line-height: 80px;
-text-align: center;
-
-color: #FFFFFF;
-
-
-*/
-
+// Component for the GradientProgressBar
 const GradientProgressBar = ({
   width,
   height,
@@ -45,6 +27,23 @@ const GradientProgressBar = ({
   progress: number;
 }) => {
   const radius = height / 2;
+
+  // Check if the platform is web
+  if (Platform.OS === "web") {
+    return (
+      <div
+        style={{
+          width: width,
+          height: height,
+          background: `linear-gradient(90deg, hsla(349, 86%, 61%, 1) ${progress * 100}%, hsla(213, 100%, 61%, 1) 0%)`,
+          borderRadius: radius,
+          opacity: 0.4,
+        }}
+      />
+    );
+  }
+
+  // Skia version for mobile
   return (
     <Canvas style={{ flex: 1 }}>
       <RoundedRect
@@ -67,17 +66,9 @@ const GradientProgressBar = ({
         />
       </RoundedRect>
       <Mask
-        mask={
-          <RoundedRect x={0} y={0} width={width} height={height} r={radius} />
-        }
+        mask={<RoundedRect x={0} y={0} width={width} height={height} r={radius} />}
       >
-        <RoundedRect
-          x={0}
-          y={0}
-          width={width * progress}
-          height={height}
-          r={height / 2}
-        >
+        <RoundedRect x={0} y={0} width={width * progress} height={height} r={height / 2}>
           <SkiaLinearGradient
             start={vec(0, 0)}
             end={vec(width, 0)}
@@ -94,6 +85,7 @@ const GradientProgressBar = ({
   );
 };
 
+// ProgressBar Component
 function ProgressBar({
   countdownTime,
   elapsedTime,
@@ -105,14 +97,13 @@ function ProgressBar({
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
 
   if (elapsedTime < 0) {
-    return <View className="h-[12] rounded-full bg-timer-out-of-time"></View>;
+    return <View style={styles.progressBarOutOfTime}></View>;
   } else {
     return (
       <View
-        className="h-[12] rounded-full"
+        style={styles.progressBar}
         onLayout={(event) => {
-          event.nativeEvent.layout.width &&
-            setContainerWidth(event.nativeEvent.layout.width);
+          event.nativeEvent.layout.width && setContainerWidth(event.nativeEvent.layout.width);
         }}
         ref={containerRef}
       >
@@ -128,6 +119,7 @@ function ProgressBar({
   }
 }
 
+// ActiveTimerWidget Component
 export const ActiveTimerWidget = () => {
   const actorRef = TimerContext.useActorRef();
   const timer = useMachineSelector(actorRef, (state) => state.context.timer);
@@ -138,16 +130,14 @@ export const ActiveTimerWidget = () => {
   if (!timer || !event) return null;
 
   return (
-    <View className="flex-col flex-1 justify-between">
-      <View className="flex-row justify-between">
+    <View style={styles.container}>
+      <View style={styles.header}>
         <CompanyLogo height={20} width={89} strokeWidth={0} />
-        <Text className="text-lg font-semibold text-main-light">
-          {event.speakerName}
-        </Text>
+        <Text style={styles.speakerName}>{event.speakerName}</Text>
       </View>
-      <View className="flex-1 items-center justify-center">
-        <Text
-          className={cn(
+      <View style={styles.timerContainer}>
+        <RNText
+          style={cn(
             "text-8xl font-cousine font-medium",
             timer.elapsed && timer.elapsed < 0 && "text-countdown-out-of-time",
             !timer.elapsed || (timer.elapsed >= 0 && "text-primary")
@@ -157,11 +147,9 @@ export const ActiveTimerWidget = () => {
             elapsedTime: timer.elapsed ?? timer.countdownTime,
             countdownTime: timer.countdownTime,
           })}
-        </Text>
-        <View className="absolute bottom-[40]">
-          <Text className="text-lg font-semibold text-main-light">
-            {event.description}
-          </Text>
+        </RNText>
+        <View style={styles.eventDescription}>
+          <Text style={styles.eventDescriptionText}>{event.description}</Text>
         </View>
       </View>
       <ProgressBar
@@ -171,3 +159,44 @@ export const ActiveTimerWidget = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  speakerName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
+  },
+  timerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  eventDescription: {
+    position: 'absolute',
+    bottom: 40,
+  },
+  eventDescriptionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'lightgray',
+  },
+  progressBar: {
+    height: 12,
+    borderRadius: 9999,
+  },
+  progressBarOutOfTime: {
+    height: 12,
+    borderRadius: 9999,
+    backgroundColor: 'gray',
+  },
+});
+
+export default ActiveTimerWidget;

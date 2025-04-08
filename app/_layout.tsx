@@ -84,6 +84,13 @@ export default function RootLayout() {
     "Cousine-Regular": require("../assets/fonts/Cousine-Regular.ttf"),
   });
 
+  const webStyle = Platform.OS === 'web'
+  ? ({
+      flexGrow: 1,
+      minHeight: "100vh" as any,
+      backgroundColor: 'hsl(var(--background-brand))',
+    } as any)
+  : {};
   React.useEffect(() => {
     if (loaded || error) {
       SplashScreen.hideAsync();
@@ -160,29 +167,35 @@ export default function RootLayout() {
                   style={isDarkColorScheme ? "light" : "dark"}
                   networkActivityIndicatorVisible
                 />
-                <View className="flex-1 bg-screenBackground">
-                  <Background />
-                  <View className="flex-1">
-                    <Stack
-                      screenOptions={{
-                        contentStyle: { backgroundColor: "transparent" },
-                      }}
-                    >
-                      <Stack.Screen
-                        options={{
-                          header: () => null,
-                        }}
-                        name="index"
-                      />
-                      <Stack.Screen
-                        name="scanCode"
-                        options={{
-                          header: () => null,
-                        }}
-                      />
-                    </Stack>
-                  </View>
-                </View>
+                 <View
+      className={Platform.OS !== 'web' ? "flex-1 bg-screenBackground" : ""}
+      style={[Platform.OS === 'web' ? webStyle : styles.mobileContainer]}
+    >
+      <Background />
+      <View
+        className={Platform.OS !== 'web' ? "flex-1" : ""}
+        style={[Platform.OS === 'web' ? webStyle : styles.mobileContainer]}
+      >
+        <Stack
+          screenOptions={{
+            contentStyle: { backgroundColor: "transparent" },
+          }}
+        >
+          <Stack.Screen
+            options={{
+              header: () => null,
+            }}
+            name="index"
+          />
+          <Stack.Screen
+            name="scanCode"
+            options={{
+              header: () => null,
+            }}
+          />
+        </Stack>
+      </View>
+    </View>
                 <PortalHost />
                 <ToastProvider />
               </ThemeProvider>
@@ -196,6 +209,9 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  mobileContainer: {
     flex: 1,
   },
   blurContainer: {

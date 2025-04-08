@@ -1,5 +1,5 @@
-import React from "react";
-import { View } from "react-native";
+import React, { useState } from "react";
+import { View, Platform } from "react-native";
 import Sortable from "react-native-sortables";
 import { useSelector as useMachineSelector } from "@xstate/react";
 import { Button } from "~/components/ui/button";
@@ -13,11 +13,10 @@ import { Trash } from "~/lib/icons/Trash";
 import { Move } from "~/lib/icons/Move";
 import { useSelector } from "@xstate/store/react";
 import { eventConfigStore, Message } from "~/lib/store/eventConfig";
-import { useContext, useState } from "react";
-import { useMachine } from "@xstate/react";
 import { TimerContext } from "~/lib/store/timer";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { CardScrollRefContext } from "../Card";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 export const MessageWidgetHeader = () => {
   const [isFlashing, setIsFlashing] = useState(false);
@@ -84,11 +83,9 @@ function MessageRow({ message }: { message: Message }) {
         }}
       />
       <View className="justify-between items-center flex-row gap-[12]">
-        <Sortable.Handle>
-          <View className="w-[50] items-start justify-center">
-            <Move color="hsla(213, 5%, 57%, 1)" size={16} />
-          </View>
-        </Sortable.Handle>
+        <View className="w-[50] items-start justify-center">
+          <Move color="hsla(213, 5%, 57%, 1)" size={16} />
+        </View>
         <View className="flex-row gap-[12]">
           <IconButton
             border
@@ -140,7 +137,6 @@ function MessageRow({ message }: { message: Message }) {
 
 export const MessageWidget = () => {
   const scrollViewRef = React.useContext(CardScrollRefContext);
-
   const messages = useSelector(
     eventConfigStore,
     (state) => state.context.messages
@@ -149,31 +145,67 @@ export const MessageWidget = () => {
   if (messages.length === 0) {
     return (
       <View className="flex-1 h-auto items-center justify-center">
-        <Text>kek</Text>
+        <Text>No Messages</Text>
       </View>
     );
   }
 
+  const onDragEnd = (result) => {
+    if (!result.destination) return; // Dropped outside the list
+    eventConfigStore.send({
+      type: "changeMessageOrder",
+      fromIndex: result.source.index,
+      toIndex: result.destination.index,
+    });
+  };
+
   return (
-    <Sortable.Grid
-      onDragEnd={({ fromIndex, toIndex }) => {
-        eventConfigStore.send({
-          type: "changeMessageOrder",
-          fromIndex,
-          toIndex,
-        });
-      }}
-      scrollableRef={scrollViewRef}
-      rowGap={20}
-      columns={1}
-      dragActivationDelay={0}
-      data={messages}
-      activeItemScale={1.05}
-      overDrag="vertical"
-      customHandle
-      renderItem={({ item: message }) => (
-        <MessageRow key={message.id} message={message} />
+    <View>
+      {Platform.OS === "web" ? (
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="droppable">
+            {(provided) => (
+              <View ref={provided.innerRef} {...provided.droppableProps}>
+                {messages.map((message, index) => (
+                  <Draggable key={message.id} draggableId={message.id} index={index}>
+                    {(provided) => (
+                      <View
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <MessageRow message={message} />
+                      </View>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </View>
+            )}
+          </Droppable>
+        </DragDropContext>
+      ) : (
+        <Sortable.Grid
+          onDragEnd={({ fromIndex, toIndex }) => {
+            eventConfigStore.send({
+              type: "changeMessageOrder",
+              fromIndex,
+              toIndex,
+            });
+          }}
+          scrollableRef={scrollViewRef}
+          rowGap={20}
+          columns={1}
+          dragActivationDelay={0}
+          data={messages}
+          activeItemScale={1.05}
+          overDrag="vertical"
+          customHandle
+          renderItem={({ item: message }) => (
+            <MessageRow key={message.id} message={message} />
+          )}
+        />
       )}
-    />
+    </View>
   );
 };

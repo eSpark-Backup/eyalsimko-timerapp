@@ -202,8 +202,17 @@ const snapshotKey = 'configSnapshot-v1'
 
 AsyncStorage.getItem(snapshotKey)
   .then(snapshot => {
+    if (!snapshot) {
+      // If snapshot is null or undefined, initialize an empty state
+      eventConfigStore.send({
+        type: 'initialize',
+        ...initialState
+      })
+      return;
+    }
+
     const parsedSnapshot = (() => {
-      const parsed = JSON.parse(snapshot ?? 'null')
+      const parsed = JSON.parse(snapshot);
 
       return {
         ...parsed,
@@ -211,7 +220,6 @@ AsyncStorage.getItem(snapshotKey)
           return {
             ...event,
             startedAt: event.startedAt ? new Date(event.startedAt) : null
-            // startedAt: new Date("2023-03-01T18:00:00.000Z")
           }
         }),
         logs: [{
@@ -220,13 +228,15 @@ AsyncStorage.getItem(snapshotKey)
           date: new Date("2023-03-01T18:00:00.000Z"),
         }],
       }
-    })() as State | null
-    if (parsedSnapshot) {
-      eventConfigStore.send({
-        type: 'initialize',
-        ...parsedSnapshot
-      })
-    }
+    })() as State;
+
+    eventConfigStore.send({
+      type: 'initialize',
+      ...parsedSnapshot
+    })
+  })
+  .catch(error => {
+    console.error("Error loading snapshot:", error);
   })
 
 eventConfigStore.subscribe(snapshot => {
