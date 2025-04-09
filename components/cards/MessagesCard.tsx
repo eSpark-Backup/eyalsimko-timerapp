@@ -45,6 +45,6 @@ export default function MessagesCard() {
   return (
     <Card header={<MessageWidgetHeader />} autoScrollToBottom scrollable={true}>
       <MessageWidget />
-    </Card>
+  </Card>
   );
 }
