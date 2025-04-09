@@ -84,7 +84,7 @@ const ThemeSwitchNative = React.forwardRef<
 ThemeSwitchNative.displayName = "SwitchNative";
 
 const ThemeSwitch = Platform.select({
-  web: ThemeSwitchWeb,
+  web: ThemeSwitchNative,
   default: ThemeSwitchNative,
 });
 

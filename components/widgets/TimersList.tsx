@@ -1,4 +1,4 @@
-import { findNodeHandle, Platform, UIManager, View } from "react-native";
+import { findNodeHandle, Platform, TouchableWithoutFeedback, UIManager, View } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { Text } from "~/components/ui/text";
 import { Button } from "../ui/button";
@@ -41,6 +41,12 @@ import { connectionActor } from "~/lib/store/connectionStore";
 import { CardScrollPositionContext, CardScrollRefContext } from "../Card";
 import Sortable from "react-native-sortables";
 import { useModal, useShowModal } from "~/lib/context/ModalContext";
+
+interface EventItemProps {
+  event: Event;
+  index: number;
+  dragHandleProps?: any;
+}
 
 export const TimersListHeader = () => {
   const showModal = useShowModal();
@@ -413,7 +419,7 @@ type ModalState =
       event: Event;
     };
 
-function EventItem({ event, index }: { event: Event; index: number }) {
+function EventItem({ event, index, dragHandleProps }: EventItemProps) {
   const showModal = useShowModal();
   const insets = useSafeAreaInsets();
   const contentInsets = {
@@ -479,14 +485,24 @@ function EventItem({ event, index }: { event: Event; index: number }) {
         event.id !== runningTimerId && "bg-item"
       )}
     >
-      <Sortable.Handle>
+      {Platform.OS === "web" ? (
         <View
           className="h-full justify-center"
-          style={{ margin: -20, padding: 20 }}
+          style={{ margin: 0, padding: 20 }}
+          {...dragHandleProps}
         >
           <Move color="hsla(213, 5%, 57%, 1)" size={16} />
         </View>
-      </Sortable.Handle>
+      ) : (
+        <Sortable.Handle>
+          <View
+            className="h-full justify-center"
+            style={{ margin: -20, padding: 20 }}
+          >
+            <Move color="hsla(213, 5%, 57%, 1)" size={16} />
+          </View>
+        </Sortable.Handle>
+      )}
       <View className="flex-1 flex-row items-center justify-between">
         <View className="flex-row items-center gap-[16]">
           <Text
@@ -664,9 +680,13 @@ export default function TimersList() {
                       <View
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        {...provided.dragHandleProps}
+                        // Remove the dragHandleProps from here
                       >
-                        <EventItem event={event} index={index} />
+                        <EventItem 
+                          event={event} 
+                          index={index} 
+                          dragHandleProps={provided.dragHandleProps}
+                        />
                       </View>
                     )}
                   </Draggable>
