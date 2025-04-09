@@ -169,14 +169,14 @@ export const MessageWidget = () => {
                 {messages.map((message, index) => (
                   <Draggable key={message.id} draggableId={message.id} index={index}>
                     {(provided) => (
-                      <View
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={{ marginBottom: "12px" }} // Gap between items
-                      >
-                        <MessageRow message={message} />
-                      </View>
+                     <View
+                     ref={provided.innerRef}
+                     {...provided.draggableProps}
+                     {...provided.dragHandleProps}
+                     style={{ marginBottom: 12 }} // Correct for React Native
+                   >
+                     <MessageRow message={message} />
+                   </View>
                     )}
                   </Draggable>
                 ))}
