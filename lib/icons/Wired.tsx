@@ -65,14 +65,13 @@ const RawWiredForWeb = (props: Props) => {
         width="20"
         height="20"
         viewBox="0 0 20 20"
-        fill="none"
         style={{
           width: "100%",
           height: "100%",
           maxWidth: "100%",
           maxHeight: "100%",
-          objectFit: "contain",
-        }}
+          objectFit: "contain", 
+        }} 
         {...props} // Spread the props here
       >
         <rect
