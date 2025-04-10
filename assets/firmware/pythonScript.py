@@ -45,7 +45,8 @@ import hashlib
 
 
 
-PATH_PROGRAM_DIRECTORY = "/home/pi/OneUpGroup"
+# PATH_PROGRAM_DIRECTORY = "/home/pi/OneUpGroup"         # when Testing on raspi in home/pi-username dir
+PATH_PROGRAM_DIRECTORY = "home/pi/OneUpGroup"            # when Testing on Window
 PATH_LOGO = "NexTime_just_logo.png"
 PATH_BACKGROUND = "NexTime_full_logo.png"
 VERSION_NUM = 1.4
@@ -142,7 +143,7 @@ PORT = 8000
 #==========
 stop_event_blink = threading.Event()
 stop_event_timer = threading.Event()
-stop_event_timer = threading.Event()
+# stop_event_timer = threading.Event()
 toggle_thread = None
 timer_thread = None
 timer_running = False
@@ -186,7 +187,7 @@ def change_font_size(label, new_size):
         return
     #font will jump on screen if you don't clear before chaning size
     label.config(text="")
-    global current_font_size
+    # global current_font_size
     
     if current_font_size == new_size:
         return
@@ -212,11 +213,11 @@ async def handle_websocket(websocket, path):
             await websocket.send(msg)
     #Todo if timer is running when this happens send the time back
     
-    with lock:
-        if timer_running:
-            json_data = { "time_left":time_left,"blink_start_time":blink_start_time, "blink_length":blink_length}
-            msg = f"recover:{json.dumps(json_data)}"
-            await websocket.send(msg)
+    # with lock:
+    #     if timer_running:
+    #         json_data = { "time_left":time_left,"blink_start_time":blink_start_time, "blink_length":blink_length}
+    #         msg = f"recover:{json.dumps(json_data)}"
+    #         await websocket.send(msg)
     try:
         async for message in websocket:
             print(f"Received message: {message}")
@@ -229,7 +230,7 @@ async def handle_websocket(websocket, path):
             #This was intended for a button in the app to blink the side flashers
             #I don't know if we actually need this
             elif message == "b":
-                if is_blinking:
+                # if is_blinking:
                 if is_blinking:
                     stop_color_toggle()
                 else:
@@ -287,7 +288,7 @@ async def handle_websocket(websocket, path):
                 stop_event_timer.set()
                 lblTimer.config(text="")
                 if is_blinking:
-                if is_blinking:
+                # if is_blinking:
                     stop_color_toggle()
             elif "blink:" in message:
                 blink_start_time = int(message.split(":")[1])
@@ -553,13 +554,24 @@ def start_http_server():
         print(f"Serving HTTP on port {PORT}")
         httpd.serve_forever()
 
+# def start_websocket_server(loop):
+#     global websocket_server
+#     asyncio.set_event_loop(loop)
+#     start_server = websockets.serve(handle_websocket, "0.0.0.0", PORT + 1)
+#     websocket_server = loop.run_until_complete(start_server)
+#     print(f"Serving WebSocket on port {PORT + 1}")
+#     loop.run_forever()
+
 def start_websocket_server(loop):
     global websocket_server
-    asyncio.set_event_loop(loop)
-    start_server = websockets.serve(handle_websocket, "0.0.0.0", PORT + 1)
-    websocket_server = loop.run_until_complete(start_server)
-    print(f"Serving WebSocket on port {PORT + 1}")
+    asyncio.set_event_loop(loop)   # set the event loop manually
+    loop.run_until_complete(run_websocket_server())
     loop.run_forever()
+
+async def run_websocket_server():
+    start_server = await websockets.serve(handle_websocket, "0.0.0.0", PORT + 1)
+    print(f"Serving WebSocket on port {PORT + 1}")
+    return start_server
 
 #close the webserver correctly on ctrl+c, for development
 #close the webserver correctly on ctrl+c, for development
@@ -620,7 +632,7 @@ def start_color_toggle():
     
     #we should not start another blink if it's already blinking
     if is_blinking:
-    if is_blinking:
+    # if is_blinking:
         print("Flashers already blinking")
         return
 
@@ -637,7 +649,7 @@ def stop_color_toggle():
     print("stop color toggle")
     
     is_blinking = False
-    global is_blinking, canvas
+    # global is_blinking, canvas
     print("stop color toggle")
     
     is_blinking = False
@@ -685,7 +697,7 @@ def updateMessageLabel():
 #remove default screen with logo and qr code
 def removeLogo():
     global imgLogo, lblWifiSSID, imgQRCode, lblWifiPASS, isLogoShowing, lblVersionNum, lblTimer
-    global imgLogo, lblWifiSSID, imgQRCode, lblWifiPASS, isLogoShowing, lblVersionNum, lblTimer
+    # global imgLogo, lblWifiSSID, imgQRCode, lblWifiPASS, isLogoShowing, lblVersionNum, lblTimer
     isLogoShowing = False
     imgLogo.place_forget()
     lblWifiSSID.place_forget()
@@ -699,7 +711,7 @@ def removeLogo():
 #show default screen with logo and qrcode
 def showLogo():
     global imgLogo, lblWifiSSID, imgQRCode, lblWifiPASS, isLogoShowing, lblVersionNum, lblTimer
-    global imgLogo, lblWifiSSID, imgQRCode, lblWifiPASS, isLogoShowing, lblVersionNum, lblTimer
+    # global imgLogo, lblWifiSSID, imgQRCode, lblWifiPASS, isLogoShowing, lblVersionNum, lblTimer
     isLogoShowing = True
     lblTimer.place_forget()
     lblMessage.place_forget()
@@ -750,8 +762,8 @@ def start_tkinter_gui():
     #For debugging use this so you can see terminal
     #root.geometry("3840x1100") 
     
-    CANVAS_WIDTH = 3840
-    CANVAS_HEIGHT = 1100
+    # CANVAS_WIDTH = 3840
+    # CANVAS_HEIGHT = 1100
 
     # Set the background color to black
     root.configure(bg="black")
@@ -760,7 +772,7 @@ def start_tkinter_gui():
 
     # Create a canvas
     canvas = tk.Canvas(root, width=CANVAS_WIDTH, height = CANVAS_HEIGHT, bg="black", highlightthickness=0)
-    canvas = tk.Canvas(root, width=CANVAS_WIDTH, height = CANVAS_HEIGHT, bg="black", highlightthickness=0)
+    # canvas = tk.Canvas(root, width=CANVAS_WIDTH, height = CANVAS_HEIGHT, bg="black", highlightthickness=0)
     canvas.pack(fill="both", expand=True)
 
     # Update the window to ensure it gets the correct dimensions
@@ -808,9 +820,9 @@ def start_tkinter_gui():
     #img = img.convert("RGBA")
     print(f"Image mode: {img.mode}")
     #resize image
-    img = Image.open(f"{PATH_PROGRAM_DIRECTORY}/{PATH_LOGO}")
-    #img = img.convert("RGBA")
-    print(f"Image mode: {img.mode}")
+    # img = Image.open(f"{PATH_PROGRAM_DIRECTORY}/{PATH_LOGO}")
+    # #img = img.convert("RGBA")
+    # print(f"Image mode: {img.mode}")
     #resize image
     new_width = int(root.winfo_screenwidth() * 0.4)
     width_percent = (new_width / float(img.size[0]))
@@ -819,7 +831,7 @@ def start_tkinter_gui():
     photo = ImageTk.PhotoImage(resizedImg)
     #create label to display image
     imgLogo = tk.Label(root,image=photo, bg="black")
-    imgLogo = tk.Label(root,image=photo, bg="black")
+    # imgLogo = tk.Label(root,image=photo, bg="black")
     imgLogo.place(relx=0.5, rely=0.5, anchor='center')
     #canvas.create_image(10,10,image=photo)
     
@@ -831,21 +843,21 @@ def start_tkinter_gui():
     qr_image = qr_image.resize((700,700), Image.Resampling.LANCZOS)
     tk_image = ImageTk.PhotoImage(qr_image)
     imgQRCode = tk.Label(root,image=tk_image,bg="black")
-    imgQRCode.place(relx=0.85,rely=0.5,anchor="center")
+    imgQRCode.place(relx=0.82,rely=0.5,anchor="center")
     #setup wifi label
     #to confirm PI is setup correctly get hostname rather than use WIFI variable
     #to confirm PI is setup correctly get hostname rather than use WIFI variable
     hostname = socket.gethostname()
     lblWifiSSID =tk.Label(root,text=f"SSID:{hostname}", fg="white", bg="black")
     lblWifiSSID.config(font=font.Font(size=70))
-    lblWifiSSID.place(relx=0.15, rely=0.45, anchor='center')
+    lblWifiSSID.place(relx=0.3, rely=0.45, anchor='center')
     #canvas.create_window(0.15 * CANVAS_WIDTH,0.45 * CANVAS_HEIGHT,window=lblWifiSSID,anchor="center")
     #canvas.create_window(0.15 * CANVAS_WIDTH,0.45 * CANVAS_HEIGHT,window=lblWifiSSID,anchor="center")
 
     lblWifiPASS =tk.Label(root,text=f"PSWD:{WIFI_PASS}", fg="white", bg="black")
     #lblWifiPASS =tk.Label(root,text="TEST", fg="white", bg="black")
     lblWifiPASS.config(font=font.Font(size=70))
-    lblWifiPASS.place(relx=0.15, rely=0.55, anchor='center')
+    lblWifiPASS.place(relx=0.19, rely=0.55, anchor='center')
 
 
     #bind ESC to exit
@@ -892,20 +904,20 @@ def update_gui_time():
     #print(f"UpdateGui: blackout:{isBlackoutMode}  showTimer:{showTimer}")
     with lock:
         if not timer_running:
-            return;
+            return
         if isBlackoutMode:            
             root.after(GUI_REFRESH_DELAY,update_gui_time)
             return
         
     
-    global time_left, lblTimer, timer_running, showTimer, strCurrentTime, root, isBlackoutMode
-    #print(f"UpdateGui: blackout:{isBlackoutMode}  showTimer:{showTimer}")
-    with lock:
-        if not timer_running:
-            return;
-        if isBlackoutMode:            
-            root.after(GUI_REFRESH_DELAY,update_gui_time)
-            return
+    # global time_left, lblTimer, timer_running, showTimer, strCurrentTime, root, isBlackoutMode
+    # #print(f"UpdateGui: blackout:{isBlackoutMode}  showTimer:{showTimer}")
+    # with lock:
+    #     if not timer_running:
+    #         return
+    #     if isBlackoutMode:            
+    #         root.after(GUI_REFRESH_DELAY,update_gui_time)
+    #         return
         
     
     #we ned a show time so that we can negate the time when we turn it red and show it counting up
@@ -947,7 +959,7 @@ def update_gui_time():
             #todo store global current font, check if it's not size for timer and only change then
             change_font_size(lblTimer,FONT_SIZE)
             #todo store global current font, check if it's not size for timer and only change then
-            change_font_size(lblTimer,FONT_SIZE)
+            # change_font_size(lblTimer,FONT_SIZE)
             lblTimer.config(text=time_formatted)
         #check if we should start/stop blinking, we blink for a bit when you hit zero so this only needs to happen before 0 hit
         if blink_start_time != -1 and int(time_left) > 0:
@@ -962,15 +974,15 @@ def update_gui_time():
             
         
         #check if we should start/stop blinking, we blink for a bit when you hit zero so this only needs to happen before 0 hit
-        if blink_start_time != -1 and int(time_left) > 0:
-            #if we are in the range of blinking and the color toggle isn't currently running then start it
-            if time_left <= blink_start_time and time_left >= blink_start_time - blink_length and not is_blinking:
-                start_color_toggle()
-            #if we are below the blink range and still blinking, turn off
-            elif time_left < blink_start_time - blink_length and is_blinking:
-                stop_color_toggle()
+    # if blink_start_time != -1 and int(time_left) > 0:
+    #     #if we are in the range of blinking and the color toggle isn't currently running then start it
+    #     if time_left <= blink_start_time and time_left >= blink_start_time - blink_length and not is_blinking:
+    #         start_color_toggle()
+    #     #if we are below the blink range and still blinking, turn off
+    #     elif time_left < blink_start_time - blink_length and is_blinking:
+    #         stop_color_toggle()
             
-    root.after(GUI_REFRESH_DELAY,update_gui_time)
+    # root.after(GUI_REFRESH_DELAY,update_gui_time)
             
         
 
@@ -996,19 +1008,19 @@ def clock_countdown():
             elapsed = time.monotonic() - timer_start_time
             #tick_start = time.monotonic()  
             #time.sleep(0.01)
-            elapsed = time.monotonic() - timer_start_time
+            # elapsed = time.monotonic() - timer_start_time
             with lock:
                 #time_left = time.monotonic() - tick_start
                 time_left = current_timer - elapsed
                 #time_left = time.monotonic() - tick_start
-                time_left = current_timer - elapsed
+                # time_left = current_timer - elapsed
 
 
 
 if __name__ == "__main__":
     #register sig handler
     signal.signal(signal.SIGINT,signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+    # signal.signal(signal.SIGTERM, signal_handler)
 
     # Start HTTP server in a separate thread
     http_thread = threading.Thread(target=start_http_server)
