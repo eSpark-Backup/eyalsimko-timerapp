@@ -42,7 +42,7 @@ export default function TimerScreen() {
               </Card>
             </View>
           </View>
-          <View className="h-[400] flex-row gap-[24]">
+          <View className="h-[390] flex-row gap-[24]">
             <View className="flex-1">
               <MessagesCard />
             </View>

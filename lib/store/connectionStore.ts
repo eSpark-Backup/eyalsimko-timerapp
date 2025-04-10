@@ -15,9 +15,10 @@ const recoverMessageSchema = z.object({
 export type RecoverMessage = z.infer<typeof recoverMessageSchema>
 
 // PROD
+// *TODO Dev Note:- Both Ips should be same with your Ip address and port should be also same for LAN and WIFI
 const wsConfigs = [
-  { url: "ws://192.168.0.1:8001/ws", type: "LAN" },
-  { url: "ws://192.168.4.1:8001/ws", type: "WIFI" },
+  { url: "ws://192.168.100.4:8001/ws", type: "LAN" },
+  { url: "ws://192.168.100.4:8001/ws", type: "WIFI" },
 ] as const
 
 // DEV
@@ -27,6 +28,7 @@ const wsConfigs = [
 // ] as const
 
 const connectToServer = async () => {
+  console.log("connection start")
   return getConnection(wsConfigs[0]).catch(() => getConnection(wsConfigs[1]))
 }
 
@@ -102,11 +104,13 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
       ws.onopen = onOpen
 
       const timeout = setTimeout(() => {
+        console.log("Getting Timeout")
         ws.close()
         reject(new Error("Have not recienved hello message"))
       }, 1000)
 
       ws.onerror = (err: Event) => {
+        console.log("Getting Error "+JSON.stringify(err))
         clearTimeout(timeout)
         const errWithCorrectType = err as unknown as WebSocketErrorEvent
         reject(err)
@@ -173,6 +177,7 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
 }
 
 const sendMessageOverWs = (ws: WebSocket, message: WsMessage) => {
+  console.log("connecting "+JSON.stringify(message))
   const serializedMessage = "data" in message ? `${message.type}:${message.data}` : message.type
   ws.send(serializedMessage)
 }
@@ -204,6 +209,7 @@ const connectionStore = setup({
     tryToReconnect: fromPromise(() => {
       return new Promise((resolve, reject) => {
         AppState.addEventListener('change', (newState) => {
+          console.log("connectionChange "+JSON.stringify(newState))
           if (newState === "active") {
             NetInfo.fetch().then(connection => {
               if (connection.type !== "none") {
@@ -214,6 +220,7 @@ const connectionStore = setup({
         })
 
         NetInfo.addEventListener((connection) => {
+          console.log("connectionType "+JSON.stringify(connection.type))
           if (connection.type === "none") {
             setTimeout(() => reject(), 10000)
           } else {
@@ -266,6 +273,7 @@ const connectionStore = setup({
         onDone: {
           target: 'CONNECTED',
           actions: assign(({ context, event }) => {
+            console.log('State: Connected')
             context.messageQueue.forEach(message => sendMessageOverWs(event.output.ws, message))
             if (!context.messageQueue.some(message => message.type === "blink_length")) {
               sendMessageOverWs(event.output.ws, {
@@ -283,6 +291,7 @@ const connectionStore = setup({
         },
         onError: {
           target: 'ERROR',
+          actions: () => console.log('State: Connection Error')
         }
       },
       on: {
@@ -292,10 +301,13 @@ const connectionStore = setup({
     },
     CONNECTED: {
       initial: "RUNNING",
+      entry: () => console.log('State: Entered CONNECTED state'),
       states: {
         RUNNING: {
+          entry: () => console.log('State: Entered RUNNING state')
         },
         UPDATE_FIRMWARE: {
+          entry: () => console.log('State: Entered UPDATE_FIRMWARE state'),
           invoke: {
             src: "updateFirmware",
             input: ({ context }) => context.ws as WebSocket,
@@ -334,6 +346,7 @@ const connectionStore = setup({
         connectionLost: {
           target: 'ERROR',
           actions: () => {
+            console.log("Getting error")
             showConnectionLostModal()
           }
         }
@@ -354,8 +367,12 @@ const connectionStore = setup({
 
     },
     DISCONNECTED: {
+      entry: () => console.log('State: Entered DISCONNECTED state'),
       on: {
-        reconnect: 'CONNECTING',
+        reconnect: {
+          target: 'CONNECTING',
+          actions: () => console.log('State: Attempting reconnection from DISCONNECTED')
+        },
       }
     },
     ERROR: {

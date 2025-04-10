@@ -112,11 +112,7 @@ function MessageRow({ message }: { message: Message }) {
             </Button>
           ) : (
             <Button
-              disabled={
-                !canShowMessage ||
-                !isConnected ||
-                message.content.trim().length === 0
-              }
+              disabled={message.content.trim().length === 0 || !canShowMessage || !isConnected}
               size="xs"
               onPress={() => {
                 actorRef.send({
@@ -165,17 +161,22 @@ export const MessageWidget = () => {
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="droppable">
             {(provided) => (
-              <View ref={provided.innerRef} {...provided.droppableProps}>
+              <View
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                style={{ paddingBottom: "10px" }} // To add some space below the list
+              >
                 {messages.map((message, index) => (
                   <Draggable key={message.id} draggableId={message.id} index={index}>
                     {(provided) => (
-                      <View
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        <MessageRow message={message} />
-                      </View>
+                     <View
+                     ref={provided.innerRef}
+                     {...provided.draggableProps}
+                     {...provided.dragHandleProps}
+                     style={{ marginBottom: 12 }} // Correct for React Native
+                   >
+                     <MessageRow message={message} />
+                   </View>
                     )}
                   </Draggable>
                 ))}
@@ -194,7 +195,7 @@ export const MessageWidget = () => {
             });
           }}
           scrollableRef={scrollViewRef}
-          rowGap={20}
+          rowGap={20} // Ensure gap between items on mobile
           columns={1}
           dragActivationDelay={0}
           data={messages}
