@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View } from "react-native";
 import { Text } from "./ui/text";
 import { CompanyLogo } from "~/lib/icons/CompanyLogo";
@@ -24,12 +24,16 @@ import { Settings } from "~/lib/icons/Settings";
 import { Logs } from "~/lib/icons/Logs";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { useShowModal } from "~/lib/context/ModalContext";
+import { useColorScheme } from '~/lib/useColorScheme';
+import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
 export const Header = () => {
   const [isSettingsDropdownOpen, setIsSettingsDropdownOpen] = useState(false);
   const insets = useSafeAreaInsets();
+  const { isDarkColorScheme, setColorScheme } = useColorScheme();
 
   const contentInsets = {
     top: insets.top,
@@ -38,7 +42,6 @@ export const Header = () => {
     right: 12,
   };
 
-  const [isDarkColorScheme, setIsDarkColorScheme] = useState(true);
 
   const isConnected = useMachineSelector(connectionActor, (state) =>
     state.matches("CONNECTED")
@@ -50,6 +53,20 @@ export const Header = () => {
   });
 
   const showModal = useShowModal();
+
+  useEffect(() => {
+    const newTheme = 'dark'
+    setColorScheme(newTheme);
+    setAndroidNavigationBar(newTheme);
+    AsyncStorage.setItem('theme', newTheme);
+  }, [])
+  
+  const onThemeChange = () => {
+    const newTheme = isDarkColorScheme ? 'light' : 'dark';
+    setColorScheme(newTheme);
+    setAndroidNavigationBar(newTheme);
+    AsyncStorage.setItem('theme', newTheme);
+  }
 
   return (
     <View className="h-[60] px-[32] pt-[20]">
@@ -76,7 +93,7 @@ export const Header = () => {
           </View>
           <Switch
             checked={isDarkColorScheme}
-            onCheckedChange={setIsDarkColorScheme}
+            onCheckedChange={onThemeChange}
           />
           <DropdownMenu onOpenChange={setIsSettingsDropdownOpen}>
             <DropdownMenuTrigger asChild>
