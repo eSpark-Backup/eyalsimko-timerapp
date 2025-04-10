@@ -1,4 +1,10 @@
-import { findNodeHandle, Platform, TouchableWithoutFeedback, UIManager, View } from "react-native";
+import {
+  findNodeHandle,
+  Platform,
+  TouchableWithoutFeedback,
+  UIManager,
+  View,
+} from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { Text } from "~/components/ui/text";
 import { Button } from "../ui/button";
@@ -29,7 +35,12 @@ import {
   DialogFooter,
   DialogHeader,
 } from "../ui/dialog";
-import React, { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import { TrashDanger } from "~/lib/icons/TrashDanger";
 import { Input } from "../ui/input";
 import { getLocale } from "~/lib/locale";
@@ -141,7 +152,10 @@ function TimerForm({
           rules={{
             required: true,
           }}
-          render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <Input
               hasError={!!error}
               background="modal"
@@ -158,7 +172,10 @@ function TimerForm({
           rules={{
             required: false,
           }}
-          render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <Input
               hasError={!!error}
               background="modal"
@@ -175,7 +192,10 @@ function TimerForm({
           rules={{
             required: true,
           }}
-          render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <Input
               hasError={!!error}
               background="modal"
@@ -192,7 +212,10 @@ function TimerForm({
           rules={{
             required: true,
           }}
-          render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <TimeInput
               editable={!isTimerRunning}
               hasError={!!error}
@@ -212,7 +235,10 @@ function TimerForm({
               rules={{
                 required: false,
               }}
-              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              render={({
+                field: { onChange, onBlur, value },
+                fieldState: { error },
+              }) => (
                 <TimeInput
                   editable={!isTimerRunning}
                   hasError={!!error}
@@ -232,7 +258,10 @@ function TimerForm({
               rules={{
                 required: false,
               }}
-              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              render={({
+                field: { onChange, onBlur, value },
+                fieldState: { error },
+              }) => (
                 <TimeInput
                   editable={!isTimerRunning}
                   hasError={!!error}
@@ -434,10 +463,24 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
   };
 
   const actorRef = TimerContext.useActorRef();
-  const runningTimerId = useMachineSelector(actorRef, (state) => state.context.timer?.eventId);
-  const isRunning = useMachineSelector(actorRef, (state) => state.matches({ ACTIVE: "running" }));
-  const isPaused = useMachineSelector(actorRef, (state) => state.matches({ ACTIVE: "paused" }));
-  const canStop = useMachineSelector(actorRef, (state) => state.can({ type: "stop" }));
+  const runningTimerId = useMachineSelector(
+    actorRef,
+    (state) => state.context.timer?.eventId
+  );
+  const isRunning = useMachineSelector(actorRef, (state) =>
+    state.matches({ ACTIVE: "running" })
+  );
+
+  const timerIsStarted = useMachineSelector(actorRef, (state) => {
+    return state.context.timer?.elapsed !== null;
+  });
+  
+  const isPaused = useMachineSelector(actorRef, (state) =>
+    state.matches({ ACTIVE: "paused" })
+  );
+  const canStop = useMachineSelector(actorRef, (state) =>
+    state.can({ type: "stop" })
+  );
 
   const setupEvent: SetupEvent = {
     type: "setup",
@@ -445,8 +488,12 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
       eventId: event.id,
     },
   } as const;
-  const canSetup = useMachineSelector(actorRef, (state) => state.can(setupEvent));
-  const isConnected = useMachineSelector(connectionActor, (state) => state.matches("CONNECTED"));
+  const canSetup = useMachineSelector(actorRef, (state) =>
+    state.can(setupEvent)
+  );
+  const isConnected = useMachineSelector(connectionActor, (state) =>
+    state.matches("CONNECTED")
+  );
 
   return (
     <View
@@ -477,7 +524,10 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
       )}
       <View className="flex-1 flex-row items-center justify-between">
         <View className="flex-row items-center gap-[16]">
-          <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }} className="text-md w-[20]">
+          <Text
+            style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
+            className="text-md w-[20]"
+          >
             {index + 1}
           </Text>
           <Text className="color-primary text-md w-[100] font-cousine">
@@ -485,16 +535,24 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
           </Text>
           <View className="w-[64]">
             <Text className="color-primary font-cousine">
-              {formatCountdown({ countdownTime: event.countdownTime, elapsedTime: event.countdownTime })}
+              {formatCountdown({
+                countdownTime: event.countdownTime,
+                elapsedTime: event.countdownTime,
+              })}
             </Text>
           </View>
           <View className="gap-[4]">
             <View className="flex-row gap-[12]">
               <Text>{event.name}</Text>
-              <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>{event.speakerName}</Text>
+              <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>
+                {event.speakerName}
+              </Text>
             </View>
             {event.description && (
-              <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }} className="text-sm">
+              <Text
+                style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
+                className="text-sm"
+              >
                 {event.description}
               </Text>
             )}
@@ -544,14 +602,18 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
               className="w-[148]"
             >
               <DropdownMenuGroup className="gap-[8]">
-                <DropdownMenuItem onPress={() => showModal({ type: "editEvent", event })}>
+                <DropdownMenuItem
+                  onPress={() => showModal({ type: "editEvent", event })}
+                >
                   <View className="flex-1 flex-row justify-between items-center">
                     <Text className="text-sm font-normal">Edit</Text>
                     <Edit size={16} />
                   </View>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  disabled={event.id === runningTimerId ? timerIsStarted : false}
+                  disabled={
+                    event.id === runningTimerId ? timerIsStarted : false
+                  }
                   onPress={() => showModal({ type: "deleteEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
@@ -569,12 +631,11 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
 }
 
 const TimersListWeb: React.FC<TimersListProps> = ({ events }) => {
-  const onDragEnd = (result:any) => {
+  const onDragEnd = (result: any) => {
     if (!result.destination) return;
 
-
     eventConfigStore.send({
-      type: 'changeEventOrder',
+      type: "changeEventOrder",
       fromIndex: result.source.index,
       toIndex: result.destination.index,
     });
@@ -587,36 +648,40 @@ const TimersListWeb: React.FC<TimersListProps> = ({ events }) => {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
           >
-            {events.map((event:Event, index:number) => (
+            {events.map((event: Event, index: number) => (
               <Draggable key={event.id} draggableId={event.id} index={index}>
                 {(provided) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
-                    {...provided.dragHandleProps} // Ensures that drag handle is applied 
+                    {...provided.dragHandleProps} // Ensures that drag handle is applied
                     style={{
                       ...provided.draggableProps.style,
                       marginBottom: 12, // Space between items
                     }}
                   >
-                    <EventItem event={event} index={index} dragHandleProps={provided.dragHandleProps} />
+                    <EventItem
+                      event={event}
+                      index={index}
+                      dragHandleProps={provided.dragHandleProps}
+                    />
                   </div>
                 )}
               </Draggable>
             ))}
-            {provided.placeholder} {/* Ensures the layout is updated during drag */}
+            {provided.placeholder}{" "}
+            {/* Ensures the layout is updated during drag */}
           </div>
         )}
       </Droppable>
     </DragDropContext>
   );
-}
-
+};
 
 const TimersListNative: React.FC<TimersListProps> = ({ events }) => {
-  const onDragEnd = (result:any) => {
+  const onDragEnd = (result: any) => {
     if (!result.destination) return;
     eventConfigStore.send({
       type: "changeEventOrder",
@@ -655,25 +720,35 @@ export default function TimersList() {
   const scrollPosition = React.useContext(CardScrollPositionContext);
   const events = useSelector(eventConfigStore, (state) => state.context.events);
   const actorRef = TimerContext.useActorRef();
-  const runningTimerId = useMachineSelector(actorRef, (state) => state.context.timer?.eventId);
+  const runningTimerId = useMachineSelector(
+    actorRef,
+    (state) => state.context.timer?.eventId
+  );
 
   const checkVisibility = (timerRef: React.RefObject<View>) => {
     const currentRunningTimerRef = timerRef.current;
     const currentScrollViewRef = scrollViewRef.current;
 
     if (currentRunningTimerRef && currentScrollViewRef) {
-      (currentScrollViewRef as unknown as View).measureInWindow((_sx, scrollY, _sw, scrollViewHeight) => {
-        if (scrollViewHeight === 0) return;
-        currentRunningTimerRef.measureLayout(currentScrollViewRef as unknown as View, (_ex, elementY, _ew, elementHeight) => {
-          const isVisible = elementY < scrollViewHeight + scrollPosition - elementHeight && elementY > scrollPosition;
-          if (!isVisible) {
-            currentScrollViewRef.scrollTo({
-              y: elementY,
-              animated: true,
-            });
-          }
-        });
-      });
+      (currentScrollViewRef as unknown as View).measureInWindow(
+        (_sx, scrollY, _sw, scrollViewHeight) => {
+          if (scrollViewHeight === 0) return;
+          currentRunningTimerRef.measureLayout(
+            currentScrollViewRef as unknown as View,
+            (_ex, elementY, _ew, elementHeight) => {
+              const isVisible =
+                elementY < scrollViewHeight + scrollPosition - elementHeight &&
+                elementY > scrollPosition;
+              if (!isVisible) {
+                currentScrollViewRef.scrollTo({
+                  y: elementY,
+                  animated: true,
+                });
+              }
+            }
+          );
+        }
+      );
     }
   };
 
@@ -681,14 +756,13 @@ export default function TimersList() {
     checkVisibility(runningTimerRef);
   }, [runningTimerId]);
 
-
   return (
     <View>
-    {Platform.OS === "web" ? (
-      <TimersListWeb events={events} />
-    ) : (
-      <TimersListNative events={events} />
-    )}
-  </View>
+      {Platform.OS === "web" ? (
+        <TimersListWeb events={events} />
+      ) : (
+        <TimersListNative events={events} />
+      )}
+    </View>
   );
 }
