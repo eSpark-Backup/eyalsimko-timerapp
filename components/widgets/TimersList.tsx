@@ -629,7 +629,7 @@ const TimersListNative: React.FC<TimersListProps> = ({ events }) => {
     <Sortable.Grid
       onDragEnd={onDragEnd}
       data={events}
-      rowGap={12}
+      rowGap={1}
       columns={1}
       dragActivationDelay={0}
       activeItemScale={1.05}
@@ -639,7 +639,7 @@ const TimersListNative: React.FC<TimersListProps> = ({ events }) => {
         <View key={event.id}>
           <Sortable.Handle>
             <View style={{ margin: 10, padding: 10 }}>
-              <Move color="hsla(213, 5%, 57%, 1)" size={16} />
+              {/* <Move color="hsla(213, 5%, 57%, 1)" size={16} /> */}
             </View>
           </Sortable.Handle>
           <EventItem event={event} index={index} />

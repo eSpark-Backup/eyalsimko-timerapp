@@ -2,7 +2,7 @@ import { WebSocketServer } from 'ws';
 
 const wss = new WebSocketServer({
   port: 8080,
-  host: '192.168.0.112'
+  host: '192.168.1.2'
 });
 
 wss.on('connection', function connection(ws) {
