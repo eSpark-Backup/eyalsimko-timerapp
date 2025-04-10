@@ -55,7 +55,7 @@ pip install qrcode[pil]
 
 Run the python script:
 ```bash
-python python_script.py
+python pythonScript.py
 ```
 
 
