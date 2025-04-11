@@ -142,7 +142,7 @@ export default function TimerScreen() {
         disabled={speakerIndex === 0}
       >
         <ArrowLeft className="h-4 w-4 color-primary-foreground" />
-        <Text className="text-primary-foreground">Prev</Text>
+        <Text className="text-primary-foreground font-poppins web:font-poppins">Prev</Text>
       </Button>
     </Link>
   );
@@ -158,7 +158,7 @@ export default function TimerScreen() {
       asChild
     >
       <Button variant="outline" className="bg-brand gap-2 flex-row">
-        <Text className="text-primary-foreground">
+        <Text className="text-primary-foreground font-poppins web:font-poppins">
           {isLastSpeaker ? "Add" : "Next"}
         </Text>
         {isLastSpeaker ? (
@@ -189,7 +189,7 @@ export default function TimerScreen() {
                 <View className="flex flex-row justify-between gap-8 md:gap-32">
                   <View className="hidden md:flex">{prevButton}</View>
                   <View className="flex flex-row grow gap-4 items-center">
-                    <Text className="text-3xl font-bold text-primary">
+                    <Text className="text-3xl font-bold text-primary font-poppins web:font-poppins">
                       Timer {speakerIndex + 1}:
                     </Text>
                     <Input
@@ -208,7 +208,7 @@ export default function TimerScreen() {
                 </View>
                 <View className="flex flex-col md:flex-row justify-between gap-8">
                   <View className="flex flex-row gap-8">
-                    <Text className="text-2xl font-semibold text-primary">
+                    <Text className="text-2xl font-semibold text-primary font-poppins web:font-poppins">
                       Countdown Time:
                     </Text>
                     <SetTime
@@ -221,7 +221,7 @@ export default function TimerScreen() {
                     />
                   </View>
                   <View className="flex flex-row gap-8">
-                    <Text className="text-2xl font-semibold text-primary">
+                    <Text className="text-2xl font-semibold text-primary font-poppins web:font-poppins">
                       Blink Start Time:
                     </Text>
                     <SetTime

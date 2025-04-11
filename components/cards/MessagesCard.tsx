@@ -19,10 +19,10 @@ export default function MessagesCard() {
         <MessageWidgetHeader />
         <View className="flex-1 items-center justify-center gap-[24]">
           <View className="gap-[12]">
-            <Text className="text-xl font-semibold text-center">
+            <Text className="text-xl font-semibold text-center font-poppins web:font-poppins">
               No Messages Yet
             </Text>
-            <Text className="text-lg text-muted-foreground">
+            <Text className="text-lg text-muted-foreground font-poppins web:font-poppins">
               Want to display a message on the timer? Add now!
             </Text>
           </View>
@@ -35,7 +35,7 @@ export default function MessagesCard() {
               eventConfigStore.send({ type: "addMessage" });
             }}
           >
-            <Text>Add Message</Text>
+            <Text className="font-poppins web:font-poppins">Add Message</Text>
           </Button>
         </View>
       </Card>

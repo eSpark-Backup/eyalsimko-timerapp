@@ -87,10 +87,10 @@ function TimerPickerWithControls({
           }}
           className="flex-1"
         >
-          <Text>Submit</Text>
+          <Text className="font-normal font-poppins web:font-poppin">Submit</Text>
         </Button>
         <Button onPress={reset} className="flex-1">
-          <Text>Reset</Text>
+          <Text className="font-normal font-poppins web:font-poppin">Reset</Text>
         </Button>
       </View>
     </View>
@@ -157,7 +157,7 @@ function EventNameSettings({
           }}
           className="flex-1"
         >
-          <Text>Reset</Text>
+          <Text className="font-normal font-poppins web:font-poppin">Reset</Text>
         </Button>
       </View>
     </View>
@@ -191,7 +191,7 @@ function ThemeSettings() {
             size={24}
             strokeWidth={1.25}
           />
-          <Text>{theme.title}</Text>
+          <Text className="font-normal font-poppins web:font-poppin">{theme.title}</Text>
         </Button>
       ))}
     </View>
@@ -334,9 +334,9 @@ function ConnectionSettings() {
           <>
             {connectionType === "SCREEN_WIFI" && (
               <View>
-                <Text>You connected to the wrong wifi network.</Text>
+                <Text className="font-normal font-poppins web:font-poppin">You connected to the wrong wifi network.</Text>
                 <View className="flex gap-1">
-                  <Text>
+                  <Text className="font-normal font-poppins web:font-poppin">
                     {" "}
                     Please connect to the WiFi network using SSID and password
                     from the screen or
@@ -344,21 +344,21 @@ function ConnectionSettings() {
                   <Link href="/scanCode" asChild>
                     <Button className="flex-row gap-2">
                       <QrCode className="h-4 w-4 text-primary-foreground" />
-                      <Text>Scan the QR code from the screen</Text>
+                      <Text className="font-normal font-poppins web:font-poppin">Scan the QR code from the screen</Text>
                     </Button>
                   </Link>
-                  <Text>
+                  <Text className="font-normal font-poppins web:font-poppin">
                     To connect to the screen via a wired connection, please turn
                     off the WiFi
                   </Text>
                   <Button onPress={openWifiSettings}>
-                    <Text>Open WIFI settings to turn WiFi off</Text>
+                    <Text className="font-normal font-poppins web:font-poppin">Open WIFI settings to turn WiFi off</Text>
                   </Button>
                 </View>
               </View>
             )}
             {connectionType === "LAN" && (
-              <Text>
+              <Text className="font-normal font-poppins web:font-poppin">
                 You used a wired connection, but the app can't reach the screen.
                 Please make sure you've connected to the screen by wire.
               </Text>
@@ -369,7 +369,7 @@ function ConnectionSettings() {
                   <>
                     {knownLifeWifiNetworks.length !== 0 && (
                       <View className="gap-1">
-                        <Text>Screen WIFI is available.</Text>
+                        <Text className="font-normal font-poppins web:font-poppin">Screen WIFI is available.</Text>
                         {knownLifeWifiNetworks.length === 1 ? (
                           <Button
                             disabled={isConnectingToWifi}
@@ -377,7 +377,7 @@ function ConnectionSettings() {
                               connectToWifi(knownLifeWifiNetworks[0]);
                             }}
                           >
-                            <Text>
+                            <Text className="font-normal font-poppins web:font-poppin">
                               {isConnectingToWifi
                                 ? "Connecting..."
                                 : `Connect to the ${knownLifeWifiNetworks[0].ssid}`}
@@ -432,18 +432,18 @@ function ConnectionSettings() {
                     )}
                   </>
                 )}
-                <Text>No wired of WiFi connection available.</Text>
-                <Text>
+                <Text className="font-normal font-poppins web:font-poppin">No wired of WiFi connection available.</Text>
+                <Text className="font-normal font-poppins web:font-poppin">
                   Please connect to the WiFi network using SSID and password
                   from the screen or
                 </Text>
                 <Button onPress={openWifiSettings}>
-                  <Text>Open WIFI settings to change the network</Text>
+                  <Text className="font-normal font-poppins web:font-poppin">Open WIFI settings to change the network</Text>
                 </Button>
                 <Link href="/scanCode" asChild>
                   <Button className="flex-row gap-2">
                     <QrCode className="h-4 w-4 text-primary-foreground" />
-                    <Text>Scan the QR code from the screen</Text>
+                    <Text className="font-normal font-poppins web:font-poppin">Scan the QR code from the screen</Text>
                   </Button>
                 </Link>
               </>
@@ -475,7 +475,7 @@ function ConnectionSettings() {
             }}
           >
             <Unplug className="h-4 w-4 text-primary-foreground" />
-            <Text>Disconnect</Text>
+            <Text className="font-normal font-poppins web:font-poppin">Disconnect</Text>
           </Button>
           <Button
             className="flex-1 flex-row gap-2"
@@ -501,7 +501,7 @@ function ConnectionSettings() {
             }}
           >
             <Power className="h-4 w-4 text-destructive-foreground" />
-            <Text>Shutdown</Text>
+            <Text className="font-normal font-poppins web:font-poppin">Shutdown</Text>
           </Button>
         </View>
       )}
@@ -514,7 +514,7 @@ function ConnectionSettings() {
               onPress={() => connectionActor.send(reconnectEvent)}
             >
               <RotateCcw className="h-4 w-4 text-primary-foreground" />
-              <Text>Reconnect</Text>
+              <Text className="font-normal font-poppins web:font-poppin">Reconnect</Text>
             </Button>
           )}
         </View>
@@ -530,7 +530,7 @@ function VersionInfo() {
 
   return (
     <View className="pb-safe pt-safe items-center">
-      <Text>
+      <Text className="font-normal font-poppins web:font-poppin">
         Version: {appVersion} ({buildVersion})
       </Text>
     </View>
@@ -582,7 +582,7 @@ export default function SettingsScreen() {
             <AccordionTrigger
               onPress={() => toggleTab("eventNameAndDescription")}
             >
-              <Text>Event name & description</Text>
+              <Text className="font-normal font-poppins web:font-poppin">Event name & description</Text>
             </AccordionTrigger>
             <AccordionContent>
               <EventNameSettings
@@ -595,7 +595,7 @@ export default function SettingsScreen() {
             <AccordionTrigger
               onPress={() => toggleTab("defaultBlinkingStartTime")}
             >
-              <Text>
+              <Text className="font-normal font-poppins web:font-poppin">
                 Default blink start time:{" "}
                 {defaultBlinkingStartTime
                   ? formatDuration(defaultBlinkingStartTime)
@@ -624,7 +624,7 @@ export default function SettingsScreen() {
           </AccordionItem>
           <AccordionItem value="blinkLength">
             <AccordionTrigger onPress={() => toggleTab("blinkLength")}>
-              <Text>
+              <Text className="font-normal font-poppins web:font-poppin">
                 Blink length:{" "}
                 {blinkLength ? formatDuration(blinkLength) : "None"}
               </Text>
@@ -651,7 +651,7 @@ export default function SettingsScreen() {
           </AccordionItem>
           <AccordionItem value="theme">
             <AccordionTrigger onPress={() => toggleTab("theme")}>
-              <Text>Theme: {colorScheme}</Text>
+              <Text className="font-normal font-poppins web:font-poppin">Theme: {colorScheme}</Text>
             </AccordionTrigger>
             <AccordionContent>
               <ThemeSettings />
@@ -659,7 +659,7 @@ export default function SettingsScreen() {
           </AccordionItem>
           <AccordionItem value="connection">
             <AccordionTrigger onPress={() => toggleTab("connection")}>
-              <Text>
+              <Text className="font-normal font-poppins web:font-poppin">
                 Connection settings:{" "}
                 {connectionMode
                   ? `Connected over ${connectionMode}`
@@ -672,7 +672,7 @@ export default function SettingsScreen() {
           </AccordionItem>
           <AccordionItem value="reset">
             <AccordionTrigger onPress={() => toggleTab("reset")}>
-              <Text>Clear Timers</Text>
+              <Text className="font-normal font-poppins web:font-poppin">Clear Timers</Text>
             </AccordionTrigger>
             <AccordionContent>
               <Button
@@ -686,13 +686,13 @@ export default function SettingsScreen() {
                 }}
               >
                 <CircleAlert className="h-4 w-4 text-destructive-foreground" />
-                <Text>Clear event data</Text>
+                <Text className="font-normal font-poppins web:font-poppin">Clear event data</Text>
               </Button>
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="OTA-update">
             <AccordionTrigger onPress={() => toggleTab("OTA-update")}>
-              <Text>OTA update</Text>
+              <Text className="font-normal font-poppins web:font-poppin">OTA update</Text>
             </AccordionTrigger>
             <AccordionContent>
               <Button
@@ -721,7 +721,7 @@ export default function SettingsScreen() {
                   );
                 }}
               >
-                <Text>Update Timer module firmware</Text>
+                <Text className="font-normal font-poppins web:font-poppin">Update Timer module firmware</Text>
               </Button>
             </AccordionContent>
           </AccordionItem>

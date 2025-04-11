@@ -54,7 +54,7 @@ function VersionInfo() {
   const buildVersion = Application.nativeBuildVersion;
 
   return (
-    <Text className="text-center pt-[12]">
+    <Text className="text-center pt-[12] font-poppins web:font-poppin">
       Version: {appVersion} ({buildVersion})
     </Text>
   );
@@ -180,15 +180,15 @@ function ConnectionSettings() {
 
   return (
     <View className="flex gap-4">
-      <Text className="text-lg font-semibold">Connection Settings</Text>
+      <Text className="text-lg font-semibold font-poppins web:font-poppin">Connection Settings</Text>
       {isConnectionErrorOrConnecting && (
         <View className="gap-[20]">
           {knownLifeWifiNetworks.length !== 0 && (
             <View className="gap-1">
               {Platform.OS === "android" ? (
-                <Text className="text-md">Screen WIFI is available.</Text>
+                <Text className="text-md font-poppins web:font-poppin">Screen WIFI is available.</Text>
               ) : (
-                <Text className="text-md">Known WiFi networks:</Text>
+                <Text className="text-md font-poppins web:font-poppin">Known WiFi networks:</Text>
               )}
               {knownLifeWifiNetworks.length === 1 ? (
                 <Button
@@ -199,7 +199,7 @@ function ConnectionSettings() {
                     connectToWifiWithToasts(knownLifeWifiNetworks[0]);
                   }}
                 >
-                  <Text>
+                  <Text className="font-normal font-poppins web:font-poppin">
                     {isConnectingToWifi
                       ? "Connecting..."
                       : `Connect to the ${knownLifeWifiNetworks[0].ssid}`}
@@ -247,13 +247,13 @@ function ConnectionSettings() {
             </View>
           )}
           {knownLifeWifiNetworks.length === 0 && (
-            <Text className="text-md">There's no known WiFi networks.</Text>
+            <Text className="text-md font-poppins web:font-poppin">There's no known WiFi networks.</Text>
           )}
           <View className="gap-[4]">
-            <Text className="text-md">
+            <Text className="text-md font-poppins web:font-poppin">
               No wired of WiFi connection detected.
             </Text>
-            <Text className="text-md">
+            <Text className="text-md font-poppins web:font-poppin">
               Please connect to the WiFi network using SSID and password from
               the screen.
             </Text>
@@ -265,18 +265,18 @@ function ConnectionSettings() {
               openWifiSettings();
             }}
           >
-            <Text>Open WiFi settings to change the network</Text>
+            <Text className="font-normal font-poppins web:font-poppin">Open WiFi settings to change the network</Text>
           </Button>
           <Link href="/scanCode" asChild>
             <Button size="lg" border="none" onPress={closeModal}>
-              <Text>Scan the QR code from the screen</Text>
+              <Text className="font-normal font-poppins web:font-poppin">Scan the QR code from the screen</Text>
             </Button>
           </Link>
         </View>
       )}
       {isConnected && (
         <View className="gap-4">
-          <Text className="text-md">
+          <Text className="text-md font-poppins web:font-poppin">
             Connection with the screen is established.
           </Text>
           <View className="flex flex-row gap-4">
@@ -306,7 +306,7 @@ function ConnectionSettings() {
                 );
               }}
             >
-              <Text>Disconnect</Text>
+              <Text className="font-normal font-poppins web:font-poppin">Disconnect</Text>
             </Button>
             <Button
               size="lg"
@@ -333,7 +333,7 @@ function ConnectionSettings() {
                 );
               }}
             >
-              <Text>Shutdown</Text>
+              <Text className="font-normal font-poppins web:font-poppin">Shutdown</Text>
             </Button>
           </View>
           <Button
@@ -364,13 +364,13 @@ function ConnectionSettings() {
               );
             }}
           >
-            <Text>Update Timer module firmware</Text>
+            <Text className="font-normal font-poppins web:font-poppin">Update Timer module firmware</Text>
           </Button>
         </View>
       )}
       {isDisconnected && (
         <View className="gap-4">
-          <Text className="text-md">
+          <Text className="text-md font-poppins web:font-poppin">
             You manually disconnected from the Screen.
           </Text>
           <View className="flex flex-row gap-2">
@@ -382,7 +382,7 @@ function ConnectionSettings() {
                 size="lg"
                 icon={RotateCcw}
               >
-                <Text>Reconnect</Text>
+                <Text className="font-normal font-poppins web:font-poppin">Reconnect</Text>
               </Button>
             )}
           </View>
@@ -418,13 +418,13 @@ export function SettingsModal() {
     <DialogContent className="w-[464]">
       <View className="gap-[40]">
         <DialogHeader>
-          <Text className="text-xl text-center font-semibold">
+          <Text className="text-xl text-center font-semibold font-poppins web:font-poppin">
             General Settings
           </Text>
         </DialogHeader>
         <View className="gap-[40]">
           <View className="gap-[12]">
-            <Text className="text-lg font-semibold">Flash Settings</Text>
+            <Text className="text-lg font-semibold font-poppins web:font-poppin">Flash Settings</Text>
             <View className="flex-row gap-[20]">
               <View className="flex-1">
                 <TimeInput
@@ -456,7 +456,7 @@ export function SettingsModal() {
               border="none"
               onPress={() => showModal({ type: "deleteData" })}
             >
-              <Text>Delete all timers</Text>
+              <Text className="font-normal font-poppins web:font-poppin">Delete all timers</Text>
             </Button>
           </View>
         </View>
@@ -464,7 +464,7 @@ export function SettingsModal() {
           <View className="flex-row justify-between">
             <DialogClose asChild>
               <Button size="lg" border="none">
-                <Text>Cancel</Text>
+                <Text className="font-normal font-poppins web:font-poppin">Cancel</Text>
               </Button>
             </DialogClose>
             <Button
@@ -483,7 +483,7 @@ export function SettingsModal() {
                 closeModal();
               }}
             >
-              <Text>Save Changes</Text>
+              <Text className="font-normal font-poppins web:font-poppin">Save Changes</Text>
             </Button>
           </View>
           <VersionInfo />

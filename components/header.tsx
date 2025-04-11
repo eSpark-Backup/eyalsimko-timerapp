@@ -62,7 +62,7 @@ export const Header = () => {
               variant={connectionType === "LAN" ? "primary-muted" : "secondary"}
               icon={Wired}
             >
-              <Text>Wired</Text>
+              <Text className="font-normal font-poppins web:font-poppins">Wired</Text>
             </Button>
             <Button
               border="none"
@@ -71,7 +71,7 @@ export const Header = () => {
               }
               icon={Wifi}
             >
-              <Text>WiFi</Text>
+              <Text className="font-normal font-poppins web:font-poppins">WiFi</Text>
             </Button>
           </View>
           <Switch
@@ -90,7 +90,7 @@ export const Header = () => {
                 >
                   <AvatarImage source={{ uri: GITHUB_AVATAR_URI }} />
                   <AvatarFallback>
-                    <Text className="text-primary">ZN</Text>
+                    <Text className="text-primary font-normal font-poppins web:font-poppins">ZN</Text>
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -109,7 +109,7 @@ export const Header = () => {
                   onPress={() => showModal({ type: "settings" })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal">
+                    <Text className="text-sm font-normal font-poppins web:font-poppins">
                       General Settings
                     </Text>
                     <Settings size={20} />
@@ -117,13 +117,13 @@ export const Header = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem onPress={() => showModal({ type: "logs" })}>
                   <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal">Logs</Text>
+                    <Text className="text-sm font-normal font-poppins web:font-poppins">Logs</Text>
                     <Logs size={20} />
                   </View>
                 </DropdownMenuItem>
                 <DropdownMenuItem onPress={() => showModal({ type: "help" })}>
                   <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal">Help</Text>
+                    <Text className="text-sm font-normal font-poppins web:font-poppins">Help</Text>
                     <Help size={20} />
                   </View>
                 </DropdownMenuItem>

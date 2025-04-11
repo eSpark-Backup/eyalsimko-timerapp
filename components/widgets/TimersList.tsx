@@ -67,18 +67,18 @@ export const TimersListHeader = () => {
   const showModal = useShowModal();
 
   return (
-    <>
-      <View className="flex-row justify-between items-center">
-        <Text className="text-lg font-semibold">List of Events</Text>
-        <Button
-          size="sm"
-          icon={Plus}
-          onPress={() => showModal({ type: "addEvent" })}
-        >
-          <Text>Add New Timer</Text>
-        </Button>
-      </View>
-    </>
+    <View className="flex-row justify-between items-center">
+      <Text>
+        List of Events
+      </Text>
+      <Button
+        size="sm"
+        icon={Plus}
+        onPress={() => showModal({ type: "addEvent" })}
+      >
+        <Text className="font-poppins web:font-poppins">Add New Timer</Text>
+      </Button>
+    </View>
   );
 };
 
@@ -286,7 +286,7 @@ function TimerForm({
             submit(e);
           }}
         >
-          <Text>{submitLabel}</Text>
+          <Text className="font-normal font-poppins web:font-poppins">{submitLabel}</Text>
         </Button>
       )}
     </>
@@ -314,13 +314,13 @@ function TimerModals({
         <DialogContent className="w-[400]">
           <View className="gap-[40]">
             <DialogHeader>
-              <View className="justify-center items-center gap-[20]">
+              <View className="justify-center items-center gap-[20] font-poppins web:font-poppins">
                 <TrashDanger className="text-transparent" size={60} />
                 <View className="items-center gap-[12]">
-                  <Text className="text-2xl text-primary font-semibold">
+                  <Text className="text-2xl text-primary font-semibold font-poppins web:font-poppins">
                     Delete Timer?
                   </Text>
-                  <Text className="text-lg text-primary/60">
+                  <Text className="text-lg text-primary/60 font-poppins web:font-poppins">
                     Are you sure you want to delete this timer?
                   </Text>
                 </View>
@@ -330,7 +330,7 @@ function TimerModals({
               <View className="flex-row justify-between">
                 <DialogClose asChild>
                   <Button size="lg" border="none">
-                    <Text>Cancel</Text>
+                    <Text className="font-normal font-poppins web:font-poppins">Cancel</Text>
                   </Button>
                 </DialogClose>
                 <Button
@@ -345,7 +345,7 @@ function TimerModals({
                   size="lg"
                   variant="destructive"
                 >
-                  <Text>Delete</Text>
+                  <Text className="font-normal font-poppins web:font-poppins">Delete</Text>
                 </Button>
               </View>
             </DialogFooter>
@@ -356,7 +356,7 @@ function TimerModals({
         <DialogContent className="w-[464]">
           <View className="gap-[40]">
             <DialogHeader>
-              <Text className="text-xl text-center font-semibold">
+              <Text className="text-xl text-center font-semibold font-poppins web:font-poppins">
                 Edit Timer
               </Text>
             </DialogHeader>
@@ -382,7 +382,7 @@ function TimerModals({
                           border="none"
                           onPress={() => setModal(null)}
                         >
-                          <Text>Cancel</Text>
+                          <Text className="font-normal font-poppins web:font-poppins">Cancel</Text>
                         </Button>
                         {submitButton}
                       </View>
@@ -398,7 +398,7 @@ function TimerModals({
         <DialogContent className="w-[464]">
           <View className="gap-[40]">
             <DialogHeader>
-              <Text className="text-xl text-center font-semibold">
+              <Text className="text-xl text-center font-semibold font-poppins web:font-poppins">
                 Add New Timer
               </Text>
             </DialogHeader>
@@ -420,7 +420,7 @@ function TimerModals({
                         border="none"
                         onPress={() => setModal(null)}
                       >
-                        <Text>Cancel</Text>
+                        <Text className="font-normal font-poppins web:font-poppins">Cancel</Text>
                       </Button>
                       {submitButton}
                     </View>
@@ -526,15 +526,15 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
         <View className="flex-row items-center gap-[16]">
           <Text
             style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
-            className="text-md w-[20]"
+            className="text-md w-[20] font-poppins web:font-poppins"
           >
             {index + 1}
           </Text>
-          <Text className="color-primary text-md w-[100] font-cousine">
+          <Text className="color-primary text-md w-[100] font-poppins web:font-poppins">
             {event.startedAt ? dateFormatter.format(event.startedAt) : ""}
           </Text>
           <View className="w-[64]">
-            <Text className="color-primary font-cousine">
+            <Text className="color-primary font-poppins web:font-poppins">
               {formatCountdown({
                 countdownTime: event.countdownTime,
                 elapsedTime: event.countdownTime,
@@ -543,7 +543,7 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
           </View>
           <View className="gap-[4]">
             <View className="flex-row gap-[12]">
-              <Text>{event.name}</Text>
+              <Text className="font-normal font-poppins web:font-poppins">{event.name}</Text>
               <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>
                 {event.speakerName}
               </Text>
@@ -606,7 +606,7 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
                   onPress={() => showModal({ type: "editEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal">Edit</Text>
+                    <Text className="text-sm font-normal font-poppins web:font-poppins">Edit</Text>
                     <Edit size={16} />
                   </View>
                 </DropdownMenuItem>
@@ -617,7 +617,7 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
                   onPress={() => showModal({ type: "deleteEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal">Delete</Text>
+                    <Text className="text-sm font-normal font-poppins web:font-poppins">Delete</Text>
                     <Trash size={16} />
                   </View>
                 </DropdownMenuItem>
