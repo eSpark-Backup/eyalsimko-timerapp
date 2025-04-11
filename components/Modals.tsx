@@ -261,7 +261,7 @@ function TimerForm({
             submit(e);
           }}
         >
-          <Text>{submitLabel}</Text>
+          <Text className="font-normal font-poppins web:font-poppin">{submitLabel}</Text>
         </Button>
       )}
     </>
@@ -319,10 +319,10 @@ export function Modals() {
               <View className="justify-center items-center gap-[20]">
                 <TrashDanger className="text-transparent" size={60} />
                 <View className="items-center gap-[12]">
-                  <Text className="text-2xl text-primary font-semibold">
+                  <Text className="text-2xl text-primary font-semibold font-poppins web:font-poppin">
                     Delete Timer?
                   </Text>
-                  <Text className="text-lg text-primary/60">
+                  <Text className="text-lg text-primary/60 font-poppins web:font-poppin">
                     Are you sure you want to delete this timer?
                   </Text>
                 </View>
@@ -332,7 +332,7 @@ export function Modals() {
               <View className="flex-row justify-between">
                 <DialogClose asChild>
                   <Button size="lg" border="none">
-                    <Text>Cancel</Text>
+                    <Text className="font-normal font-poppins web:font-poppin">Cancel</Text>
                   </Button>
                 </DialogClose>
                 <Button
@@ -347,7 +347,7 @@ export function Modals() {
                   size="lg"
                   variant="destructive"
                 >
-                  <Text>Delete</Text>
+                  <Text className="font-normal font-poppins web:font-poppin">Delete</Text>
                 </Button>
               </View>
             </DialogFooter>
@@ -363,7 +363,7 @@ export function Modals() {
         >
           <View className="gap-[40]">
             <DialogHeader>
-              <Text className="text-xl text-center font-semibold">
+              <Text className="text-xl text-center font-semibold font-poppins web:font-poppin">
                 Edit Timer
               </Text>
             </DialogHeader>
@@ -385,7 +385,7 @@ export function Modals() {
                     <DialogFooter>
                       <View className="flex-row justify-between">
                         <Button size="lg" border="none" onPress={closeModal}>
-                          <Text>Cancel</Text>
+                          <Text className="font-normal font-poppins web:font-poppin">Cancel</Text>
                         </Button>
                         {submitButton}
                       </View>
@@ -406,7 +406,7 @@ export function Modals() {
         >
           <View className="gap-[40]">
             <DialogHeader>
-              <Text className="text-xl text-center font-semibold">
+              <Text className="text-xl text-center font-semibold font-poppins web:font-poppins">
                 Add New Timer
               </Text>
             </DialogHeader>
@@ -425,7 +425,7 @@ export function Modals() {
                   <DialogFooter>
                     <View className="flex-row justify-between">
                       <Button size="lg" border="none" onPress={closeModal}>
-                        <Text>Cancel</Text>
+                        <Text className="font-normal font-poppins web:font-poppin">Cancel</Text>
                       </Button>
                       {submitButton}
                     </View>
@@ -447,7 +447,7 @@ export function Modals() {
           style={{ width: 718 }}
           header={
             <DialogHeader className="flex-row justify-center relative">
-              <Text className="text-3xl text-center font-semibold">Help</Text>
+              <Text className="text-3xl text-center font-semibold font-poppins web:font-poppin">Help</Text>
               <Help size={32} className="text-primary-foreground" />
               <View className="absolute right-0 top-1">
                 <IconButton
@@ -463,10 +463,10 @@ export function Modals() {
           <View className="gap-[32] pt-[30]">
             {helpContent.map(({ title, text }, index) => (
               <View key={index} className="gap-[12]">
-                <Text className="text-xl leading-[1.5] font-semibold">
+                <Text className="text-xl leading-[1.5] font-semibold font-poppins web:font-poppin">
                   {title}
                 </Text>
-                <Text className="text-md leading-[1.5] text-muted-foreground">
+                <Text className="font-poppins web:font-poppin text-md leading-[1.5] text-muted-foreground">
                   {text.join("\n\n")}
                 </Text>
               </View>
@@ -481,10 +481,10 @@ export function Modals() {
               <View className="justify-center items-center gap-[20]">
                 <TrashDanger className="text-transparent" size={60} />
                 <View className="items-center gap-[12]">
-                  <Text className="text-2xl text-primary font-semibold">
+                  <Text className="font-poppins web:font-poppin text-2xl text-primary font-semibold">
                     Delete All Timers?
                   </Text>
-                  <Text className="text-lg text-primary/60">
+                  <Text className="font-poppins web:font-poppin text-lg text-primary/60">
                     Are you sure you want to delete all timers?
                   </Text>
                 </View>
@@ -494,7 +494,7 @@ export function Modals() {
               <View className="flex-row justify-between">
                 <DialogClose asChild>
                   <Button size="lg" border="none">
-                    <Text>Cancel</Text>
+                    <Text className="font-normal font-poppins web:font-poppin">Cancel</Text>
                   </Button>
                 </DialogClose>
                 <Button
@@ -506,7 +506,7 @@ export function Modals() {
                   size="lg"
                   variant="destructive"
                 >
-                  <Text>Delete</Text>
+                  <Text className="font-normal font-poppins web:font-poppin">Delete</Text>
                 </Button>
               </View>
             </DialogFooter>
@@ -521,7 +521,7 @@ export function Modals() {
           headerHeight={28}
           header={
             <DialogHeader className="flex-row justify-center relative">
-              <Text className="text-xl text-center font-semibold">Logs</Text>
+              <Text className="font-poppins web:font-poppin text-xl text-center font-semibold">Logs</Text>
               <View className="absolute right-0 top-1">
                 <IconButton
                   variant="outline"
@@ -536,7 +536,7 @@ export function Modals() {
           <View className="pt-[40]">
             {logs.length === 0 && (
               <View className="h-[200] items-center justify-center">
-                <Text className="text-2xl text-muted-foreground">
+                <Text className="font-poppins web:font-poppin text-2xl text-muted-foreground">
                   No logs yet
                 </Text>
               </View>
@@ -544,7 +544,7 @@ export function Modals() {
             {logs.map((log, index) => (
               <View key={index} className="flex-row">
                 <View className="w-[80] mr-[6] items-center">
-                  <Text className="text-sm font-semibold leading-none font-cousine">
+                  <Text className="text-sm font-semibold leading-none font-poppins web:font-poppins">
                     {timerFormatter.format(log.date)}
                   </Text>
                 </View>
@@ -563,10 +563,10 @@ export function Modals() {
                     index !== logs.length - 1 && "mb-[24]"
                   )}
                 >
-                  <Text className="font-semibold leading-none">
+                  <Text className="font-poppins web:font-poppin font-semibold leading-none">
                     {logToText(log).title}
                   </Text>
-                  <Text className="text-sm text-muted-foreground">
+                  <Text className="font-poppins web:font-poppin text-sm text-muted-foreground">
                     {logToText(log).description}
                   </Text>
                 </View>

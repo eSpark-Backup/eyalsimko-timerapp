@@ -22,7 +22,7 @@ export const MessageWidgetHeader = () => {
   const [isFlashing, setIsFlashing] = useState(false);
   return (
     <View className="flex-row items-baseline justify-between">
-      <Text className="text-lg font-semibold">Messages</Text>
+      <Text className="text-lg font-semibold font-[Poppins] web:font-poppins">Messages</Text>
       <View className="flex-row gap-[12]">
         <Button
           size="sm"
@@ -30,7 +30,7 @@ export const MessageWidgetHeader = () => {
           icon={Zap}
           onPress={() => setIsFlashing(!isFlashing)}
         >
-          <Text>Flash</Text>
+          <Text className="font-[Poppins] web:font-poppins">Flash</Text>
         </Button>
         <Button
           size="sm"
@@ -39,7 +39,7 @@ export const MessageWidgetHeader = () => {
             eventConfigStore.send({ type: "addMessage" });
           }}
         >
-          <Text>Add New Message</Text>
+          <Text className="font-[Poppins] web:font-poppins">Add New Message</Text>
         </Button>
       </View>
     </View>
@@ -72,6 +72,7 @@ function MessageRow({ message }: { message: Message }) {
         maxLength={40}
         defaultValue={message.content}
         editable={message.id !== activeMessageId}
+        className="font-[Poppins] web:font-poppins"
         onSubmitEditing={(event) => {
           eventConfigStore.send({
             type: "editMessage",
@@ -108,7 +109,7 @@ function MessageRow({ message }: { message: Message }) {
               }}
               icon={Eye}
             >
-              <Text>Hide</Text>
+              <Text className="font-[Poppins] web:font-poppins">Hide</Text>
             </Button>
           ) : (
             <Button
@@ -122,7 +123,7 @@ function MessageRow({ message }: { message: Message }) {
               }}
               icon={Eye}
             >
-              <Text>Show</Text>
+              <Text className="font-[Poppins] web:font-poppins">Show</Text>
             </Button>
           )}
         </View>
@@ -141,13 +142,13 @@ export const MessageWidget = () => {
   if (messages.length === 0) {
     return (
       <View className="flex-1 h-auto items-center justify-center">
-        <Text>No Messages</Text>
+        <Text className="font-[Poppins] web:font-poppins">No Messages</Text>
       </View>
     );
   }
 
   const onDragEnd = (result) => {
-    if (!result.destination) return; // Dropped outside the list
+    if (!result.destination) return;
     eventConfigStore.send({
       type: "changeMessageOrder",
       fromIndex: result.source.index,
@@ -164,19 +165,19 @@ export const MessageWidget = () => {
               <View
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                style={{ paddingBottom: "10px" }} // To add some space below the list
+                style={{ paddingBottom: "10px" }}
               >
                 {messages.map((message, index) => (
                   <Draggable key={message.id} draggableId={message.id} index={index}>
                     {(provided) => (
                      <View
-                     ref={provided.innerRef}
-                     {...provided.draggableProps}
-                     {...provided.dragHandleProps}
-                     style={{ marginBottom: 12 }} // Correct for React Native
-                   >
-                     <MessageRow message={message} />
-                   </View>
+                       ref={provided.innerRef}
+                       {...provided.draggableProps}
+                       {...provided.dragHandleProps}
+                       style={{ marginBottom: 12 }}
+                     >
+                       <MessageRow message={message} />
+                     </View>
                     )}
                   </Draggable>
                 ))}
@@ -195,7 +196,7 @@ export const MessageWidget = () => {
             });
           }}
           scrollableRef={scrollViewRef}
-          rowGap={20} // Ensure gap between items on mobile
+          rowGap={20}
           columns={1}
           dragActivationDelay={0}
           data={messages}

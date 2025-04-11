@@ -66,8 +66,8 @@ export function ConnectionLostModal() {
           <DialogHeader className="items-center gap-[20]">
             <Warning size={80} />
             <View className="items-center gap-[12]">
-              <Text className="text-2xl font-semibold">Connection Lost</Text>
-              <Text className="text-lg text-muted-foreground text-center">
+              <Text className="text-2xl font-semibold font-poppins web:font-poppin">Connection Lost</Text>
+              <Text className="text-lg text-muted-foreground text-center font-poppins web:font-poppin">
                 You have lost the connection with the Screen. Please check the
                 WiFi or Wired connection.
               </Text>
@@ -76,7 +76,7 @@ export function ConnectionLostModal() {
           <DialogFooter className="items-center">
             <DialogClose asChild>
               <Button size="lg" border="none">
-                <Text>Close</Text>
+                <Text className="font-normal font-poppins web:font-poppin">Close</Text>
               </Button>
             </DialogClose>
           </DialogFooter>

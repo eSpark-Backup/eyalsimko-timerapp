@@ -234,7 +234,7 @@ const DropdownMenuShortcut = ({ className, ...props }: TextProps) => {
   return (
     <Text
       className={cn(
-        "ml-auto text-xs native:text-sm tracking-widest text-muted-foreground",
+        "font-normal font-poppins web:font-poppin ml-auto text-xs native:text-sm tracking-widest text-muted-foreground",
         className
       )}
       {...props}

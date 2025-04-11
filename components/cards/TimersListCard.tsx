@@ -19,10 +19,10 @@ export default function TimersListCard() {
         <TimersListHeader />
         <View className="flex-1 items-center justify-center gap-[24]">
           <View className="gap-[12]">
-            <Text className="text-xl font-semibold text-center">
+            <Text className="font-poppins web:font-poppin text-xl font-semibold text-center">
               No Events Found
             </Text>
-            <Text className="text-lg text-muted-foreground">
+            <Text className="font-poppins web:font-poppin text-lg text-muted-foreground">
               It looks empty here! Start by adding a new event.
             </Text>
           </View>
@@ -35,7 +35,7 @@ export default function TimersListCard() {
               showModal({ type: "addEvent" });
             }}
           >
-            <Text>Add Event</Text>
+            <Text className="font-normal font-poppins web:font-poppin">Add Event</Text>
           </Button>
         </View>
       </Card>
