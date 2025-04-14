@@ -13,10 +13,12 @@ export default function TimersListCard() {
 
   const showModal = useShowModal();
 
+console.log("TimersListCard", events);
+
   if (events.length === 0) {
     return (
       <Card>
-        <TimersListHeader />
+        <TimersListHeader/*  events={events} */ />
         <View className="flex-1 items-center justify-center gap-[24]">
           <View className="gap-[12]">
             <Text className="font-poppins web:font-poppin text-xl font-semibold text-center">
@@ -43,7 +45,7 @@ export default function TimersListCard() {
   }
 
   return (
-    <Card scrollable={true} autoScrollToBottom header={<TimersListHeader />}>
+    <Card scrollable={true} autoScrollToBottom header={<TimersListHeader/*  events={events}  *//>}>
       <TimersList />
     </Card>
   );

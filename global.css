@@ -29,7 +29,7 @@
     --background-ellipsis-2: 245, 100%, 31%, 1;
     --background-ellipsis-3: 259, 83%, 27%, 1;
     --background-ellipsis-4: 147, 100%, 35%, 0.38;
-    --card-border-color: 40 10% 3.9%;
+    --card-border-color: 0, 0%, 100%, 0.25;
     --button-default-background: 0, 0%, 100%, 0.1;
     --button-default-border-color: 0, 0%, 100%, 0.2;
     --item-highlight: 147, 100%, 35%, 0.25;
