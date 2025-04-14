@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Platform } from "react-native";
-import Sortable from "react-native-sortables";
+import SortableJS from "sortablejs";
 import { useSelector as useMachineSelector } from "@xstate/react";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -16,7 +16,7 @@ import { eventConfigStore, Message } from "~/lib/store/eventConfig";
 import { TimerContext } from "~/lib/store/timer";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { CardScrollRefContext } from "../Card";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import Sortable from "react-native-sortables";
 
 export const MessageWidgetHeader = () => {
   const [isFlashing, setIsFlashing] = useState(false);
@@ -138,6 +138,7 @@ export const MessageWidget = () => {
     eventConfigStore,
     (state) => state.context.messages
   );
+  const listRef = useRef<HTMLDivElement>(null);
 
   if (messages.length === 0) {
     return (
@@ -147,45 +148,42 @@ export const MessageWidget = () => {
     );
   }
 
-  const onDragEnd = (result) => {
-    if (!result.destination) return;
-    eventConfigStore.send({
-      type: "changeMessageOrder",
-      fromIndex: result.source.index,
-      toIndex: result.destination.index,
-    });
-  };
+  useEffect(() => {
+    if (listRef.current) {
+      SortableJS.create(listRef.current, {
+        animation: 150, // Smooth animation
+        handle: ".drag-handle", // Class for the drag handle
+        onEnd: (evt) => {
+          const { oldIndex, newIndex } = evt;
+
+          if (oldIndex !== undefined && newIndex !== undefined) {
+            eventConfigStore.send({
+              type: "changeMessageOrder",
+              fromIndex: oldIndex,
+              toIndex: newIndex,
+            });
+          }
+        },
+      });
+    }
+  }, []);
 
   return (
     <View>
       {Platform.OS === "web" ? (
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="droppable">
-            {(provided) => (
-              <View
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                style={{ paddingBottom: "10px" }}
-              >
-                {messages.map((message, index) => (
-                  <Draggable key={message.id} draggableId={message.id} index={index}>
-                    {(provided) => (
-                     <View
-                       ref={provided.innerRef}
-                       {...provided.draggableProps}
-                       {...provided.dragHandleProps}
-                       style={{ marginBottom: 12 }}
-                     >
-                       <MessageRow message={message} />
-                     </View>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </View>
-            )}
-          </Droppable>
-        </DragDropContext>
+        <div ref={listRef} style={{ paddingBottom: "10px" }}>
+          {messages.map((message, index) => (
+            <div
+              key={message.id}
+              className="drag-handle cursor-move"
+              style={{ marginBottom: 12 }}
+            >
+
+              {/* Message Row */}
+              <MessageRow message={message} />
+            </div>
+          ))}
+        </div>
       ) : (
         <Sortable.Grid
           onDragEnd={({ fromIndex, toIndex }) => {

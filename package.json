@@ -58,7 +58,6 @@
     "nanoid": "^5.1.5",
     "nativewind": "^4.1.23",
     "react": "18.3.1",
-    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "18.3.1",
     "react-hook-form": "^7.54.2",
     "react-native": "0.76.7",
@@ -76,6 +75,7 @@
     "react-native-web": "~0.19.13",
     "react-native-wifi-reborn": "^4.13.4",
     "sha256-uint8array": "^0.10.7",
+    "sortablejs": "^1.15.6",
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "3.3.5",
     "tailwindcss-animate": "^1.0.7",
@@ -88,6 +88,7 @@
     "@babel/core": "^7.26.0",
     "@types/react": "~18.3.12",
     "@types/react-beautiful-dnd": "^13.1.8",
+    "@types/sortablejs": "^1.15.8",
     "typescript": "^5.3.3"
   },
   "private": true
