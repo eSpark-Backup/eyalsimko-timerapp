@@ -18,7 +18,7 @@ console.log("TimersListCard", events);
   if (events.length === 0) {
     return (
       <Card>
-        <TimersListHeader/*  events={events} */ />
+        <TimersListHeader events={events} />
         <View className="flex-1 items-center justify-center gap-[24]">
           <View className="gap-[12]">
             <Text className="font-poppins web:font-poppin text-xl font-semibold text-center">
@@ -45,7 +45,7 @@ console.log("TimersListCard", events);
   }
 
   return (
-    <Card scrollable={true} autoScrollToBottom header={<TimersListHeader/*  events={events}  *//>}>
+    <Card scrollable={true} autoScrollToBottom header={<TimersListHeader events={events} />}>
       <TimersList />
     </Card>
   );

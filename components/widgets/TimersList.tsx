@@ -71,9 +71,9 @@ interface TimersListProps {
   events: Event[];
 }
 
-export const TimersListHeader = (/* { events }: { events: Event[] } */) => {
+export const TimersListHeader = ({ events }: { events: Event[] }) => {
   const showModal = useShowModal();
-  // console.log("TimersListHeader", events);
+  console.log("TimersListHeader", events);
 
   const handleImportCSV = async () => {
     try {
@@ -101,7 +101,7 @@ export const TimersListHeader = (/* { events }: { events: Event[] } */) => {
         List of Events
       </Text>
       <View className="flex-row gap-2">
-        {/* <Button
+        <Button
           size="sm"
           icon={Import}
           onPress={() => handleImportCSV()}
@@ -110,7 +110,7 @@ export const TimersListHeader = (/* { events }: { events: Event[] } */) => {
         </Button>
         <Button size="sm" icon={Plus} onPress={() => exportEventsToCSV(events)}>
           <Text className="font-poppins web:font-poppins">Export</Text>
-        </Button> */}
+        </Button>
         <Button
           size="sm"
           icon={Plus}
