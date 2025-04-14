@@ -17,8 +17,8 @@ export type RecoverMessage = z.infer<typeof recoverMessageSchema>
 // PROD
 // *TODO Dev Note:- Both Ips should be same with your Ip address and port should be also same for LAN and WIFI
 const wsConfigs = [
-  { url: "ws://192.168.100.4:8001/ws", type: "LAN" },
-  { url: "ws://192.168.100.4:8001/ws", type: "WIFI" },
+  { url: "ws://192.168.1.2:8080/ws", type: "LAN" },
+  { url: "ws://192.168.1.2:8080/ws", type: "WIFI" },
 ] as const
 
 // DEV
@@ -94,7 +94,6 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
   return new Promise((resolve, reject) => {
     try {
       const ws = new WebSocket(config.url);
-
       const onOpen = () => {
         // send reset and stop to set screen to blank state
         const initMessage = { type: "init" } as const
@@ -107,7 +106,7 @@ const getConnection = (config: Config): Promise<ConnectedState> => {
         console.log("Getting Timeout")
         ws.close()
         reject(new Error("Have not recienved hello message"))
-      }, 1000)
+      }, 1000)  
 
       ws.onerror = (err: Event) => {
         console.log("Getting Error "+JSON.stringify(err))
@@ -376,6 +375,7 @@ const connectionStore = setup({
       }
     },
     ERROR: {
+      entry: () => console.log('State: Entered ERROR state'),
       invoke: {
         src: 'tryToReconnect',
         onDone: {
