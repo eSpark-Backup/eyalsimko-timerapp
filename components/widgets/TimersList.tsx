@@ -8,6 +8,7 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { Text } from "~/components/ui/text";
 import { Button } from "../ui/button";
+import SortableJS from "sortablejs";
 import { Plus } from "~/lib/icons/Plus";
 import { cn, formatCountdown } from "~/lib/utils";
 import { IconButton } from "../iconButton";
@@ -16,7 +17,6 @@ import { Pause } from "~/lib/icons/Pause";
 import { Play } from "~/lib/icons/Play";
 import { Restart } from "~/lib/icons/Restart";
 import { More } from "~/lib/icons/More";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { useSelector as useMachineSelector } from "@xstate/react";
 import {
   DropdownMenu,
@@ -68,7 +68,7 @@ export const TimersListHeader = () => {
 
   return (
     <View className="flex-row justify-between items-center">
-      <Text>
+      <Text className="text-lg font-semibold font-poppins web:font-poppins">
         List of Events
       </Text>
       <Button
@@ -631,52 +631,40 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
 }
 
 const TimersListWeb: React.FC<TimersListProps> = ({ events }) => {
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return;
+  const listRef = useRef<HTMLDivElement>(null);
 
-    eventConfigStore.send({
-      type: "changeEventOrder",
-      fromIndex: result.source.index,
-      toIndex: result.destination.index,
-    });
-  };
+  useEffect(() => {
+    if (listRef.current) {
+      SortableJS.create(listRef.current, {
+        animation: 150, // Smooth animation
+        handle: ".drag-handle", // Class for the drag handle
+        onEnd: (evt) => {
+          const { oldIndex, newIndex } = evt;
+
+          if (oldIndex !== undefined && newIndex !== undefined) {
+            eventConfigStore.send({
+              type: "changeEventOrder",
+              fromIndex: oldIndex,
+              toIndex: newIndex,
+            });
+          }
+        },
+      });
+    }
+  }, []);
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="droppable">
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            style={{ width: "100%" }}
-          >
-            {events.map((event: Event, index: number) => (
-              <Draggable key={event.id} draggableId={event.id} index={index}>
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps} // Ensures that drag handle is applied
-                    style={{
-                      ...provided.draggableProps.style,
-                      marginBottom: 12, // Space between items
-                    }}
-                  >
-                    <EventItem
-                      event={event}
-                      index={index}
-                      dragHandleProps={provided.dragHandleProps}
-                    />
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}{" "}
-            {/* Ensures the layout is updated during drag */}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <div ref={listRef} style={{ width: "100%" }}>
+      {events.map((event: Event, index: number) => (
+        <div
+          key={event.id}
+          className="drag-handle cursor-move"
+          style={{ marginBottom: 12 }}
+        >
+          <EventItem event={event} index={index} />
+        </div>
+      ))}
+    </div>
   );
 };
 
