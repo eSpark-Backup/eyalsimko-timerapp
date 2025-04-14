@@ -1,5 +1,6 @@
 import { WebSocketServer } from 'ws';
 
+// *TODO Dev Note:-Mock server Ip and port should be same as the one in the connectionStore client
 const wss = new WebSocketServer({
   port: 8080,
   host: '192.168.1.2'

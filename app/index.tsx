@@ -1,5 +1,5 @@
 import * as React from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import Card from "~/components/Card";
 import { useSelector as useMachineSelector } from "@xstate/react";
@@ -30,29 +30,31 @@ export default function TimerScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
       >
         <Header />
-        <View className="flex-1 gap-[24] pt-[20] px-[32] pb-[34]">
-          <View className="flex-1 flex-row gap-[24]">
-            <TimersListCard />
-            <View style={{ width: 395 }}>
-              <Card
-                spacing="small"
-                borderColor={timerIsActive ? "active" : "default"}
-              >
-                <ActiveTimerWidget />
-              </Card>
+        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+          <View className="flex-1 gap-[24] pt-[20] px-[32] pb-[34]">
+            <View className="flex-1 flex-row gap-[24]">
+              <TimersListCard />
+              <View style={{ width: 395 }}>
+                <Card
+                  spacing="small"
+                  borderColor={timerIsActive ? "active" : "default"}
+                >
+                  <ActiveTimerWidget />
+                </Card>
+              </View>
+            </View>
+            <View className={`h-[390] flex-row gap-[24]`}>
+              <View className="flex-1">
+                <MessagesCard />
+              </View>
+              <View className="flex-1">
+                <Card>
+                  <TimerControls />
+                </Card>
+              </View>
             </View>
           </View>
-          <View className="h-[390] flex-row gap-[24]">
-            <View className="flex-1">
-              <MessagesCard />
-            </View>
-            <View className="flex-1">
-              <Card>
-                <TimerControls />
-              </Card>
-            </View>
-          </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
       <ConnectionLostModal />
       <Modals />

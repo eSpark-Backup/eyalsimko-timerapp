@@ -33,7 +33,7 @@ const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 export const Header = () => {
   const [isSettingsDropdownOpen, setIsSettingsDropdownOpen] = useState(false);
   const insets = useSafeAreaInsets();
-  const { isDarkColorScheme, setColorScheme } = useColorScheme();
+  const { isDarkColorScheme, setColorScheme, colorScheme } = useColorScheme();
 
   const contentInsets = {
     top: insets.top,
@@ -55,10 +55,19 @@ export const Header = () => {
   const showModal = useShowModal();
 
   useEffect(() => {
-    const newTheme = 'dark'
-    setColorScheme(newTheme);
-    setAndroidNavigationBar(newTheme);
-    AsyncStorage.setItem('theme', newTheme);
+    (async () => {
+      const newTheme = await AsyncStorage.getItem("theme");
+      if (!newTheme) {
+        AsyncStorage.setItem("theme", colorScheme);
+        setColorScheme(colorScheme);
+        setAndroidNavigationBar(colorScheme);
+        return;
+      }
+      const theme: any = newTheme ?? "dark";
+      setColorScheme(theme);
+      setAndroidNavigationBar(theme);
+      AsyncStorage.setItem("theme", theme);
+    })()
   }, [])
   
   const onThemeChange = () => {
