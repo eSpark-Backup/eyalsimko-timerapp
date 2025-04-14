@@ -8,7 +8,6 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { Text } from "~/components/ui/text";
 import { Button } from "../ui/button";
-import SortableJS from "sortablejs";
 import { Plus } from "~/lib/icons/Plus";
 import { cn, formatCountdown } from "~/lib/utils";
 import { IconButton } from "../iconButton";
@@ -52,6 +51,15 @@ import { connectionActor } from "~/lib/store/connectionStore";
 import { CardScrollPositionContext, CardScrollRefContext } from "../Card";
 import Sortable from "react-native-sortables";
 import { useModal, useShowModal } from "~/lib/context/ModalContext";
+import { Import } from "lucide-react-native";
+import { exportEventsToCSV, importEventsFromCSV } from "~/app/utils/csvUtils";
+import Toast from "react-native-toast-message";
+
+let SortableJS: any;
+if (Platform.OS === "web") {
+  const sortableModule = require("sortablejs");
+  SortableJS = sortableModule.default || sortableModule; // Access the default export
+  }
 
 interface EventItemProps {
   event: Event;
@@ -63,13 +71,46 @@ interface TimersListProps {
   events: Event[];
 }
 
-export const TimersListHeader = () => {
+export const TimersListHeader = (/* { events }: { events: Event[] } */) => {
   const showModal = useShowModal();
+  // console.log("TimersListHeader", events);
+
+  const handleImportCSV = async () => {
+    try {
+      const importedEvents = await importEventsFromCSV();
+      if (importedEvents && importedEvents.length > 0) {
+        importedEvents.forEach((event) => {
+          eventConfigStore.send({
+            type: "addEvent",
+            event,
+          });
+        });
+        Toast.show({ type: "success", text1: "Events imported successfully!" });
+      } else {
+        Toast.show({ type: "info", text1: "No events were imported." });
+      }
+    } catch (error) {
+      console.error("Error importing events:", error);
+      Toast.show({ type: "error", text1: "Failed to import events." });
+    }
+  };
 
   return (
-    <>
-      <View className="flex-row justify-between items-center mb-[10]">
-        <Text className="text-lg font-semibold font-poppins web:font-poppins">List of Events</Text>
+    <View className="flex-row justify-between items-center mb-[10]">
+      <Text className="text-lg font-semibold font-poppins web:font-poppins">
+        List of Events
+      </Text>
+      <View className="flex-row gap-2">
+        {/* <Button
+          size="sm"
+          icon={Import}
+          onPress={() => handleImportCSV()}
+        >
+          <Text className="font-poppins web:font-poppins">Import</Text>
+        </Button>
+        <Button size="sm" icon={Plus} onPress={() => exportEventsToCSV(events)}>
+          <Text className="font-poppins web:font-poppins">Export</Text>
+        </Button> */}
         <Button
           size="sm"
           icon={Plus}
@@ -78,7 +119,7 @@ export const TimersListHeader = () => {
           <Text className="font-poppins web:font-poppins">Add New Timer</Text>
         </Button>
       </View>
-    </>
+    </View>
   );
 };
 
@@ -286,7 +327,9 @@ function TimerForm({
             submit(e);
           }}
         >
-          <Text className="font-normal font-poppins web:font-poppins">{submitLabel}</Text>
+          <Text className="font-normal font-poppins web:font-poppins">
+            {submitLabel}
+          </Text>
         </Button>
       )}
     </>
@@ -330,7 +373,9 @@ function TimerModals({
               <View className="flex-row justify-between">
                 <DialogClose asChild>
                   <Button size="lg" border="none">
-                    <Text className="font-normal font-poppins web:font-poppins">Cancel</Text>
+                    <Text className="font-normal font-poppins web:font-poppins">
+                      Cancel
+                    </Text>
                   </Button>
                 </DialogClose>
                 <Button
@@ -345,7 +390,9 @@ function TimerModals({
                   size="lg"
                   variant="destructive"
                 >
-                  <Text className="font-normal font-poppins web:font-poppins">Delete</Text>
+                  <Text className="font-normal font-poppins web:font-poppins">
+                    Delete
+                  </Text>
                 </Button>
               </View>
             </DialogFooter>
@@ -382,7 +429,9 @@ function TimerModals({
                           border="none"
                           onPress={() => setModal(null)}
                         >
-                          <Text className="font-normal font-poppins web:font-poppins">Cancel</Text>
+                          <Text className="font-normal font-poppins web:font-poppins">
+                            Cancel
+                          </Text>
                         </Button>
                         {submitButton}
                       </View>
@@ -420,7 +469,9 @@ function TimerModals({
                         border="none"
                         onPress={() => setModal(null)}
                       >
-                        <Text className="font-normal font-poppins web:font-poppins">Cancel</Text>
+                        <Text className="font-normal font-poppins web:font-poppins">
+                          Cancel
+                        </Text>
                       </Button>
                       {submitButton}
                     </View>
@@ -474,7 +525,7 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
   const timerIsStarted = useMachineSelector(actorRef, (state) => {
     return state.context.timer?.elapsed !== null;
   });
-  
+
   const isPaused = useMachineSelector(actorRef, (state) =>
     state.matches({ ACTIVE: "paused" })
   );
@@ -543,7 +594,9 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
           </View>
           <View className="gap-[4]">
             <View className="flex-row gap-[12]">
-              <Text className="font-normal font-poppins web:font-poppins">{event.name}</Text>
+              <Text className="font-normal font-poppins web:font-poppins">
+                {event.name}
+              </Text>
               <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>
                 {event.speakerName}
               </Text>
@@ -606,7 +659,9 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
                   onPress={() => showModal({ type: "editEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal font-poppins web:font-poppins">Edit</Text>
+                    <Text className="text-sm font-normal font-poppins web:font-poppins">
+                      Edit
+                    </Text>
                     <Edit size={16} />
                   </View>
                 </DropdownMenuItem>
@@ -617,7 +672,9 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
                   onPress={() => showModal({ type: "deleteEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal font-poppins web:font-poppins">Delete</Text>
+                    <Text className="text-sm font-normal font-poppins web:font-poppins">
+                      Delete
+                    </Text>
                     <Trash size={16} />
                   </View>
                 </DropdownMenuItem>
@@ -634,11 +691,11 @@ const TimersListWeb: React.FC<TimersListProps> = ({ events }) => {
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (listRef.current) {
-      SortableJS.create(listRef.current, {
+    if (Platform.OS === "web" && listRef.current && SortableJS) {
+      const sortable = SortableJS.create(listRef.current, {
         animation: 150, // Smooth animation
         handle: ".drag-handle", // Class for the drag handle
-        onEnd: (evt) => {
+        onEnd: (evt: any) => {
           const { oldIndex, newIndex } = evt;
 
           if (oldIndex !== undefined && newIndex !== undefined) {
@@ -650,6 +707,10 @@ const TimersListWeb: React.FC<TimersListProps> = ({ events }) => {
           }
         },
       });
+
+      return () => {
+        sortable.destroy(); // Cleanup on unmount
+      };
     }
   }, []);
 
@@ -689,12 +750,7 @@ const TimersListNative: React.FC<TimersListProps> = ({ events }) => {
       overDrag="vertical"
       customHandle
       renderItem={({ item: event, index }) => (
-        <View key={event.id}>
-          <Sortable.Handle>
-            <View style={{ margin: 10, padding: 10 }}>
-              {/* <Move color="hsla(213, 5%, 57%, 1)" size={16} /> */}
-            </View>
-          </Sortable.Handle>
+        <View style={{ margin: 5}} key={event.id}>
           <EventItem event={event} index={index} />
         </View>
       )}

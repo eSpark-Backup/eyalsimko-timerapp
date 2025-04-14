@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Platform } from "react-native";
-import SortableJS from "sortablejs";
 import { useSelector as useMachineSelector } from "@xstate/react";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -17,7 +16,12 @@ import { TimerContext } from "~/lib/store/timer";
 import { connectionActor } from "~/lib/store/connectionStore";
 import { CardScrollRefContext } from "../Card";
 import Sortable from "react-native-sortables";
-
+let SortableJS: any;
+if (Platform.OS === "web") {
+  const sortableModule = require("sortablejs");
+  SortableJS = sortableModule.default || sortableModule; // Access the default export
+  }
+  
 export const MessageWidgetHeader = () => {
   const [isFlashing, setIsFlashing] = useState(false);
   return (
@@ -149,24 +153,28 @@ export const MessageWidget = () => {
   }
 
   useEffect(() => {
-    if (listRef.current) {
-      SortableJS.create(listRef.current, {
-        animation: 150, // Smooth animation
-        handle: ".drag-handle", // Class for the drag handle
-        onEnd: (evt) => {
-          const { oldIndex, newIndex } = evt;
-
-          if (oldIndex !== undefined && newIndex !== undefined) {
-            eventConfigStore.send({
-              type: "changeMessageOrder",
-              fromIndex: oldIndex,
-              toIndex: newIndex,
-            });
-          }
-        },
-      });
-    }
-  }, []);
+      if (Platform.OS === "web" && listRef.current && SortableJS) {
+        const sortable = SortableJS.create(listRef.current, {
+          animation: 150, // Smooth animation
+          handle: ".drag-handle", // Class for the drag handle
+          onEnd: (evt: any) => {
+            const { oldIndex, newIndex } = evt;
+  
+            if (oldIndex !== undefined && newIndex !== undefined) {
+              eventConfigStore.send({
+                type: "changeEventOrder",
+                fromIndex: oldIndex,
+                toIndex: newIndex,
+              });
+            }
+          },
+        });
+  
+        return () => {
+          sortable.destroy(); // Cleanup on unmount
+        };
+      }
+    }, []);
 
   return (
     <View>
