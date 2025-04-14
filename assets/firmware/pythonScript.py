@@ -172,7 +172,7 @@ BLINK_SPEED = 0.5 #the red flashers on the side blink speed. this amount is dela
 #=====
 #Global font sizes
 #=====
-FONT_SIZE = 900
+FONT_SIZE = 300
 FONT_SIZE_1LINES = 430
 FONT_SIZE_VERSION = 30
 current_font_size = FONT_SIZE
@@ -201,7 +201,7 @@ def change_font_size(label, new_size):
 
 
 # WebSocket handler
-async def handle_websocket(websocket, path):
+async def handle_websocket(websocket):
     global lblTimer, time_left, timer_running, blink_start_time, blink_length,is_blinking, showTimer,strCurrentTime, isLogoShowing, current_timer, current_msg, isBlackoutMode, isMessageMode
     print("WebSocket connection established")
     #Todo if timer is running when this happens send the time back

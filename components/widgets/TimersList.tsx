@@ -8,6 +8,7 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { Text } from "~/components/ui/text";
 import { Button } from "../ui/button";
+import SortableJS from "sortablejs";
 import { Plus } from "~/lib/icons/Plus";
 import { cn, formatCountdown } from "~/lib/utils";
 import { IconButton } from "../iconButton";
@@ -16,7 +17,6 @@ import { Pause } from "~/lib/icons/Pause";
 import { Play } from "~/lib/icons/Play";
 import { Restart } from "~/lib/icons/Restart";
 import { More } from "~/lib/icons/More";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { useSelector as useMachineSelector } from "@xstate/react";
 import {
   DropdownMenu,
@@ -69,13 +69,13 @@ export const TimersListHeader = () => {
   return (
     <>
       <View className="flex-row justify-between items-center mb-[10]">
-        <Text className="text-lg font-semibold">List of Events</Text>
+        <Text className="text-lg font-semibold font-poppins web:font-poppins">List of Events</Text>
         <Button
           size="sm"
           icon={Plus}
           onPress={() => showModal({ type: "addEvent" })}
         >
-          <Text>Add New Timer</Text>
+          <Text className="font-poppins web:font-poppins">Add New Timer</Text>
         </Button>
       </View>
     </>
@@ -286,7 +286,7 @@ function TimerForm({
             submit(e);
           }}
         >
-          <Text>{submitLabel}</Text>
+          <Text className="font-normal font-poppins web:font-poppins">{submitLabel}</Text>
         </Button>
       )}
     </>
@@ -314,13 +314,13 @@ function TimerModals({
         <DialogContent className="w-[400]">
           <View className="gap-[40]">
             <DialogHeader>
-              <View className="justify-center items-center gap-[20]">
+              <View className="justify-center items-center gap-[20] font-poppins web:font-poppins">
                 <TrashDanger className="text-transparent" size={60} />
                 <View className="items-center gap-[12]">
-                  <Text className="text-2xl text-primary font-semibold">
+                  <Text className="text-2xl text-primary font-semibold font-poppins web:font-poppins">
                     Delete Timer?
                   </Text>
-                  <Text className="text-lg text-primary/60">
+                  <Text className="text-lg text-primary/60 font-poppins web:font-poppins">
                     Are you sure you want to delete this timer?
                   </Text>
                 </View>
@@ -330,7 +330,7 @@ function TimerModals({
               <View className="flex-row justify-between">
                 <DialogClose asChild>
                   <Button size="lg" border="none">
-                    <Text>Cancel</Text>
+                    <Text className="font-normal font-poppins web:font-poppins">Cancel</Text>
                   </Button>
                 </DialogClose>
                 <Button
@@ -345,7 +345,7 @@ function TimerModals({
                   size="lg"
                   variant="destructive"
                 >
-                  <Text>Delete</Text>
+                  <Text className="font-normal font-poppins web:font-poppins">Delete</Text>
                 </Button>
               </View>
             </DialogFooter>
@@ -356,7 +356,7 @@ function TimerModals({
         <DialogContent className="w-[464]">
           <View className="gap-[40]">
             <DialogHeader>
-              <Text className="text-xl text-center font-semibold">
+              <Text className="text-xl text-center font-semibold font-poppins web:font-poppins">
                 Edit Timer
               </Text>
             </DialogHeader>
@@ -382,7 +382,7 @@ function TimerModals({
                           border="none"
                           onPress={() => setModal(null)}
                         >
-                          <Text>Cancel</Text>
+                          <Text className="font-normal font-poppins web:font-poppins">Cancel</Text>
                         </Button>
                         {submitButton}
                       </View>
@@ -398,7 +398,7 @@ function TimerModals({
         <DialogContent className="w-[464]">
           <View className="gap-[40]">
             <DialogHeader>
-              <Text className="text-xl text-center font-semibold">
+              <Text className="text-xl text-center font-semibold font-poppins web:font-poppins">
                 Add New Timer
               </Text>
             </DialogHeader>
@@ -420,7 +420,7 @@ function TimerModals({
                         border="none"
                         onPress={() => setModal(null)}
                       >
-                        <Text>Cancel</Text>
+                        <Text className="font-normal font-poppins web:font-poppins">Cancel</Text>
                       </Button>
                       {submitButton}
                     </View>
@@ -526,15 +526,15 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
         <View className="flex-row items-center gap-[16]">
           <Text
             style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
-            className="text-md w-[20]"
+            className="text-md w-[20] font-poppins web:font-poppins"
           >
             {index + 1}
           </Text>
-          <Text className="color-primary text-md w-[100] font-cousine">
+          <Text className="color-primary text-md w-[100] font-poppins web:font-poppins">
             {event.startedAt ? dateFormatter.format(event.startedAt) : ""}
           </Text>
           <View className="w-[64]">
-            <Text className="color-primary font-cousine">
+            <Text className="color-primary font-poppins web:font-poppins">
               {formatCountdown({
                 countdownTime: event.countdownTime,
                 elapsedTime: event.countdownTime,
@@ -543,7 +543,7 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
           </View>
           <View className="gap-[4]">
             <View className="flex-row gap-[12]">
-              <Text>{event.name}</Text>
+              <Text className="font-normal font-poppins web:font-poppins">{event.name}</Text>
               <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>
                 {event.speakerName}
               </Text>
@@ -606,7 +606,7 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
                   onPress={() => showModal({ type: "editEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal">Edit</Text>
+                    <Text className="text-sm font-normal font-poppins web:font-poppins">Edit</Text>
                     <Edit size={16} />
                   </View>
                 </DropdownMenuItem>
@@ -617,7 +617,7 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
                   onPress={() => showModal({ type: "deleteEvent", event })}
                 >
                   <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal">Delete</Text>
+                    <Text className="text-sm font-normal font-poppins web:font-poppins">Delete</Text>
                     <Trash size={16} />
                   </View>
                 </DropdownMenuItem>
@@ -631,52 +631,40 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
 }
 
 const TimersListWeb: React.FC<TimersListProps> = ({ events }) => {
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return;
+  const listRef = useRef<HTMLDivElement>(null);
 
-    eventConfigStore.send({
-      type: "changeEventOrder",
-      fromIndex: result.source.index,
-      toIndex: result.destination.index,
-    });
-  };
+  useEffect(() => {
+    if (listRef.current) {
+      SortableJS.create(listRef.current, {
+        animation: 150, // Smooth animation
+        handle: ".drag-handle", // Class for the drag handle
+        onEnd: (evt) => {
+          const { oldIndex, newIndex } = evt;
+
+          if (oldIndex !== undefined && newIndex !== undefined) {
+            eventConfigStore.send({
+              type: "changeEventOrder",
+              fromIndex: oldIndex,
+              toIndex: newIndex,
+            });
+          }
+        },
+      });
+    }
+  }, []);
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="droppable">
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            style={{ width: "100%" }}
-          >
-            {events.map((event: Event, index: number) => (
-              <Draggable key={event.id} draggableId={event.id} index={index}>
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps} // Ensures that drag handle is applied
-                    style={{
-                      ...provided.draggableProps.style,
-                      marginBottom: 12, // Space between items
-                    }}
-                  >
-                    <EventItem
-                      event={event}
-                      index={index}
-                      dragHandleProps={provided.dragHandleProps}
-                    />
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}{" "}
-            {/* Ensures the layout is updated during drag */}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <div ref={listRef} style={{ width: "100%" }}>
+      {events.map((event: Event, index: number) => (
+        <div
+          key={event.id}
+          className="drag-handle cursor-move"
+          style={{ marginBottom: 12 }}
+        >
+          <EventItem event={event} index={index} />
+        </div>
+      ))}
+    </div>
   );
 };
 

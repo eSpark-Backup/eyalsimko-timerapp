@@ -168,13 +168,13 @@ const Input = React.forwardRef<TextInputRef, FloatingLabelInputProps>(
           {label}
         </Animated.Text>
         {Icon && (
-          <View className={iconVariants({ size })}>
-            <Icon size={20} />
-          </View>
-        )}
+            <View className="absolute right-3 top-0 bottom-0 flex-row items-center justify-center">
+              <Icon size={20} className="text-muted" />
+            </View>
+          )}
         {hint && isFilledOrFocused && (
           <View className="absolute flex-row bottom-[12] left-[17]">
-            <Text className={cn("text-md text-muted-foreground", hitClassName)}>
+            <Text className={cn("font-normal font-poppins web:font-poppin text-md text-muted-foreground", hitClassName)}>
               {hint}
             </Text>
           </View>

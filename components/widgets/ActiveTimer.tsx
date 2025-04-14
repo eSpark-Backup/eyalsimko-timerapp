@@ -7,6 +7,7 @@ import { TimerContext } from "~/lib/store/timer";
 import { useSelector } from "@xstate/store/react";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { cn, formatCountdown } from "~/lib/utils";
+
 import {
   Canvas,
   Mask,
@@ -32,16 +33,25 @@ const GradientProgressBar = ({
     return (
       <div
         style={{
-          width,
-          height,
-          background: `linear-gradient(90deg, hsla(349, 86%, 61%, 1) ${progress * 100}%, hsla(213, 100%, 61%, 1) 0%)`,
+          width: width,
+          height: height,
           borderRadius: radius,
-          opacity: 0.4,
+          position: 'relative',
+          overflow: 'hidden',
+          background: 'linear-gradient(90deg, hsla(349, 86%, 61%, 0.4) 0%, hsla(213, 100%, 61%, 0.4) 35.8%, hsla(213, 100%, 61%, 0.4) 100%)'
         }}
-      />
+      >
+        <div
+          style={{
+            width: `${progress * 100}%`,
+            height: '100%',
+            background: 'linear-gradient(90deg, hsla(349, 86%, 61%, 1) 0%, hsla(213, 100%, 61%, 1) 35.8%, hsla(213, 100%, 61%, 1) 100%)',
+            transition: 'width 0.3s ease-out'
+          }}
+        />
+      </div>
     );
   }
-
   // Mobile version with Skia
   return (
     <Canvas style={{ flex: 1 }}>
@@ -213,8 +223,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF", // Normal color (white)
   },
   eventDescription: {
-    position: "absolute",
-    bottom: 40,
+    alignItems: "center",
   },
   eventDescriptionText: {
     fontSize: 16,

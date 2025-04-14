@@ -9,8 +9,8 @@ module.exports = {
     extend: {
       fontFamily: {
         poppins: ["Poppins"],
-        cousine: ["Cousine"],
-      },
+        cousine: ['Cousine', 'monospace'],
+            },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -43,8 +43,9 @@ module.exports = {
           foreground: 'hsl(var(--popover-foreground))',
         },
         card: {
-          DEFAULT: 'hsl(var(--card))',
+          DEFAULT: 'hsla(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
+          background: 'hsla(var(--card-background))',
         },
         brand: 'hsl(var(--brand))',
         cardBorder: 'hsl(var(--card-border-color))',

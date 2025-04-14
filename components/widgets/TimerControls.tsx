@@ -83,7 +83,7 @@ export default function TimerControls() {
     <View className="flex-col gap-[16]">
       <View className="flex-row justify-between items-center">
         <Button size="sm">
-          <Text>-1m</Text>
+          <Text className="font-poppins web:font-poppins">-1m</Text>
         </Button>
         <View className="flex-row gap-[24] items-center">
           <IconButton
@@ -139,14 +139,14 @@ export default function TimerControls() {
           />
         </View>
         <Button size="sm">
-          <Text>+1m</Text>
+          <Text className="font-poppins web:font-poppins">+1m</Text>
         </Button>
       </View>
       <View className="flex-row justify-between">
         {/* TODO: revisit all text and set 20pt line height*/}
-        <Text className="text-md font-normal">Countdown Timer</Text>
+        <Text className="text-md font-normal font-poppins web:font-poppins">Countdown Timer</Text>
         {timer && (
-          <Text className="text-md font-normal font-cousine">
+          <Text className="text-md font-normal font-poppins web:font-poppins">
             {formatCountdown({
               countdownTime: timer.countdownTime,
               elapsedTime: timer.countdownTime,
@@ -155,37 +155,38 @@ export default function TimerControls() {
         )}
       </View>
       <View className="flex-row justify-between items-center">
-        <Text className="font-normal ">Flash Timer</Text>
+        <Text className="font-normal font-poppins web:font-poppins">Flash Timer</Text>
         {event && (
-          <Text className="font-normal font-cousine">
+          <Text className="font-normal font-poppins web:font-poppins">
             {formatDuration(event.blinkingStartTime, true)}
           </Text>
         )}
       </View>
       <View className="flex-row justify-between items-center">
-        <Text className="font-normal ">Flash Length</Text>
+        <Text className="font-normal font-poppins web:font-poppins">Flash Length</Text>
         {event && (
-          <Text className="font-normal font-cousine">
+          <Text className="font-normal font-poppins web:font-poppins">
             {formatDuration(event.blinkLength, true)}
           </Text>
         )}
       </View>
       <View className="flex-row justify-between items-center">
-        <Text className="font-normal ">Glow Effect</Text>
+        <Text className="font-normal font-poppins web:font-poppins">Glow Effect</Text>
         <Switch
           checked={glowActive}
           onCheckedChange={() => setGlowActive(!glowActive)}
         />
       </View>
       <View className="flex-row justify-between items-center">
-        <Text className="font-normal ">Blackout Screen</Text>
+        <Text className="font-normal font-poppins web:font-poppins">Blackout Screen</Text>
         <Switch
           checked={blackoutActive}
           onCheckedChange={() => actorRef.send({ type: "toggleBlackout" })}
         />
       </View>
+      <View>
       <View className="flex-row justify-between items-center">
-        <Text className="font-normal ">Elapsed Time</Text>
+        <Text className="font-normal font-poppins web:font-poppins">Elapsed Time</Text>
         <View className="flex-row gap-[8] items-center">
           {event?.startedAt && (
             <IconButton
@@ -203,24 +204,26 @@ export default function TimerControls() {
             />
           )}
           <View className="border-highlight border py-[8] px-[12] rounded-[8]">
-            <Text className="font-normal font-cousine">
+            <Text className="font-normal font-poppins web:font-poppins">
               <ElapsedTime />
             </Text>
           </View>
         </View>
-      </View>
-      {event && (
+
+        </View>
+        {event && (
         <View
           style={{ backgroundColor: "hsla(210, 32%, 13%, 1)" }}
-          className="flex-row gap-[16] rounded-[12] py-[12] px-[16]"
+          className="flex-row gap-[16] rounded-[12] py-[12] px-[16] items-start"
         >
-          <Text>{eventIndex + 1}</Text>
+          <Text className="font-normal font-poppins web:font-poppins">{eventIndex + 1}</Text>
           <View>
-            <Text>{event.name}</Text>
-            <Text>{event.speakerName}</Text>
+            <Text className="font-normal font-poppins web:font-poppins">{event.name}</Text>
+            <Text className="font-normal font-poppins web:font-poppins">{event.speakerName}</Text>
           </View>
         </View>
       )}
+      </View>
     </View>
   );
 }

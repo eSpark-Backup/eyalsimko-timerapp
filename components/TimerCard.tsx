@@ -96,7 +96,7 @@ function Countdown() {
     timer.elapsed === null ? timer.countdownTime : Math.abs(timer.elapsed);
 
   const blinkPeriod = (
-    <Text className="text-2xl">
+    <Text className="text-2xl font-poppins web:font-poppin">
       Blink from {formatDuration(blinkTimePeriod.start)} till{" "}
       {formatDuration(blinkTimePeriod.end)}
     </Text>
@@ -107,12 +107,12 @@ function Countdown() {
   return (
     <View className="flex flex-col md:flex-row md:landscape:flex-col gap-2 md:gap-4 items-baseline">
       <View className="flex flex-row gap-1 items-baseline">
-        <Text className="text-2xl">
+        <Text className="text-2xl font-poppins web:font-poppin">
           Timer {timer.eventId + 1}: {timer.eventId}:
         </Text>
         <View className="flex flex-row gap-0.5"></View>
         <BlinkingLine isBlinking={isBlinking} />
-        <Text className={cn("text-3xl md:text-5xl", timerColor)}>
+        <Text className={cn("text-3xl md:text-5xl font-poppins web:font-poppin", timerColor)}>
           {formatDuration(displayTime)}
         </Text>
         <BlinkingLine isBlinking={isBlinking} />
@@ -157,7 +157,7 @@ function CountdownControls() {
           onPress={() => actorRef.send({ type: "pause" })}
         >
           <Pause className="color-primary" />
-          <Text className="text-primary text-lg">Pause</Text>
+          <Text className="text-primary text-lg font-poppins web:font-poppin">Pause</Text>
         </Button>
       )}
       {isPaused && (
@@ -169,7 +169,7 @@ function CountdownControls() {
           onPress={() => actorRef.send({ type: "resume" })}
         >
           <Play className="color-primary" />
-          <Text className="text-primary text-lg">Resume</Text>
+          <Text className="text-primary text-lg font-poppins web:font-poppin">Resume</Text>
         </Button>
       )}
       {isStopped && (
@@ -180,7 +180,7 @@ function CountdownControls() {
           onPress={() => actorRef.send({ type: "start" })}
         >
           <Play className="color-primary" />
-          <Text className="text-primary text-lg">Start</Text>
+          <Text className="text-primary text-lg font-poppins web:font-poppin">Start</Text>
         </Button>
       )}
       {isActive && (
@@ -192,7 +192,7 @@ function CountdownControls() {
           onPress={() => actorRef.send({ type: "stop" })}
         >
           <Square className="text-primary fill-primary" />
-          <Text className="text-primary text-lg">Stop</Text>
+          <Text className="text-primary text-lg font-poppins web:font-poppin">Stop</Text>
         </Button>
       )}
     </View>
@@ -274,7 +274,7 @@ export const TimerCard = ({
             }}
           >
             <RotateCcw className="color-primary-foreground" />
-            <Text className="text-primary-foreground text-lg">Reset</Text>
+            <Text className="text-primary-foreground text-lg font-poppins web:font-poppin">Reset</Text>
           </Button>
           <View className="flex flex-col md:flex-row gap-4 md:gap-8">
             <View className="flex-1">
@@ -310,7 +310,7 @@ export const TimerCard = ({
               onPress={toggleMessage}
               disabled={!canToggleMessage}
             >
-              <Text className="text-primary-foreground text-lg">
+              <Text className="text-primary-foreground text-lg font-poppins web:font-poppin">
                 {messageIsVisible ? "Hide" : "Show"} Message
               </Text>
             </Button>

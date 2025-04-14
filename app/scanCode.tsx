@@ -77,11 +77,11 @@ export default function ScanCodeScreen() {
   if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <Text style={styles.message}>
+        <Text className="font-normal font-poppins web:font-poppin" style={styles.message}>
           We need your permission to show the camera
         </Text>
         <Button onPress={requestPermission}>
-          <Text>grant permission</Text>
+          <Text className="font-normal font-poppins web:font-poppin">grant permission</Text>
         </Button>
       </View>
     );
@@ -172,7 +172,7 @@ export default function ScanCodeScreen() {
               size="lg"
               onPress={() => navigation.goBack()}
             >
-              <Text>Cancel</Text>
+              <Text className="font-normal font-poppins web:font-poppin">Cancel</Text>
             </Button>
           </View>
         </SafeAreaView>

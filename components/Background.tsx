@@ -11,6 +11,14 @@ import {
 
 // Colors for dark theme
 const colors = {
+  light: {
+    background: "hsla(210, 100%, 5%, 1)",
+    ellipsis1: "hsla(213, 98%, 45%, 0.19)",
+    ellipsis2: "hsla(245, 100%, 31%, 1)",
+    ellipsis3: "hsla(259, 83%, 27%, 1)",
+    ellipsis4: "hsla(147, 100%, 35%, 0.38)",
+    gradient: ["hsla(224, 83%, 49%, 1)", "hsla(224, 83%, 27%, 0)"],
+  },
   dark: {
     background: "hsla(210, 100%, 5%, 1)",
     ellipsis1: "hsla(213, 98%, 45%, 0.19)",
