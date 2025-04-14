@@ -78,7 +78,7 @@ export const Header = () => {
   }
 
   return (
-    <View className="h-[60] px-[32] pt-[20]">
+    <View className="h-[60] px-[32] pt-[20] bg-screenBackground">
       <View className="flex-1 flex-row justify-between items-center">
         <CompanyLogo size={124} strokeWidth={0} />
         <View className="flex-row gap-[24] items-center">

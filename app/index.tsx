@@ -31,7 +31,7 @@ export default function TimerScreen() {
       >
         <Header />
         <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
-          <View className="flex-1 gap-[24] pt-[20] px-[32] pb-[34]">
+          <View className="flex-1 gap-[24] pt-[20] px-[32] pb-[34] bg-screenBackground">
             <View className="flex-1 flex-row gap-[24]">
               <TimersListCard />
               <View style={{ width: 395 }}>

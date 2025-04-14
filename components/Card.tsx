@@ -85,7 +85,7 @@ export default function Card({
   if (scrollable) {
     return (
       <View
-        style={{ backgroundColor: "hsla(210, 100%, 5%, 1)" }}
+        // style={{ backgroundColor: "hsla(210, 100%, 5%, 1)" }}
         className={cn(cardVariants({ borderColor }))}
       >
         <View className={scrollableCardHeaderVariants({ spacing })}>
@@ -121,7 +121,7 @@ export default function Card({
   }
   return (
     <View
-      style={{ backgroundColor: "hsla(210, 100%, 5%, 1)" }}
+      // style={{ backgroundColor: "hsla(210, 100%, 5%, 1)" }}
       className={cn(
         nonScrollableCardVariants({ spacing }),
         cardVariants({ borderColor })

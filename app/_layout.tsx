@@ -178,7 +178,7 @@ export default function RootLayout() {
       >
         <Stack
           screenOptions={{
-            contentStyle: { backgroundColor: '#000e1b' },
+            contentStyle: { backgroundColor: 'transparent' },
           }}
         >
           <Stack.Screen
