@@ -3,6 +3,7 @@ import Toast from "react-native-toast-message";
 import { Event } from "~/lib/store/eventConfig";
 import { formatCountdown } from "~/lib/utils";
 import Papa from "papaparse"; // For parsing CSV files
+import Share from 'react-native-share';
 
 let RNFS: any;
 let saveAs: any;
@@ -73,6 +74,13 @@ export const exportEventsToCSV = async (events: Event[]) => {
 
     try {
       await RNFS.writeFile(downloadPath, csvContent.trim(), "utf8");
+      if(Platform.OS == "ios") {
+        await Share.open({
+          url: `file://${downloadPath}`,
+          type: 'text/csv',
+          filename: fileName,
+        });
+      }
       Toast.show({ type: "success", text1: `CSV saved to: ${downloadPath}` });
     } catch (error) {
       console.error("Error saving CSV file:", error);

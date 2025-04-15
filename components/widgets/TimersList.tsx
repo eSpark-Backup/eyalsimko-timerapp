@@ -3,6 +3,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   UIManager,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
@@ -96,7 +97,7 @@ export const TimersListHeader = ({ events }: { events: Event[] }) => {
   };
 
   return (
-    <View className="flex-row justify-between items-center mb-[10]">
+    <View className="flex-row justify-between items-center mb-[10] flex-wrap gap-5">
       <Text className="text-lg font-semibold font-poppins web:font-poppins">
         List of Events
       </Text>
@@ -546,6 +547,9 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
     state.matches("CONNECTED")
   );
 
+  const { width } = useWindowDimensions();
+  const isSmallScreen = width < 900;
+
   return (
     <View
       key={event.id}
@@ -567,122 +571,240 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
         <Sortable.Handle>
           <View
             className="h-full justify-center"
-            style={{ margin: -20, padding: 20 }}
+            style={[{ margin: -20, padding: 20 }, 
+            isSmallScreen && { position: "absolute", bottom: 10, right: -8},
+            ]}
           >
             <Move color="hsla(213, 5%, 57%, 1)" size={16} />
           </View>
         </Sortable.Handle>
       )}
-      <View className="flex-1 flex-row items-center justify-between">
-        <View className="flex-row items-center gap-[16]">
-          <Text
-            style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
-            className="text-md w-[20] font-poppins web:font-poppins"
-          >
-            {index + 1}
-          </Text>
-          <Text className="color-primary text-md w-[100] font-poppins web:font-poppins">
-            {event.startedAt ? dateFormatter.format(event.startedAt) : ""}
-          </Text>
-          <View className="w-[64]">
-            <Text className="color-primary font-poppins web:font-poppins">
-              {formatCountdown({
-                countdownTime: event.countdownTime,
-                elapsedTime: event.countdownTime,
-              })}
-            </Text>
-          </View>
-          <View className="gap-[4]">
-            <View className="flex-row gap-[12]">
-              <Text className="font-normal font-poppins web:font-poppins">
-                {event.name}
+      {!isSmallScreen ? (
+        <>
+          <View className="flex-1 flex-row items-center justify-between">
+            <View className="flex-row items-center gap-[16]">
+              <Text
+                style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
+                className="text-md w-[20] font-poppins"
+              >
+                {index + 1}
               </Text>
-              <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>
+              <Text className="color-primary text-md w-[100] font-poppins">
+                {event.startedAt ? dateFormatter.format(event.startedAt) : ""}
+              </Text>
+              <View className="w-[64]">
+                <Text className="color-primary font-poppins">
+                  {formatCountdown({
+                    countdownTime: event.countdownTime,
+                    elapsedTime: event.countdownTime,
+                  })}
+                </Text>
+              </View>
+              <View className="gap-[4]">
+                <View className="flex-row gap-[12]">
+                  <Text className="font-normal font-poppins">{event.name}</Text>
+                  <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>
+                    {event.speakerName}
+                  </Text>
+                </View>
+                {event.description && (
+                  <Text
+                    style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
+                    className="text-sm"
+                  >
+                    {event.description}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            <View className="flex-row gap-[16] self-end">
+              {event.id === runningTimerId && isRunning ? (
+                <IconButton
+                  disabled={!isConnected}
+                  size="sm"
+                  variant="success"
+                  icon={Pause}
+                  onPress={() => actorRef.send({ type: "pause" })}
+                />
+              ) : (
+                <IconButton
+                  disabled={!isConnected}
+                  size="sm"
+                  variant="primary"
+                  icon={Play}
+                  onPress={() => {
+                    if (event.id !== runningTimerId) {
+                      actorRef.send(setupEvent);
+                      actorRef.send({ type: "start" });
+                    } else if (isPaused && event.id === runningTimerId) {
+                      actorRef.send({ type: "resume" });
+                    }
+                  }}
+                />
+              )}
+
+              <IconButton
+                disabled={!isConnected}
+                size="sm"
+                icon={Restart}
+                onPress={() => actorRef.send(setupEvent)}
+              />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <IconButton size="sm" icon={More} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  avoidCollisions={true}
+                  align="end"
+                  alignOffset={-32 - 6}
+                  sideOffset={-32 - 12}
+                  insets={contentInsets}
+                  className="w-[148]"
+                >
+                  <DropdownMenuGroup className="gap-[8]">
+                    <DropdownMenuItem
+                      onPress={() => showModal({ type: "editEvent", event })}
+                    >
+                      <View className="flex-1 flex-row justify-between items-center">
+                        <Text className="text-sm font-normal font-poppins">
+                          Edit
+                        </Text>
+                        <Edit size={16} />
+                      </View>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={event.id === runningTimerId ? isRunning : false}
+                      onPress={() => showModal({ type: "deleteEvent", event })}
+                    >
+                      <View className="flex-1 flex-row justify-between items-center">
+                        <Text className="text-sm font-normal font-poppins">
+                          Delete
+                        </Text>
+                        <Trash size={16} />
+                      </View>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </View>
+          </View>
+        </>
+      ) : (
+        <>
+          <View className="flex-1">
+            <View className="flex-row flex-wrap items-center justify-between gap-x-[12]">
+              <Text
+                style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
+                className="font-poppins text-md"
+              >
+                {index + 1}
+              </Text>
+
+              <Text className="text-md color-primary font-poppins">
+                {event.startedAt ? dateFormatter.format(event.startedAt) : ""}
+              </Text>
+
+              <Text className="color-primary font-poppins">
+                {formatCountdown({
+                  countdownTime: event.countdownTime,
+                  elapsedTime: event.countdownTime,
+                })}
+              </Text>
+
+              <Text className="font-poppins font-medium">{event.name}</Text>
+              {event.description && (
+                <Text
+                  numberOfLines={1}
+                  className="mt-[4] font-poppins text-sm text-white/50"
+                >
+                  {event.description}
+                </Text>
+              )}
+
+              <Text
+                style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
+                className="font-poppins"
+              >
                 {event.speakerName}
               </Text>
             </View>
-            {event.description && (
-              <Text
-                style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
-                className="text-sm"
-              >
-                {event.description}
-              </Text>
-            )}
+
+            <View className="flex-row gap-[12] self-end mt-[8]">
+              {event.id === runningTimerId && isRunning ? (
+                <IconButton
+                  disabled={!isConnected}
+                  size="sm"
+                  variant="success"
+                  icon={Pause}
+                  onPress={() => actorRef.send({ type: "pause" })}
+                />
+              ) : (
+                <IconButton
+                  disabled={!isConnected}
+                  size="sm"
+                  variant="primary"
+                  icon={Play}
+                  onPress={() => {
+                    if (event.id !== runningTimerId) {
+                      actorRef.send(setupEvent);
+                      actorRef.send({ type: "start" });
+                    } else if (isPaused && event.id === runningTimerId) {
+                      actorRef.send({ type: "resume" });
+                    }
+                  }}
+                />
+              )}
+
+              <IconButton
+                disabled={!isConnected}
+                size="sm"
+                icon={Restart}
+                onPress={() => actorRef.send(setupEvent)}
+              />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <IconButton size="sm" icon={More} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  avoidCollisions
+                  align="end"
+                  alignOffset={-32 - 6}
+                  sideOffset={-32 - 12}
+                  insets={contentInsets}
+                  className="w-[148]"
+                >
+                  <DropdownMenuGroup className="gap-[8]">
+                    <DropdownMenuItem
+                      onPress={() => showModal({ type: "editEvent", event })}
+                    >
+                      <View className="flex-row justify-between items-center w-full">
+                        <Text className="text-sm font-normal font-poppins">
+                          Edit
+                        </Text>
+                        <Edit size={16} />
+                      </View>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={event.id === runningTimerId ? isRunning : false}
+                      onPress={() => showModal({ type: "deleteEvent", event })}
+                    >
+                      <View className="flex-row justify-between items-center w-full">
+                        <Text className="text-sm font-normal font-poppins">
+                          Delete
+                        </Text>
+                        <Trash size={16} />
+                      </View>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </View>
           </View>
-        </View>
-        <View className="flex-row gap-[16] self-end">
-          {event.id === runningTimerId && isRunning ? (
-            <IconButton
-              disabled={!isConnected}
-              size="sm"
-              variant="success"
-              icon={Pause}
-              onPress={() => actorRef.send({ type: "pause" })}
-            />
-          ) : (
-            <IconButton
-              disabled={!isConnected}
-              size="sm"
-              variant="primary"
-              icon={Play}
-              onPress={() => {
-                if (event.id !== runningTimerId) {
-                  actorRef.send(setupEvent);
-                  actorRef.send({ type: "start" });
-                } else if (isPaused && event.id === runningTimerId) {
-                  actorRef.send({ type: "resume" });
-                }
-              }}
-            />
-          )}
-          <IconButton
-            disabled={!isConnected}
-            size="sm"
-            icon={Restart}
-            onPress={() => actorRef.send(setupEvent)}
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <IconButton size="sm" icon={More} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              avoidCollisions={true}
-              align="end"
-              alignOffset={-32 - 6}
-              sideOffset={-32 - 12}
-              insets={contentInsets}
-              className="w-[148]"
-            >
-              <DropdownMenuGroup className="gap-[8]">
-                <DropdownMenuItem
-                  onPress={() => showModal({ type: "editEvent", event })}
-                >
-                  <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal font-poppins web:font-poppins">
-                      Edit
-                    </Text>
-                    <Edit size={16} />
-                  </View>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  disabled={
-                    event.id === runningTimerId ? timerIsStarted : false
-                  }
-                  onPress={() => showModal({ type: "deleteEvent", event })}
-                >
-                  <View className="flex-1 flex-row justify-between items-center">
-                    <Text className="text-sm font-normal font-poppins web:font-poppins">
-                      Delete
-                    </Text>
-                    <Trash size={16} />
-                  </View>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </View>
-      </View>
+        </>
+      )}
     </View>
   );
 }
