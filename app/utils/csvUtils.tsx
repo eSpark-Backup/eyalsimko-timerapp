@@ -4,12 +4,15 @@ import { Event } from "~/lib/store/eventConfig";
 import { formatCountdown } from "~/lib/utils";
 import Papa from "papaparse"; // For parsing CSV files
 
+let RNFetchBlob: any;
 let RNFS: any;
+let Share: any;
 let saveAs: any;
 if (Platform.OS !== "web") {
+  RNFetchBlob = require("rn-fetch-blob").default; 
   RNFS = require("react-native-fs");
-}
-else{
+  Share = require("react-native-share");
+} else {
   saveAs = require("file-saver");
 }
 
@@ -52,31 +55,60 @@ export const exportEventsToCSV = async (events: Event[]) => {
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     saveAs(blob, fileName);
   } else {
-    let downloadPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
-
-    if (Platform.OS === "android") {
-      const hasPermission = await requestStoragePermission();
-      if (!hasPermission) {
-        Toast.show({
-          type: "error",
-          text1: "Storage permission is required to save the file.",
-        });
-        return;
-      }
-
-      if (Platform.Version >= 29) {
-        downloadPath = `${RNFS.DownloadDirectoryPath}/${fileName}`;
-      } else {
-        downloadPath = `${RNFS.ExternalStorageDirectoryPath}/Download/${fileName}`;
-      }
-    }
-
     try {
-      await RNFS.writeFile(downloadPath, csvContent.trim(), "utf8");
-      Toast.show({ type: "success", text1: `CSV saved to: ${downloadPath}` });
+      if (Platform.OS === "android") {
+        const hasPermission = await requestStoragePermission();
+        if (!hasPermission) {
+          Toast.show({
+            type: "error",
+            text1: "Storage permission is required to save the file.",
+          });
+          return;
+        }
+      }
+      const downloadPath =
+        Platform.OS === "ios"
+          ? RNFetchBlob.fs.dirs.DocumentDir
+          : RNFetchBlob.fs.dirs.DownloadDir;
+
+      const filePath = `${downloadPath}/${fileName}`;
+
+      const exists = await RNFetchBlob.fs.exists(filePath);
+      if (exists) {
+        await RNFetchBlob.fs.unlink(filePath);
+      }
+
+      await RNFetchBlob.fs.writeFile(filePath, csvContent, "utf8");
+
+      if (Platform.OS === "android") {
+        await RNFetchBlob.android.addCompleteDownload({
+          title: fileName,
+          description: "CSV Export",
+          mime: "text/csv",
+          path: filePath,
+          showNotification: true,
+          mediaScannable: true,
+          useDownloadManager: true,
+        });
+      } else {
+        let options = {
+          type: "text/csv",
+          url: filePath,
+          saveToFiles: true,
+        };
+        await Share.open(options);
+      }
+
+      Toast.show({
+        type: "success",
+        text1:
+          Platform.OS === "ios"
+            ? "Events file ready to share"
+            : "Events saved to Downloads",
+      });
     } catch (error) {
       console.error("Error saving CSV file:", error);
-      Toast.show({ type: "error", text1: `Failed to save CSV file.` });
+      Toast.show({ type: "error", text1: "Failed to save CSV file" });
     }
   }
 };
@@ -91,8 +123,7 @@ const requestStoragePermission = async (): Promise<boolean> => {
       PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
       {
         title: "Storage Permission Required",
-        message:
-          "This app needs access to your storage to save CSV files.",
+        message: "This app needs access to your storage to save CSV files.",
         buttonNeutral: "Ask Me Later",
         buttonNegative: "Cancel",
         buttonPositive: "OK",
@@ -180,9 +211,14 @@ const pickCSVFile = async (): Promise<string | null> => {
   const DocumentPicker = require("react-native-document-picker");
   try {
     const res = await DocumentPicker.pick({
-      type: [DocumentPicker.types.plainText],
+      type: [
+        DocumentPicker.types.csv,
+        "text/csv",
+        "text/comma-separated-values",
+      ],
+      copyTo: "cachesDirectory", // This helps with file access on iOS
     });
-    return res[0]?.uri || null;
+    return res[0]?.fileCopyUri || res[0]?.uri || null;
   } catch (err) {
     if (DocumentPicker.isCancel(err)) {
       console.log("User canceled file picker");
