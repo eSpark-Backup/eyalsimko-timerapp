@@ -14,6 +14,7 @@ import { useSelector } from "@xstate/store/react";
 import { eventConfigStore } from "~/lib/store/eventConfig";
 import { Play } from "~/lib/icons/Play";
 import { Restart } from "~/lib/icons/Restart";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 function ElapsedTime() {
   const firstEventStartedAt = useSelector(eventConfigStore, (state) => {
@@ -78,7 +79,7 @@ export default function TimerControls() {
     (state) => state.context.blackout
   );
   const [glowActive, setGlowActive] = useState(false);
-
+  const { colorScheme } = useColorScheme()
   return (
     <View className="flex-col gap-[16]">
       <View className="flex-row justify-between items-center">
@@ -213,7 +214,7 @@ export default function TimerControls() {
         </View>
         {event && (
         <View
-          style={{ backgroundColor: "hsla(210, 32%, 13%, 1)" }}
+          style={colorScheme == "dark" ? { backgroundColor: "hsla(210, 32%, 13%, 1)" } : {backgroundColor: "#cdcdcd"}}
           className="flex-row gap-[16] rounded-[12] py-[12] px-[16] items-start"
         >
           <Text className="font-normal font-poppins web:font-poppins">{eventIndex + 1}</Text>

@@ -15,6 +15,7 @@ import {
   LinearGradient as SkiaLinearGradient,
   vec,
 } from "@shopify/react-native-skia";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 // Gradient Progress Bar
 const GradientProgressBar = ({
@@ -143,7 +144,7 @@ const ProgressBar = ({
 };
 
 // Main ActiveTimerWidget component
-export const ActiveTimerWidget = () => {
+export const ActiveTimerWidget = ({colorScheme}: any) => {
   const actorRef = TimerContext.useActorRef();
   const timer = useMachineSelector(actorRef, (state) => state.context.timer);
   const event = useSelector(eventConfigStore, (state) =>
@@ -154,7 +155,6 @@ export const ActiveTimerWidget = () => {
 
   const isOutOfTime = timer.elapsed !== undefined && timer.elapsed < 0;
   const elapsedMs = timer.elapsedInMs ?? timer.countdownTime * 1000;
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -166,7 +166,7 @@ export const ActiveTimerWidget = () => {
         <RNText
           style={[
             styles.timerText,
-            isOutOfTime ? styles.timerOutOfTime : styles.timerNormal,
+            isOutOfTime ? styles.timerOutOfTime : (colorScheme == "light" ? {color: '#000'} : styles.timerNormal),
           ]}
         >
           {formatCountdown({

@@ -25,7 +25,7 @@ if (Platform.OS === "web") {
 export const MessageWidgetHeader = () => {
   const [isFlashing, setIsFlashing] = useState(false);
   return (
-    <View className="flex-row items-baseline justify-between">
+    <View className="flex-row items-baseline justify-between gap-[5]">
       <Text className="text-lg font-semibold font-[Poppins] web:font-poppins">Messages</Text>
       <View className="flex-row gap-[12]">
         <Button
@@ -76,7 +76,7 @@ function MessageRow({ message }: { message: Message }) {
         maxLength={40}
         defaultValue={message.content}
         editable={message.id !== activeMessageId}
-        className="font-[Poppins] web:font-poppins"
+        className="font-[Poppins] web:font-poppins bg-screenBackground"
         onSubmitEditing={(event) => {
           eventConfigStore.send({
             type: "editMessage",

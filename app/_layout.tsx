@@ -39,6 +39,7 @@ import Background from "~/components/Background";
 import { Header } from "~/components/header";
 import { ConnectionLostModalProvider } from "~/components/ConnectionLostModal";
 import { ModalProvider } from "~/lib/context/ModalContext";
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -97,6 +98,12 @@ export default function RootLayout() {
     }
   }, [loaded, error]);
 
+  async function changeScreenOrientation() {
+    if(Platform.OS != "web") {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
+    }
+  }
+  
   React.useEffect(() => {
     (async () => {
       // const theme: string = "dark";
@@ -121,6 +128,7 @@ export default function RootLayout() {
       setIsColorSchemeLoaded(true);
     })().finally(() => {
       SplashScreen.hideAsync();
+      changeScreenOrientation()
     });
   }, []);
 

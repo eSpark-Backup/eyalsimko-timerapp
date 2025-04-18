@@ -88,7 +88,7 @@ const SwitchNative = React.forwardRef<
             className={cn(
               "h-[18] w-[18] items-center justify-center rounded-full bg-highlight",
               props.checked && "bg-highlight",
-              !props.checked && "bg-toggle-disabled"
+              !props.checked && "bg-toggle-disabled dark:bg-[#efefef]"
             )}
           />
         </Animated.View>

@@ -17,8 +17,8 @@ export type RecoverMessage = z.infer<typeof recoverMessageSchema>
 // PROD
 // *TODO Dev Note:- Both Ips should be same with your Ip address and port should be also same for LAN and WIFI
 const wsConfigs = [
-  { url: "ws://192.168.1.2:8080/ws", type: "LAN" },
-  { url: "ws://192.168.1.2:8080/ws", type: "WIFI" },
+  { url: "ws://192.168.1.10:8080/ws", type: "LAN" },
+  { url: "ws://192.168.1.10:8080/ws", type: "WIFI" },
 ] as const
 
 // DEV

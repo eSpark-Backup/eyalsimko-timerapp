@@ -11,7 +11,7 @@ let saveAs: any;
 if (Platform.OS !== "web") {
   RNFetchBlob = require("rn-fetch-blob").default; 
   RNFS = require("react-native-fs");
-  Share = require("react-native-share")
+  Share = require("react-native-share").default
 } else {
   saveAs = require("file-saver");
 }

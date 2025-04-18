@@ -2,6 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { LucideIcon } from "lucide-react-native";
 import * as React from "react";
 import { Pressable } from "react-native";
+import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";
 
 const buttonVariants = cva(
@@ -76,6 +77,7 @@ const IconButton = React.forwardRef<
   React.ElementRef<typeof Pressable>,
   ButtonProps
 >(({ className, border = false, variant, size, icon: Icon, ...props }, ref) => {
+  const {colorScheme } = useColorScheme()
   return (
     <Pressable
       className={cn(
@@ -85,6 +87,7 @@ const IconButton = React.forwardRef<
       )}
       ref={ref}
       role="button"
+      style={(colorScheme != "dark" && variant != "primary") ? {backgroundColor: '#000000'} : {}}
       {...props}
     >
       {Icon && (

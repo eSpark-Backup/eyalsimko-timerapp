@@ -59,7 +59,7 @@ const ThemeSwitchNative = React.forwardRef<
       )}
     >
       <SwitchPrimitives.Root
-        style={{ backgroundColor: "hsla(0, 0%, 100%, 0.15)" }}
+        style={{ backgroundColor: "hsla(0, 0%, 100%, 0.15)", borderWidth: colorScheme == "light" ? 0.5 : 0  }}
         className={cn(
           "flex-row w-[68] h-[40] shrink-0 items-center rounded-full",
           props.checked ? "bg-input" : "bg-input",

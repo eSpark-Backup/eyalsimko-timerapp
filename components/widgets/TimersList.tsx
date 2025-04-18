@@ -34,6 +34,7 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
+  DialogTitle,
 } from "../ui/dialog";
 import React, {
   forwardRef,
@@ -55,6 +56,7 @@ import { useModal, useShowModal } from "~/lib/context/ModalContext";
 import { Import } from "lucide-react-native";
 import { exportEventsToCSV, importEventsFromCSV } from "~/app/utils/csvUtils";
 import Toast from "react-native-toast-message";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 let SortableJS: any;
 if (Platform.OS === "web") {
@@ -74,7 +76,7 @@ interface TimersListProps {
 
 export const TimersListHeader = ({ events }: { events: Event[] }) => {
   const showModal = useShowModal();
-  console.log("TimersListHeader", events);
+  // console.log("TimersListHeader", events);
 
   const handleImportCSV = async () => {
     try {
@@ -101,9 +103,10 @@ export const TimersListHeader = ({ events }: { events: Event[] }) => {
       <Text className="text-lg font-semibold font-poppins web:font-poppins">
         List of Events
       </Text>
-      <View className="flex-row gap-2">
+      <View className="flex-row gap-2 flex-wrap">
         <Button
           size="sm"
+          style={{width: 85}}
           icon={Import}
           onPress={() => handleImportCSV()}
         >
@@ -584,7 +587,6 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
           <View className="flex-1 flex-row items-center justify-between">
             <View className="flex-row items-center gap-[16]">
               <Text
-                style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
                 className="text-md w-[20] font-poppins"
               >
                 {index + 1}
@@ -603,13 +605,12 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
               <View className="gap-[4]">
                 <View className="flex-row gap-[12]">
                   <Text className="font-normal font-poppins">{event.name}</Text>
-                  <Text style={{ color: "hsla(0, 0%, 100%, 0.5)" }}>
+                  <Text>
                     {event.speakerName}
                   </Text>
                 </View>
                 {event.description && (
                   <Text
-                    style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
                     className="text-sm"
                   >
                     {event.description}
@@ -661,7 +662,7 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
                   alignOffset={-32 - 6}
                   sideOffset={-32 - 12}
                   insets={contentInsets}
-                  className="w-[148]"
+                  className="w-[148] bg-screenBackground"
                 >
                   <DropdownMenuGroup className="gap-[8]">
                     <DropdownMenuItem
@@ -696,7 +697,6 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
           <View className="flex-1">
             <View className="flex-row flex-wrap items-center justify-between gap-x-[12]">
               <Text
-                style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
                 className="font-poppins text-md"
               >
                 {index + 1}
@@ -717,15 +717,15 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
               {event.description && (
                 <Text
                   numberOfLines={1}
-                  className="mt-[4] font-poppins text-sm text-white/50"
+                  className="mt-[4] font-poppins text-sm dark:text-white/50"
                 >
                   {event.description}
                 </Text>
               )}
 
               <Text
-                style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
-                className="font-poppins"
+                // style={{ color: "hsla(0, 0%, 100%, 0.5)" }}
+                className="font-poppins dark:text-white/50"
               >
                 {event.speakerName}
               </Text>
@@ -774,7 +774,7 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
                   alignOffset={-32 - 6}
                   sideOffset={-32 - 12}
                   insets={contentInsets}
-                  className="w-[148]"
+                  className="w-[148] bg-screenBackground"
                 >
                   <DropdownMenuGroup className="gap-[8]">
                     <DropdownMenuItem
@@ -784,7 +784,7 @@ function EventItem({ event, index, dragHandleProps }: EventItemProps) {
                         <Text className="text-sm font-normal font-poppins">
                           Edit
                         </Text>
-                        <Edit size={16} />
+                        <Edit size={16} color={"red"} />
                       </View>
                     </DropdownMenuItem>
                     <DropdownMenuItem

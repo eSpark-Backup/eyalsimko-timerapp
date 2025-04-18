@@ -24,7 +24,7 @@ console.log("TimersListCard", events);
             <Text className="font-poppins web:font-poppin text-xl font-semibold text-center">
               No Events Found
             </Text>
-            <Text className="font-poppins web:font-poppin text-lg text-muted-foreground">
+            <Text className="font-poppins web:font-poppin text-lg dark:text-muted-foreground text-center">
               It looks empty here! Start by adding a new event.
             </Text>
           </View>
@@ -37,7 +37,7 @@ console.log("TimersListCard", events);
               showModal({ type: "addEvent" });
             }}
           >
-            <Text className="font-normal font-poppins web:font-poppin">Add Event</Text>
+            <Text className="font-normal font-poppins web:font-poppin text-white">Add Event</Text>
           </Button>
         </View>
       </Card>
