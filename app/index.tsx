@@ -14,6 +14,7 @@ import { Header } from "~/components/header";
 import { Modals } from "~/components/Modals";
 import { useModal } from "~/lib/context/ModalContext";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 export default function TimerScreen() {
   const actorRef = TimerContext.useActorRef();
@@ -21,6 +22,8 @@ export default function TimerScreen() {
     state.matches("ACTIVE")
   );
   const modal = useModal();
+  const { colorScheme } = useColorScheme()
+  
   return (
     <>
       <KeyboardAvoidingView
@@ -39,7 +42,7 @@ export default function TimerScreen() {
                   spacing="small"
                   borderColor={timerIsActive ? "active" : "default"}
                 >
-                  <ActiveTimerWidget />
+                  <ActiveTimerWidget colorScheme={colorScheme} />
                 </Card>
               </View>
             </View>

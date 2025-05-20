@@ -22,7 +22,7 @@ export default function MessagesCard() {
             <Text className="text-xl font-semibold text-center font-poppins web:font-poppins">
               No Messages Yet
             </Text>
-            <Text className="text-lg text-muted-foreground font-poppins web:font-poppins">
+            <Text className="text-lg dark:text-muted-foreground font-poppins web:font-poppins">
               Want to display a message on the timer? Add now!
             </Text>
           </View>
@@ -35,7 +35,7 @@ export default function MessagesCard() {
               eventConfigStore.send({ type: "addMessage" });
             }}
           >
-            <Text className="font-poppins web:font-poppins">Add Message</Text>
+            <Text className="font-poppins web:font-poppins" style={{color: "#fff"}}>Add Message</Text>
           </Button>
         </View>
       </Card>

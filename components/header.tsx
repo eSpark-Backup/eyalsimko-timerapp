@@ -128,7 +128,7 @@ export const Header = () => {
               align="end"
               side="bottom"
               insets={contentInsets}
-              className="w-[209] border border-cardBorder"
+              className="w-[209] border border-cardBorder bg-screenBackground"
             >
               <DropdownMenuGroup className="gap-[8]">
                 <DropdownMenuItem

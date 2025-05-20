@@ -26,6 +26,7 @@ import { IconButton } from "./iconButton";
 import { Close } from "~/lib/icons/Close";
 import { GreenDot, RedDot } from "~/lib/icons/LogDots";
 import { cn } from "~/lib/utils";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 type LogType = Log["type"];
 
@@ -119,6 +120,7 @@ function TimerForm({
     });
     closeModal();
   });
+  const { colorScheme } = useColorScheme()
   return (
     <>
       <View className="gap-[20]">
@@ -138,6 +140,7 @@ function TimerForm({
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
+              style={colorScheme == "light" ? { borderColor: "#000", borderWidth: .5 } : {}}
             />
           )}
           name="name"
@@ -158,6 +161,7 @@ function TimerForm({
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
+              style={colorScheme == "light" ? { borderColor: "#000", borderWidth: .5 } : {}}
             />
           )}
           name="description"
@@ -178,6 +182,7 @@ function TimerForm({
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
+              style={colorScheme == "light" ? { borderColor: "#000", borderWidth: .5 } : {}}
             />
           )}
           name="speakerName"
@@ -199,6 +204,7 @@ function TimerForm({
               onBlur={onBlur}
               onChange={onChange}
               value={value}
+              style={colorScheme == "light" ? { borderColor: "#000", borderWidth: .5 } : {}}
             />
           )}
           name="countdownTime"
@@ -222,6 +228,7 @@ function TimerForm({
                   onBlur={onBlur}
                   onChange={onChange}
                   value={value}
+                  style={colorScheme == "light" ? { borderColor: "#000", borderWidth: .5 } : {}}
                 />
               )}
               name="blinkingStartTime"
@@ -245,6 +252,7 @@ function TimerForm({
                   onBlur={onBlur}
                   onChange={onChange}
                   value={value}
+                  style={colorScheme == "light" ? { borderColor: "#000", borderWidth: .5 } : {}}
                 />
               )}
               name="blinkLength"
@@ -261,7 +269,7 @@ function TimerForm({
             submit(e);
           }}
         >
-          <Text className="font-normal font-poppins web:font-poppin">{submitLabel}</Text>
+          <Text className="font-normal font-poppins web:font-poppin text-white">{submitLabel}</Text>
         </Button>
       )}
     </>
@@ -302,6 +310,7 @@ export function Modals() {
   const modal = useModal();
   const closeModal = useCloseModal();
 
+  const { colorScheme } = useColorScheme()
   const actorRef = TimerContext.useActorRef();
   const runningTimerId = useMachineSelector(actorRef, (state) => {
     if (!state.matches({ ACTIVE: "running" })) return null;
@@ -313,7 +322,7 @@ export function Modals() {
   return (
     <>
       <Dialog open={modal?.type === "deleteEvent"} onOpenChange={closeModal}>
-        <DialogContent className="w-[400]">
+        <DialogContent className="w-[400] bg-screenBackground">
           <View className="gap-[40]">
             <DialogHeader>
               <View className="justify-center items-center gap-[20]">
@@ -356,7 +365,7 @@ export function Modals() {
       </Dialog>
       <Dialog open={modal?.type === "editEvent"} onOpenChange={closeModal}>
         <DialogContent
-          className="w-[464]"
+          className="w-[464] bg-screenBackground"
           scrollable
           height={700}
           header={null}
@@ -403,6 +412,11 @@ export function Modals() {
           scrollable
           height={700}
           header={null}
+          style={
+            colorScheme === "light"
+              ? { shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 5, backgroundColor: '#fff' }
+              : {}
+          }
         >
           <View className="gap-[40]">
             <DialogHeader>
@@ -434,6 +448,7 @@ export function Modals() {
               }}
             />
           </View>
+          <View style={{height: 100}} /> 
         </DialogContent>
       </Dialog>
       <Dialog open={modal?.type === "settings"} onOpenChange={closeModal}>

@@ -7,13 +7,14 @@
  */
 import { createLucideIcon, LucideIcon } from "lucide-react-native";
 import { iconWithClassName } from "./iconWithClassName";
+import { useColorScheme } from "nativewind";
 
 const RawPlus = createLucideIcon("Plus", [
   [
     "path",
     {
       d: "M8 3.3335V12.6668",
-      stroke: "white",
+      stroke: "currentColor",
       strokeWidth: "1.5",
       strokeLinecap: "round",
       strokeLinejoin: "round",
@@ -24,7 +25,7 @@ const RawPlus = createLucideIcon("Plus", [
     "path",
     {
       d: "M3.33301 8H12.6663",
-      stroke: "white",
+      stroke: "currentColor",
       strokeWidth: "1.5",
       strokeLinecap: "round",
       strokeLinejoin: "round",
@@ -37,6 +38,16 @@ iconWithClassName(RawPlus);
 
 type Props = Omit<React.ComponentProps<LucideIcon>, "viewBox">;
 
-const Plus = (props: Props) => <RawPlus viewBox="0 0 16 16" {...props} />;
+const Plus = (props: Props) => {
+  const { colorScheme } = useColorScheme();
+  
+  return (
+    <RawPlus 
+      viewBox="0 0 16 16" 
+      className="text-foreground"  // This will use your theme's foreground color
+      {...props} 
+    />
+  );
+};
 
 export { Plus };

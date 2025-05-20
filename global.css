@@ -20,20 +20,20 @@
     --accent-foreground: 240 5.9% 10%;
     --destructive: 345, 57%, 48%, 1;
     --destructive-foreground: 0 0% 98%;
-    --border: 40 10% 3.9%%;
+    --border: 40 10% 3.9%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
     --brand: 24 95% 53%; /* Added brand orange color */
-    --background-brand: 0 0% 40%;
+    --background-brand: 0 0% 98%;
     --background-ellipsis-1: 213, 98%, 45%, 0.19;
     --background-ellipsis-2: 245, 100%, 31%, 1;
     --background-ellipsis-3: 259, 83%, 27%, 1;
     --background-ellipsis-4: 147, 100%, 35%, 0.38;
-    --card-border-color: 0, 0%, 100%, 0.25;
+    --card-border-color: 240 10% 3.9%;
     --button-default-background: 0, 0%, 100%, 0.1;
-    --button-default-border-color: 0, 0%, 100%, 0.2;
+    --button-default-border-color: 240 10% 3.9%;
     --item-highlight: 147, 100%, 35%, 0.25;
-    --item: 0, 0%, 100%, 0.06;
+    --item: 0, 0%, 50% / 0.6;
     --input-background: 209, 59%, 8%, 1;
     --input-background-modal: 0, 0%, 100%, 0.06;
     --main-light: 213, 82%, 69%, 1;
@@ -71,5 +71,9 @@
     --card: 0 0% 100% / 0.03;
     --card-background: 0 0% 100% / 0.03;
     --modal-background: 210 100% 5% / 1;
+    --card-border-color: 0, 0%, 100%, 0.25;
+    --button-default-background: 0, 0%, 100%, 0.1;
+    --button-default-border-color: 0, 0%, 100%, 0.2;
+    --item: 0, 0%, 100%, 0.06;
   }
 }

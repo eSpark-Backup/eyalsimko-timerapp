@@ -91,6 +91,12 @@
             "assets/fonts/Cousine-Regular.ttf"
           ]
         }
+      ],
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "LANDSCAPE_LEFT"
+        }
       ]
     ],
     "experiments": {
