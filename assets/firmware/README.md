@@ -59,3 +59,21 @@ python pythonScript.py
 ```
 
 
+For Mock Server Connection Steps:-
+
+![alt text](image.png)
+First Need to change ip address and port according to your network in mockServer.mjs, as mentioned in above image
+
+![alt text](image-1.png)
+Secondly you need to change and add same ip address for both Lan and Wan in connectionStore as you have added in mockServer.mjs
+
+So basically you need to add same ip address and port in mockServer.mjs and connectionStore file
+
+![alt text](image-2.png)
+You need to add the Wi-Fi name and password in the web_config, using the same credentials as the network you are currently connected to.
+
+
+Then after above steps we need to first run mock server command
+yarn run mock-server
+
+and then run app
