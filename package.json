@@ -55,7 +55,7 @@
     "expo-system-ui": "~4.0.8",
     "expo-updates": "~0.27.1",
     "lucide-react-native": "^0.378.0",
-    "nanoid": "^5.1.5",
+    "nanoid": "^6.0.1",
     "nativewind": "^4.1.23",
     "react": "19.2.7",
     "react-dom": "18.3.1",
