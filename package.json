@@ -52,7 +52,7 @@
     "expo-router": "~56.2.11",
     "expo-splash-screen": "~0.29.22",
     "expo-status-bar": "~2.0.0",
-    "expo-system-ui": "~4.0.8",
+    "expo-system-ui": "~57.0.3",
     "expo-updates": "~0.27.1",
     "lucide-react-native": "^0.378.0",
     "nanoid": "^5.1.5",
