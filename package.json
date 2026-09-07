@@ -74,7 +74,7 @@
     "react-native-toast-message": "^2.2.1",
     "react-native-web": "~0.19.13",
     "react-native-wifi-reborn": "^4.13.4",
-    "sha256-uint8array": "^0.10.7",
+    "sha256-uint8array": "^0.12.1",
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "3.3.5",
     "tailwindcss-animate": "^1.0.7",
