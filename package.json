@@ -72,7 +72,7 @@
     "react-native-svg": "15.8.0",
     "react-native-timer-picker": "^2.0.2",
     "react-native-toast-message": "^2.2.1",
-    "react-native-web": "~0.19.13",
+    "react-native-web": "~0.21.3",
     "react-native-wifi-reborn": "^4.13.4",
     "sha256-uint8array": "^0.10.7",
     "tailwind-merge": "^2.2.1",
