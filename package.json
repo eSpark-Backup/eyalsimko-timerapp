@@ -30,7 +30,7 @@
     "@rn-primitives/tooltip": "~1.1.0",
     "@rn-primitives/types": "~1.1.0",
     "@sentry/react-native": "~6.3.0",
-    "@shopify/react-native-skia": "1.5.0",
+    "@shopify/react-native-skia": "2.14.0",
     "@xstate/react": "^6.1.0",
     "@xstate/store": "^2.6.2",
     "class-variance-authority": "^0.7.0",
